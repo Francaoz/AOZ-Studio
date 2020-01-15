@@ -1,0 +1,72 @@
+'
+' Fake copper effects
+' AMOS 2 demo By Nick Morisson
+' 
+
+colour 1,16777215
+colour 2,15658734
+colour 3,14540253
+colour 4,13421772
+colour 5,12303291
+colour 6,11184810
+colour 7,10066329
+colour 8,8947848
+colour 9,7829367
+colour 10,6710886
+colour 11,5592405
+colour 12,4473924
+colour 13,3355443
+colour 14,2236962
+colour 15,1118481
+
+paper 0
+degree
+Curs Off
+
+NUMOFBARS = 15 : rem no underscores in labels yet!
+NUMOFSTARS = 1000
+
+Dim SX(NUMOFSTARS) : Dim SY(NUMOFSTARS) : Dim SS(NUMOFSTARS)
+
+for t = 0 to NUMOFSTARS-1
+   SX(t) = Rnd(320) : SY(t) = rnd(200) : SS(t) = rnd(2)+1
+next 
+
+repeat
+    clw
+    Curs Off
+    for t = 0 to NUMOFSTARS-1
+     if SS(t) = 1 then ink 12
+       if SS(t) = 2 then ink 8
+       if SS(t) = 3 then ink 2
+       plot SX(t),SY(t)
+       SX(t) = SX(t) - SS(t)
+       if SX(t) < 0
+         SX(t) = 320
+         SY(t) = rnd(200)
+         SS(t) = rnd(2)+1
+       end if
+    next 
+    for b = 0 to NUMOFBARS
+        by = 100+sin(a+(b*10))*50
+        DB[by]
+        next b
+        a = a + 4
+    wait vbl
+until mouse key = 1
+end
+
+procedure DB[y]
+  yy = y
+  for c = 15 to 1 step -2
+      ink c
+      draw 0,yy to 320,yy
+      inc yy
+  next
+  
+  for c = 1 to 15 step 2
+      ink c
+      draw 0,yy to 320,yy
+      inc yy
+   next 
+end proc

@@ -1,0 +1,123 @@
+'********************************* 
+'*    AMOS Professional HELP 1   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *                 Inc  (line 10)
+'*                               *                 Dec  (line 23)
+'*         Ronnie Simpson        *                 Add  (line 36)
+'********************************* 
+'
+'------------------------------------------- 
+'Inc 
+'------------------------------------------- 
+'Used to increase an integer variable by 1 
+'
+'eg.     COUNT=100 
+'        Inc COUNT 
+'        Print COUNT 
+'
+'        Prints the amswer 101 
+'
+'This instruction is the same as COUNT=COUNT+1 but is computed much faster 
+'
+'------------------------------------------- 
+'Dec 
+'------------------------------------------- 
+'Used to decrease an integer variable by 1 
+'
+'eg.     COUNT=100 
+'        Dec COUNT 
+'        Print COUNT 
+'
+'        Prints the amswer 99  
+'
+'This instruction is the same as COUNT=COUNT-1 but is computed much faster 
+'
+'------------------------------------------- 
+'Add 
+'------------------------------------------- 
+'--------------------  
+'Standard form of Add
+'--------------------
+'           +----->The instruction   
+'           |  +----->The variable   
+'           |  | +----->The amount to be added     
+'           |  | | 
+'           ^  ^ ^ 
+'          Add X,Y 
+'
+'eg.              COUNT=100               COUNT=100  
+'                 Add COUNT,17            Add COUNT,-17  
+'                 Print COUNT             Print COUNT  
+'
+'Prints the answers   117                     83 
+'
+'This instruction is the same as COUNT=COUNT+X but is computed much faster 
+'
+'--------------------  
+'Extended form of Add
+'--------------------  
+'           +----->The instruction   
+'           |  +----->The variable   
+'           |  | +----->The amount to be added     
+'           |  | |   +----->The lower limit that the variable can equal  
+'           |  | |   |       +----->The top limit that the variable can equal    
+'           |  | |   |       | 
+'           ^  ^ ^   ^       ^ 
+'          Add X,Y,BASE To LIMIT 
+'  
+'eg.       COUNT=10
+'          AMOUNT=11 
+'          Add COUNT,AMOUNT,1 To 20  
+'          Print COUNT 
+'
+'          Prints the answer 1   
+'
+'This instruction is the same as the expression-   
+'
+'          COUNT=COUNT+AMOUNT
+'          If COUNT<BASE Then COUNT=LIMIT
+'          If COUNT>LIMIT Then COUNT=BASE
+'
+'This instruction is ideal for repetitive loops  
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** Open screen ,tidy up and set variables 
+Screen Open 0,640,200,8,Hires
+Curs Off : Flash Off : Cls 0 : Hide : Pen 6 : Paper 0 : C=6 : Ink C
+V=0 : W=640 : X=0 : Y=0
+'
+Rem *** Set out the screen text
+Locate 0,7 : Centre "PRESS ANY MOUSE KEY TO STOP PROGRAM"
+Pen 5 : Locate 0,11
+Print "      INC                 DEC                 ADD                 ADD "
+Print 
+Print "     Inc V               Dec W              Add X,2         Add Y,1,1 to 10"
+Pen 2
+Locate 0,17 : Print "V" : Print : Print "W" : Print : Print "X" : Print : Print "Y"
+Pen 4
+'
+Rem *** start the main loop and do calculations
+Repeat 
+   Inc V
+   Dec W
+   Add X,2
+   Add Y,1,1 To 10
+   '
+   Rem *** change the ink colour every tenth calculation
+   If Y=1 Then Add C,1,4 To 6 : Ink C
+   '
+   Rem *** Print results and draw graphics
+   Locate 5,15 : Print "V="+Str$(V) : Plot 10+V,140
+   Locate 25,15 : Print "W="+Str$(W) : Plot W,156
+   Locate 45,15 : Print "X="+Str$(X) : Plot 10+X,172
+   Locate 65,15 : Print "Y="+Str$(Y)+" " : Plot 10+Y,188
+   '
+   Rem *** slow the whole thing down (try deleting it!) 
+   Wait 15
+   '
+   Rem *** stop program if mouse key is pressed or fastest line reaches edge  
+Until Mouse Key or X>638
+'
+Edit 

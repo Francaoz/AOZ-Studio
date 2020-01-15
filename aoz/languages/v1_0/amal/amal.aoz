@@ -1,0 +1,173 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Music Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+
+//
+// Initialization
+//
+{
+    this.banks = this.aoz.banks;
+}
+
+
+Instruction "move x", _number, _angle
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "move x", _number, _string To _number2
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "move y", _number, _angle
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "move y", _number, _string To _number2
+{
+	#notimplemented
+}
+End Instruction 
+
+Instruction "move off", _number
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "move on", _number
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "move freeze", _number
+{
+	#notimplemented
+}
+End Instruction 
+
+Instruction "anim off", _number
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "anim on", _number
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "anim freeze", _number
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "anim", _number, _angle
+{
+	#notimplemented
+}
+End Instruction 
+Instruction "anim", _number, _string To _number2
+{
+	#notimplemented
+}
+End Instruction 
+Function "movon", _number
+{
+	#notimplemented
+}
+End Function( {0} )
+Function "chanan", _number
+{
+	#notimplemented
+}
+End Function( {this.aoz.amal.isChannelAnimated(%_number)} )
+Function "chanan", _number
+{
+	#notimplemented
+}
+End Function( {this.aoz.amal.isChannelMoving(%_number)} )
+
+Instruction "amal on", _number
+{
+	#errors
+	this.aoz.amalOnOff(true,%_number);
+}
+End Instruction
+Instruction "amal off", _number
+{
+	#errors
+	this.aoz.amalOnOff(true,%_number);
+}
+End Instruction
+Instruction "amal freeze", _number
+{
+	#errors
+	this.aoz.amalOnOff(true,%_number);
+}
+End Instruction
+Function "amalerr$"
+{
+}
+End Function( {this.aoz.amalError$()} )
+Function "amalerr$"
+{
+}
+End Function( {this.aoz.amalError()} )
+
+Instruction "amplay", _number1, _number2
+{
+	#errors
+	this.aoz.amalPlay(%_number1,%_number2);
+}
+End Instruction
+Instruction "amplay", _number1, _number2, _number3 To _number4
+{
+	#errors
+	this.aoz.amalPlay(%_number1,%_number2%,_number3,%_number4);
+}
+End Instruction
+
+Instruction "synchro on"
+{
+	#errors
+	this.aoz.setSynchro(true);
+}
+End Instruction
+Instruction "synchro off"
+{
+	#errors
+	this.aoz.setSynchro(false);
+}
+End Instruction
+Instruction "synchro"
+{
+	#errors
+	this.aoz.synchro(false);
+}
+End Instruction

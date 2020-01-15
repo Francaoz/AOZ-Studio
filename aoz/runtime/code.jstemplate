@@ -1,0 +1,37 @@
+<HEADER-START>
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+//
+// APPLICATIONNAME
+// AUTHORNAME
+// VERSIONNUMBER
+// DATE
+// COPYRIGHT
+//
+// COMPILERINFOS
+//
+
+function Application( canvasId )
+{
+	this.manifest=JSON.parse('MANIFEST');
+	this.parent=this;
+	this.root=this;
+	this.contextName='application';
+	this.procParam=0;
+	this.procParam$='';
+	this.aoz=new AOZ(canvasId,this.manifest);
+
+	// Compiled program begins here
+	// ----------------------------
+<HEADER-END>
+<FOOTER-START>
+};
+<FOOTER-END>

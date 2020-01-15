@@ -1,0 +1,131 @@
+'**********************************  
+'*    AMOS Professional HELP 11   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            If Then Else  (line 10) 
+'*                                *            If Else Endif (line 21) 
+'*         Ronnie Simpson         *            Else If       (line 42) 
+'**********************************            For Next      (line 62) 
+'                                              Edit          (line 80) 
+'------------------------------------------- 
+'If Then Else
+'------------------------------------------- 
+'Choose between alternative actions
+'
+'eg.   (1) If A<1 Then Print "GAME OVER" 
+'      (2) If A>0 Then Print "MEN="+Str$(A) Else Print "GAME OVER" 
+'      (3) If A>0 or B<1 Then C=A+B Else C=0 
+'
+'If Then Else is limited to single program line. 
+'The Else is optional and can be omitted as in example (1) above 
+'------------------------------------------- 
+'If Else Endif 
+'------------------------------------------- 
+'Structured version of If Then Else
+'
+'eg.       Input "what is your age";A
+'          If A<4
+'          Print "you are a baby"
+'          Else  
+'          Print "you are not a baby"
+'          If A>18 
+'          Print "you are an adult"
+'          Else  
+'          Print "you are a youth" 
+'          End If  
+'          End If  
+'
+'Using the normal If Then inside a structured test is not allowed and
+'will produce an error.
+'Each If must be paired with its own Endif.
+'
+'------------------------------------------- 
+'Else If 
+'------------------------------------------- 
+'Multiple test Structured If Then Else 
+'
+'Else If must be used within a normal If-Endif test, If the expression is
+'true then the instructions following will be executed otherwise they will 
+'be ignored. Only one Else is allowed before the endif and this must be
+'placed after the Else If. 
+'
+'eg.         If A=0
+'               Print "A=0"
+'            Else If A=1 
+'               Print "A=1"
+'            Else If A=2 
+'               Print "A=2"
+'            Else  
+'               Print "A>2"
+'            End If
+'
+'------------------------------------------- 
+'For Next
+'------------------------------------------- 
+'Repeat part of a program a specific number of times 
+'
+'eg.     For N=1 To 100      For X=1 To 10       For N=100 To 1 Step -5
+'        Print N             For Y=1 To 10       For R=1 To 10 
+'        Next N              Plot X*5,Y*5        Print R*N 
+'                            Next Y              Next R
+'                            Next X              Next N
+'
+'Read instruction as---- For COUNTER = FIRST To LAST Step INCREMENT
+'
+'The default step increment is 1 and can be omitted if this is the case. 
+'If the step increment is negative the loop counter will be reduced
+'until it reaches the target figure. 
+'Each For must have its own coresponding Next although the counter name
+'can be omitted. 
+'------------------------------------------- 
+'Edit
+'------------------------------------------- 
+'Stop program and return to editor 
+'
+'eg.      If LIVES=0 Then Edit   
+'
+'Edit immediatly stops program execution and returns to the editor.  
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$3AF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Hide : Pen 6 : Paper 0
+'
+Rem *** Print information on screen
+Locate 0,2 : Centre "USING If...Then....Else"
+Locate 0,4 : Centre "If line reaches STOP then go back to START"
+Pen 7 : Locate 0,6 : Centre "START                                                         STOP"
+Pen 6 : Locate 0,10 : Centre "USING If...Else....Endif"
+Locate 0,12 : Centre "If line is at STOP or START then reverse direction else plot next part of line"
+Pen 7 : Locate 0,14 : Centre "START                                                        STOP"
+Pen 6 : Locate 0,18 : Centre "USING For......Next"
+Locate 0,20 : Centre "Repeat this piece of code 10000 times then stop program"
+Pen 4 : Locate 34,22 : Print "COUNT="
+'
+Rem *** set up the variables 
+X1=100 : X2=100 : D=1
+'
+Rem *** start the For/Next loop
+For COUNT=1 To 10000
+   Inc X1 : Add X2,D
+   '
+   Rem *** If...Then...Else 
+   If X1=540 Then X1=100 : Add C,1,1 To 12 : Ink C Else Plot X1,52
+   '
+   Rem *** Structured test If ...Else...Endif 
+   If X2=540 or X2=100
+      D=-D
+   Else 
+      Plot X2,116
+   End If 
+   '
+   Rem *** Show the COUNT on screen 
+   If COUNT mod(100)=0 Then Locate 40,22 : Print COUNT
+   '
+   Rem *** Icrement For...Next counter
+   Wait Vbl
+Next COUNT
+'
+Rem *** end of program - return to editor
+Edit 

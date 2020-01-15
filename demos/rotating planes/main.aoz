@@ -1,0 +1,125 @@
+'
+' Rotating planes
+'
+Curs Off
+
+' Set lens parameters
+DIST=500 : ZOM=400
+
+' Time for loops 
+TIME=1000
+
+' Coord grid limits  
+XF1=-100 : ZF1=-100 : YF1=50
+XF2=100 : ZF2=100
+
+' grid size (1 to 32)
+NS = 32
+
+Dim X3D(NS,NS),Y3D(NS,NS),Z3D(NS,NS)
+Dim XROT(NS,NS),YROT(NS,NS),ZROT(NS,NS)
+Dim X2D(NS,NS),Y2D(NS,NS)
+
+' Size of gridding intervals 
+ITX=(XF2-XF1)/NS
+ITZ=(ZF2-ZF1)/NS
+
+
+Degree 
+PHI=240
+TETA=-60
+
+
+
+' Init landscape 
+
+For J=1 To NS
+   For I=1 To NS
+      X3D(I,J)=XF1+ITX*I
+      Z3D(I,J)=ZF1+ITZ*J
+      R=((Abs(I-NS/2)+Abs(J-NS/2))*90)/NS
+      Y3D(I,J)=-128*Cos(R)
+   Next I
+Next J
+
+NN=0
+paper 0
+Repeat 
+   
+   Clw
+   
+
+   PHI = PHI + 2 : If PHU > 359 then PHI = 0
+   
+   ' Precalculation of COSs and SINs  
+   ' ( *256 to stay in integer mode (faster!))    
+   CPHI=Cos(PHI)*256
+   SPHI=Sin(PHI)*256
+   CTETA=Cos(TETA)*256
+   STETA=Sin(TETA)*256
+   
+   For J=1 To NS
+      For I=1 To NS
+         
+         ' Patch Y - landscape deformation
+         Y3D2=Y3D(I,J)*Cos((N-1)*4) : Rem+(SPHI*((I and 2)-1))/4   
+         
+         ' Calculation of rotated 3D coords of new point
+         ' ( /*256 to bring back cos and sin beetween 0->1)     
+         ' Rotation (X-Z with PHI)  
+         XROT(I,J)=(X3D(I,J)*CPHI+Z3D(I,J)*SPHI)/256
+         ZROT(I,J)=(Z3D(I,J)*CPHI-X3D(I,J)*SPHI)/256
+         YROT(I,J)=(Y3D2*CTETA+ZROT(I,J)*STETA)/256
+         ZROT(I,J)=(ZROT(I,J)*CTETA-Y3D2*STETA)/256
+         
+         ' Calculation of screen coords 
+         X2D(I,J)=160+(XROT(I,J)*ZOM)/(DIST+ZROT(I,J))
+         Y2D(I,J)=128+(YROT(I,J)*ZOM)/(DIST+ZROT(I,J))
+         
+      Next I
+   Next J
+   
+   For J1=2 To NS
+      If PHI>=0 & PHI<90
+         J=NS-J1+2
+      Else 
+         If PHI>=90 & PHI<180
+            I=J1
+         Else 
+            If PHI>=180 & PHI<270
+               J=J1
+            Else 
+               I=NS-J1+2
+            End If 
+         End If 
+      End If 
+      For I1=2 To NS
+         
+         If PHI>=0 & PHI<90
+            I=I1
+         Else 
+            If PHI>=90 & PHI<180
+               J=I1
+            Else 
+               If PHI>=180 & PHI<270
+                  I=NS-I1+2
+               Else 
+                  J=NS-I1+2
+               End If 
+            End If 
+         End If 
+         
+ '        ' Draw outlined face 
+         Ink 15
+         Polygon X2D(I,J),Y2D(I,J) To X2D(I-1,J),Y2D(I-1,J) To X2D(I-1,J-1),Y2D(I-1,J-1) To X2D(I,J-1),Y2D(I,J-1)
+         Ink 0
+         Polyline X2D(I,J),Y2D(I,J) To X2D(I-1,J),Y2D(I-1,J) To X2D(I-1,J-1),Y2D(I-1,J-1) To X2D(I,J-1),Y2D(I,J-1) To X2D(I,J),Y2D(I,J)
+         
+      Next 
+   Next 
+   
+
+   wait 1
+   Inc NN
+   
+Until Mouse Key

@@ -1,0 +1,35 @@
+cls
+curs off : cls 0
+screen open 1,340,64,64,lowres
+curs off : cls 0
+degree
+
+set font "annie use your telescope", 16
+txt$ = "a sine scroller! always wanted to code one of these back in the day, but Amos was too slow, but now - on Amos 2 - anything is possible :) "
+txt$ = upper$(txt$)
+_plot_char = 0
+offset = 1
+def scroll 1,0,0 to 340,64,-2,0
+amp = 55
+screen hide 1
+//screen to front 1
+do
+    screen 0 :cls
+    for x = 0 to 320
+        screen copy 1,x,0,x+1,64 to 0,x,100+sin(x)*amp
+    next
+
+    screen 1
+    if _plot_char = 0
+        _plot_char = 4
+        ink 2
+        text 320,32,mid$(txt$,offset,1)
+        add offset,1,1 to len(txt$)
+    else
+        dec _plot_char
+    end if
+    scroll 1
+
+    wait vbl
+loop
+

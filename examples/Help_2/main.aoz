@@ -1,0 +1,103 @@
+'********************************* 
+'*    AMOS Professional HELP 2   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *                Left$  (line 12)   
+'*                               *                Right$ (line 21)   
+'*         Ronnie Simpson        *                Mid$   (line 30)   
+'*********************************                Instr  (line 39)   
+'                                                 Upper$ (line 48)   
+'                                                 Lower$ (line 57)   
+'
+'------------------------------------------- 
+'Left$ 
+'------------------------------------------- 
+'Used to find a specified number of letters from the lefthand end of a string  
+'
+'eg.     A$="AMOS Professional"
+'        Print Left$(A$,6) 
+'
+'        Will print AMOS P   
+'------------------------------------------- 
+'Right$
+'------------------------------------------- 
+'Used to find a specified number of letters from the righthand end of a string   
+'
+'eg.     A$="AMOS Professional"
+'        Print Right$(A$,6)  
+'
+'        Will print sional 
+'------------------------------------------- 
+'Mid$
+'------------------------------------------- 
+'Used to find a specified number of letters from the middle of a string    
+'
+'eg.     A$="AMOS Professional"
+'        Print Mid$(A$,6,7)  
+'
+'        Will print Profess
+'------------------------------------------- 
+'Instr 
+'------------------------------------------- 
+'A function used to find the position a string within another string   
+'
+'eg.     A$="AMOS Professional"              a$="AMOS Professional 
+'        Print Instr(A$,"Pro")               Print Instr(a$,"i") 
+'
+'        Will print the amswer-6             Will print the answer-13
+'------------------------------------------- 
+'Upper$
+'------------------------------------------- 
+'Used to convert a string into capitals (upper case) 
+'
+'eg.     A$="AmOs PrOfEsSiOnAl"  
+'        Print Upper$(A$)  
+'
+'        Will print AMOS PROFESSIONAL  
+'------------------------------------------- 
+'Lower$
+'------------------------------------------- 
+'Used to convert a string into lower case
+'
+'eg.     A$="AmOs PrOfEsSiOnAl"  
+'        Print Upper$(A$)  
+'
+'        Will print amos professional
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** Open screen and tidy up
+Screen Open 0,640,200,8,Hires : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+'
+Rem *** Start main loop
+Repeat 
+   Cls 0 : Home : Paper 0 : Pen 1
+   '
+   Rem *** Get user to input a string to work with  
+   Print "Please enter somebody's first name then press return" : Print 
+   Pen 5 : Input "";F$ : Print 
+   Pen 1 : Print "Please enter somebody's surname then press return" : Print 
+   Pen 5 : Input "";S$ : Cls 0 : Home : Curs Off 
+   '
+   Rem *** Join the forename to the surname 
+   A$=F$+" "+S$
+   Pen 2 : Inverse On : Centre "A$="+A$ : Inverse Off : Print : Print 
+   '
+   Rem *** Do the string manipulations and print results to screen
+   Pen 1 : Centre "Left$(A$,5)-----"+Left$(A$,5) : Print : Print 
+   Centre "Right$(A$,5)-----"+Right$(A$,5) : Print : Print 
+   Centre "Mid$(A$,3,5)-----"+Mid$(A$,3,5) : Print : Print 
+   Pen 4 : Centre "Instr(A$,''e'')-----"+Str$(Instr(A$,"e")) : Print : Print 
+   Pen 7 : Centre "Upper$(A$)-----"+Upper$(A$) : Print : Print 
+   Centre "Lower$(A$)-----"+Lower$(A$)
+   '
+   Rem *** Check for end of program or repeat 
+   Pen 6 : Locate 0,19 : Centre "LEFT MOUSE KEY TO GO AGAIN"
+   Pen 5 : Locate 0,21 : Centre "RIGHT MOUSE KEY TO QUIT"
+   Do 
+      M=Mouse Key
+      Exit If M>0
+   Loop 
+Until M=2
+'
+Edit 

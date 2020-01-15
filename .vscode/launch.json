@@ -1,0 +1,48 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Make Installer",
+			"program": "${workspaceFolder}/aoz/tools/installer/makeinstaller",
+			"cwd": "${workspaceFolder}/aoz/tools/installer",
+			"args": []
+		},		
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "gitmaker",
+			"program": "${workspaceFolder}/aoz/tools/gitmaker/gitmaker.js",
+			"cwd": "${workspaceFolder}/aoz/tools/gitmaker",
+			"args": []
+		},		
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "ExecTool",
+			"program": "${workspaceFolder}/aoz/tools/exectool/exectool.js",
+			"cwd": "${workspaceFolder}/aoz/tools/exectool",
+			"args": []
+		},		
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Compiler",
+			"program": "${workspaceFolder}/aoz/compiler/aoz.js",
+			"cwd": "${workspaceFolder}/aoz",
+			//"args": [ "--compile", "-clean", "-speed", "fast", "${workspaceFolder}/examples/Help_13" ]
+			"args": [ "--compile", "-clean", "-speed", "fast", "${workspaceFolder}/applications/debugging" ]
+			//"args": [ "--compile", "-clean", "-speed", "fast", "${workspaceFolder}/applications/crunchman_2019" ]
+		},
+	  	{
+			"type": "chrome",
+			"request": "launch",
+			"name": "Application",
+			"file": "${workspaceFolder}/applications/debugging/html/index.html"
+		}
+	]
+}

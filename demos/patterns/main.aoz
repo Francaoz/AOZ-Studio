@@ -1,0 +1,52 @@
+'
+' AMOS 2 Patterns demo!
+' One can see that anti-aliasing messes up things when patterns are intersecting
+' Will be corrected in 'strict' Amiga emulation mode...
+'
+
+' Slow!
+' --------------------------------------------------------------
+for n = 0 to 34
+	clw
+/*	
+	ink rnd( 32 )
+	set pattern 0
+	set paint 0
+	polygon rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 )*/
+	ink rnd( 32 )
+	set pattern n
+	set paint 1
+	polygon rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 )
+	//bar 120,80 to 200,120
+	locate 0, 24
+	print "Pattern #: ";n;
+	wait 15
+next n
+
+' Fast!
+' --------------------------------------------------------------
+clw
+do
+	x1 = rnd( 320 )
+	y1 = rnd( 200 )
+	x2 = rnd ( 320 )
+	y2 = rnd( 200 )
+	x3 = rnd( 320 )
+	y3 = rnd( 200 )
+	set pattern 0
+	ink rnd( 32 )
+	set paint 0
+	polygon x1, y1 to x2, y2 to x3, y3
+	set pattern rnd( 34 )
+	set paint 1
+	ink rnd( 32 )
+	polygon x1, y1 to x2, y2 to x3, y3
+	locate 0, 24	
+	centre "Press a key to exit..."
+	if inkey$ <> "" then exit
+	wait vbl
+loop
+
+
+
+

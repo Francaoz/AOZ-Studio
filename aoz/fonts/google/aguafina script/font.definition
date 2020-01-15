@@ -1,0 +1,30 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ - Google Font Definition
+ *
+ */	
+<FONT_FACE-START>
+/* aguafina-script-regular - latin */
+@font-face {
+  font-family: 'Aguafina Script';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/aguafina-script-v8-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Aguafina Script Regular'), local('AguafinaScript-Regular'),
+       url('../fonts/aguafina-script-v8-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/aguafina-script-v8-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/aguafina-script-v8-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/aguafina-script-v8-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/aguafina-script-v8-latin-regular.svg#AguafinaScript') format('svg'); /* Legacy iOS */
+}
+<FONT_FACE-END>

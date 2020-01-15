@@ -1,0 +1,524 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Music Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+#include_file:"howler.js-master/dist/howler.js"
+#include_file:"howler.js-master/dist/howler.spatial.min.js"
+
+//
+// Initialization
+//
+{
+    // Base initiliations
+    this.aoz.sounds = this;
+    this.banks = this.aoz.banks;
+    this.soundBank = this.banks.soundBank;
+    this.utilities = this.aoz.utilities;
+    this.voices = [];
+    this.maxVoices = 32;
+    this.numberOfLoops = 1;
+
+    // Amiga mode...
+    if ( this.aoz.manifest.sounds.mode == 'amiga' )
+    {
+        this.numberOfVoices = 4;
+        this.voices[ 0 ] = new Voice( this, 0, 'Left-0', -1, 0, 0 );
+        this.voices[ 1 ] = new Voice( this, 1, 'Right-1', 1, 0, 0 );
+        this.voices[ 2 ] = new Voice( this, 2, 'Left-2', -1, 0, 0 );
+        this.voices[ 3 ] = new Voice( this, 3, 'Right-2', 1, 0, 0 );
+        this.amigaToPCVolume = 1 / 64;
+    }
+    else
+    {
+        this.numberOfVoices = 32;
+        for ( var n = 0; n < this.numberOfVoices; n++ )
+        {
+            this.voices[ n ] = new Voice( this, n, 'Voice #' + n, 0, 0, 0 );
+        }
+        this.amigaToPCVolume = 1;
+    }
+
+    this.callVoices = function( functionName, voices, args, contextName )
+    {
+        voices = typeof voices == 'undefined' ? 0xFFFFFFFF : voices;
+        for ( var v = 0; v < this.voices.length; v++ )
+        {
+            var mask = ( 1 << v );
+            if ( ( voices & mask ) != 0 )
+            {
+                this.voices[ v ][ functionName ]( args, contextName );
+            }
+        }
+    };
+
+    // Voice class
+    function Voice( parent, index, name, x, y, z )
+    {
+        this.parent = parent;
+        this.aoz = parent.aoz;
+        this.banks = this.aoz.banks;
+        this.soundBank = parent.soundBank;
+        this.index = index;
+        this.name = name;
+        this.volume = 1;
+        this.numberOfLoops = 1;
+        this.muted = false;
+        this.loopCount = 1;
+        this.x = typeof x != 'undefined' ? x : 0;
+        this.y = typeof y != 'undefined' ? y : 0;
+        this.z = typeof z != 'undefined' ? z : 0;
+        this.playing = {};
+    };
+    Voice.prototype.playSound = function( args, contextName )
+    {        
+        var self = this;
+        var name = args[ 0 ];
+        var rate = args[ 1 ];
+        var startTime = args[ 2 ];
+        var cueStart = args[ 3 ];
+        self.rate = typeof rate == 'undefined' ? 1 : rate;
+        cueStart = typeof cueStart == 'undefined' ? 0 : cueStart;
+        startTime = typeof startTime == 'undefined' ? 0 : startTime;
+        if ( self.playing[ name ] )
+        {
+            var sound = self.playing[ name ];
+            sound.amLoopCount = self.numberOfLoops;
+            sound.volume( self.volume );
+            sound.rate( self.rate );
+            sound.stereo( self.x );
+            sound.seek( cueStart );
+        }
+        else
+        {
+            this.banks.getSound( name, function( response, sound )
+            {
+                if ( response )
+                {
+                    sound.amLoopCount = self.numberOfLoops;
+                    sound.volume( self.volume );
+                    sound.rate( self.rate );
+                    sound.stereo( self.x );
+                    sound.seek( cueStart );
+                    sound.play();
+                    self.playing[ name ] = sound;
+
+                    sound.on( "end", function( param )
+                    {
+                        if ( sound.amLoopCount > 0 )
+                        {
+                            sound.amLoopCount--;
+                            if ( sound.amLoopCount == 0 )
+                            {
+                                sound.stop();
+                                self.playing = self.aoz.utilities.cleanObject( self.playing, sound );
+                            }
+                            else
+                                sound.play();
+                        }
+                    } );
+                    sound.on( "fade", function( param )
+                    {
+                        if ( sound.amToDestroy )
+                        {
+                            sound.stop();
+                            self.playing = self.utilities.cleanObject( self.playing, sound );
+                            sound.amToDestroy = false;
+                        }
+                    } );
+                }
+            }, {}, contextName );
+        }
+    };
+    Voice.prototype.stopSound = function( args )
+    {
+        var sound;
+        var name = args[ 0 ];
+        var startTime = args[ 1 ];
+        var duration = args[ 2 ];
+        if ( sound = this.playing[ name ] )
+        {
+            duration = typeof duration != 'undefined' ? duration : 0;
+            startTime = typeof startTime != 'undefined' ? Math.floor( startime * 1000 ) : 1;
+            var self = this;
+            setTimeout( function()
+            {
+                if ( duration )
+                {
+                    sound.amToDestroy = true;
+                    sound.fade( self.volume, 0, duration );
+                }
+                else
+                    sound.stop();
+            }, startTime );
+        }
+    };
+    Voice.prototype.setPan = function( args )
+    {
+        var position = args[ 0 ];
+        this.x = position;
+        for ( var p in this.playing )
+        {
+            this.playing[ p ].stereo( this.x );
+        }
+    };
+    Voice.prototype.setVolume = function( args )
+    {
+        this.volume = args[ 0 ];
+        for ( var p in this.playing )
+        {
+            this.playing[ p ].volume( this.volume );
+        }
+    };
+    Voice.prototype.setPitch = function( args )
+    {
+        this.pitch = args[ 0 ];
+        for ( var p in this.playing )
+        {
+            this.playing[ p ].rate( pitch );
+        }
+    };
+}
+
+// Boom
+Instruction "boom"
+{
+    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'boom' ], this.aoz.sounds.contextName );
+}
+End Instruction
+
+// Shoot
+Instruction "shoot"
+{
+    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'shoot' ], this.aoz.sounds.contextName );
+}
+End Instruction
+
+// Bell
+// Bell PITCH
+Instruction "bell", _frequency
+{
+    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'bell', %_frequency ], this.aoz.sounds.contextName );
+}
+End Instruction
+
+// Sam Play SAMPLE
+// Sam Play VOICE, SAMPLE
+// Sam Play VOICE, SAMPLE, FREQUENCY
+Instruction "sam play", _index
+{
+    #errors
+    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ %_index ] );
+}
+End Instruction
+Instruction "sam play", _name$
+{
+    #errors
+    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ %_name$ ] );
+}
+End Instruction
+Instruction "sam play", _voices, _index, _frequency
+{ 
+    #errors
+    this.aoz.sounds.callVoices( 'playSound', %_voices, [ %_index, %_frequency ] );
+}
+End Instruction
+Instruction "sam play", _voices, _name$, _frequency
+{
+    #errors
+    this.aoz.sounds.callVoices( 'playSound', %_voices, [ %_name$, %_frequency ] );
+}
+End Instruction
+
+// Sam Stop
+// Sam Stop VOICES
+Instruction "sam stop", _voices
+{
+    #errors
+    this.aoz.sounds.callVoices( 'stopSound', %_voices );
+}
+End Instruction
+
+// Volume
+Instruction "volume", _level, _voices
+{
+    #errors
+    this.aoz.sounds.callVoices( 'setVolume', %_voices, [ %_level ] );
+}
+End Instruction
+
+// Voice
+Instruction "voice", _voices
+{
+    #notimplemented
+}
+End Instruction
+
+// Play
+Instruction "play", _pitch, _delay
+{
+    #notimplemented
+}
+End Instruction
+Instruction "play", _voices, _pitch, _delay
+{
+    #notimplemented
+}
+End Instruction
+
+// Play Off
+Instruction "play off", _voices
+{
+    #notimplemented
+}
+End Instruction
+
+// Set Wave
+Instruction "set wave", _number, _shape
+{
+    #notimplemented
+}
+End Instruction
+
+// Wave
+Instruction "wave", _number, _shapes
+{
+    #notimplemented
+}
+End Instruction
+
+// Noise To
+Instruction "noise to", _voice
+{
+    #notimplemented
+}
+End Instruction
+
+// Sample
+Instruction "sample", _number, _voice
+{
+    #notimplemented
+}
+End Instruction
+
+// Del Wave
+Instruction "del wave", _number
+{
+    #notimplemented
+}
+End Instruction
+
+// Set Envel
+Instruction "set envel", _number, _phase, _duration, _volume
+{
+    #notimplemented
+}
+End Instruction
+
+// Led On
+Instruction "led on"
+{
+    #notimplemented
+}
+End Instruction
+
+// Led Off
+Instruction "led off"
+{
+    #notimplemented
+}
+End Instruction
+
+// =vumeter( voice )
+Function "vumeter", _voice
+{
+    #notimplemented
+}
+End Function( 0 )
+
+// Sam Bank
+Instruction "sam bank", _number
+{
+    #notimplemented
+}
+End Instruction
+
+// Sam Raw
+Instruction "sam raw", _voice, _address, _length, _frequency
+{
+    #notimplemented
+}
+End Instruction
+
+// Sam Loop On
+Instruction "sam loop on"
+{
+    #notimplemented
+}
+End Instruction
+
+// Sam Loop Off
+Instruction "sam loop off"
+{
+    #notimplemented
+}
+End Instruction
+
+// SLoad
+Instruction "sload", _channel, _address, _length
+{
+    #notimplemented
+}
+End Instruction
+
+// SSave
+Instruction "ssave", _channel, _start, _end
+{
+    #notimplemented
+}
+End Instruction
+
+// Sam Swap
+Instruction "sam swap", _voice, _address, _length
+{
+    #notimplemented
+}
+End Instruction
+
+// =Sam Swapped( voice )
+Function "sam swapped", _voice
+{
+    #notimplemented
+}
+End Function( 0 )
+
+// Music
+Instruction "music", _number
+{
+    #notimplemented
+}
+End Instruction
+
+// Music Stop
+Instruction "music stop"
+{
+    #notimplemented
+}
+End Instruction
+
+// Music Off
+Instruction "music off"
+{
+    #notimplemented
+}
+End Instruction
+
+// MVolume
+Instruction "mvolume", _volume
+{
+    #notimplemented
+}
+End Instruction
+
+// Tempo
+Instruction "tempo", _tempo
+{
+    #notimplemented
+}
+End Instruction
+
+// Track Load
+Instruction "track load", _module$, _bank
+{
+    #notimplemented
+}
+End Instruction
+
+// Track Play
+Instruction "track play"
+{
+    #notimplemented
+}
+End Instruction
+Instruction "track play", _bank, _pattern
+{
+    #notimplemented
+}
+End Instruction
+
+// Track Loop On
+Instruction "track loop on"
+{
+    #notimplemented
+}
+End Instruction
+
+// Track Loop Off
+Instruction "track loop off"
+{
+    #notimplemented
+}
+End Instruction
+
+// Track Stop
+Instruction "track stop"
+{
+    #notimplemented
+}
+End Instruction
+
+// Med Load
+Instruction "med load", _module$, _bank
+{
+    #notimplemented
+}
+End Instruction
+
+// Med Play
+Instruction "med play"
+{
+    #notimplemented
+}
+End Instruction
+Instruction "med play", _bank, _song
+{
+    #notimplemented
+}
+End Instruction
+
+// Med Stop
+Instruction "med stop"
+{
+    #notimplemented
+}
+End Instruction
+
+// Med Midi On
+Instruction "med midi on"
+{
+    #notimplemented
+}
+End Instruction

@@ -1,0 +1,91 @@
+'********************************* 
+'*    AMOS Professional HELP 6   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *               Gr Locate (line 11) 
+'*                               *               Xgr       (line 22) 
+'*         Ronnie Simpson        *               Ygr       (line 22) 
+'*********************************               Plot      (line 32) 
+'                                                Point     (line 42) 
+'
+'------------------------------------------- 
+'Gr Locate 
+'------------------------------------------- 
+'Sets the position of the starting point of drawing operations 
+'
+'eg.    Gr Locate 90,100  (start drawing at screen co-ord 90 across 100 down)  
+'       Plot ,            (plot a single pixel at the above point) 
+'       Circle ,,50       (draw a circle with its center at 90x,100y)  
+'
+'As in the above examples, once Gr Locate is set you can omit the coordinates
+'from drawing operations such as plot and circle.
+'------------------------------------------- 
+'Xgr 
+'Ygr 
+'------------------------------------------- 
+'Functions used to return the present graphic locations  
+'
+'     eg.    Draw 10,10 to 50,60 
+'            Print Xgr,Ygr 
+'
+'     Would print   50    60       
+'------------------------------------------- 
+'Plot
+'------------------------------------------- 
+'Plot a single pixel point 
+'
+'  eg.     Plot 50,60,2   (plot a point at 50 across,60 down in ink colour 2)  
+'          Plot10,10      (plot a point using the current ink colour)
+'
+'If the ink colour parameter is used this will become new current ink colour 
+'for all other graphic operations. 
+'------------------------------------------- 
+'Point 
+'------------------------------------------- 
+'Used to return the colour index (ink colour) at a screen coordinate 
+'
+'eg.     C=Point (100,50)
+'        Print Point (Xgr,Ygr) 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+'
+Rem *** tidy up the screen and set up the palette  
+Curs Off : Flash Off : Cls 0 : Pen 6 : Paper 0 : Change Mouse 2
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+'
+Rem *** Print the instructions 
+Locate 5,3 : Print "<COLOUR IN USE"
+Locate 0,22 : Print "PRESS LEFT MOUSE KEY TO DRAW"
+Locate 0,23 : Print "PRESS RIGHT KEY TO SELECT COLOUR"
+Locate 0,24 : Print "PRESS BOTH TO QUIT";
+'
+Rem *** Draw the colour selection at the top of the screen 
+Set Paint 1
+For Z=0 To 15
+   Ink Z,0,12
+   Bar Z*20,0 To Z*20+20,20
+Next 
+'
+Rem *** set the starting ink colour and show it in a box 
+C=4 : Ink 4 : Bar 0,23 To 40,31
+'
+Rem *** start the main loop
+Do 
+   '
+   Rem *** Plot a point in the current ink colour if left button is pressed 
+   If Mouse Key=1
+      Gr Locate X Screen(X Mouse),Y Screen(Y Mouse)
+      Plot Xgr,Ygr,C
+   End If 
+   '
+   Rem *** Select a new colour if right button is pressed   
+   If Mouse Key=2
+      C=Point(X Screen(X Mouse),Y Screen(Y Mouse))
+      Ink C : Bar 0,23 To 40,31
+   End If 
+   '
+   Rem *** Quit program if both buttons are pressed   
+   If Mouse Key=3 Then Edit 
+   '
+Loop 

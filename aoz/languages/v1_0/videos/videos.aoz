@@ -1,0 +1,270 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Video Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+
+//
+// Initialization
+//
+{
+	this.aoz = aoz;
+    this.banks = this.aoz.banks;
+	this.aoz.videos = this;
+	this.context = new AOZContext( this.aoz, this.aoz.currentContextname, { sorted: true } );
+	this.current = null;
+
+	this.getCurrent = function( number )
+	{
+		if ( typeof number == 'undefined' )
+			return this.current;
+		return this.context.getElement( this.aoz.currentContextName, number, 'video_not_opened' );
+	};
+	this.close = function( index )
+	{
+		var video = this.getCurrent( index );
+		this.context.deleteElement( this.aoz.currentContextName, video.index );
+		this.currentVideo = this.context.getFirstElement( this.aoz.currentContextName );
+	};
+	
+	
+	this.video = function( rectangle, url, tags )
+	{
+		this.rectangle = {};
+
+		this.video = document.createElement( 'video' );
+		this.loaded = false;
+		this.visible = true;
+
+		var video = this.video;
+		video.preload = "auto";
+		video.autoplay = this.aoz.utitities.getTag( tags, 'play' );
+		video.loop = this.aoz.utitities.getTag( tags, 'loop' );
+		this.setRectangle( rectangle );
+		this.show( !this.aoz.getTag( 'hidden' );)
+		this.setControls( this.aoz.getTag( 'controls' );
+		if ( url != '' )
+			this.setUrl( url );
+	};
+	this.video.prototype.setPosition = function( position )
+	{
+		this.rectangle.x = typeof position.x != 'undefined' ? position.x : this.rectangle.x;
+		this.rectangle.y = typeof position.y != 'undefined' ? position.y : this.rectangle.y;
+		this.video.style.left = this.rectangle.x + 'px';
+		this.video.style.top = this.rectangle.y + 'px';
+	};
+	this.video.prototype.setSize = function( size )
+	{
+		this.rectangle.width = typeof size.width != 'undefined' ? size.width : this.rectangle.width;
+		this.rectangle.height = typeof size.height != 'undefined' ? size.height : this.rectangle.height;
+		this.video.style.width = this.position.x + 'px';
+		this.video.style.height = this.position.y + 'px';
+	}
+	this.video.prototype.pause = function()
+	{
+		this.video.pause();
+	};
+	this.video.prototype.play = function()
+	{
+		this.video.play();
+	};
+	this.video.prototype.show = function( visible )
+	{	
+		this.visible = visible;
+		if ( this.loaded )
+		{
+			this.video.style.visibility = visible ? 'visible' : 'hidden';
+		}
+	};
+	this.video.prototype.setVolume = function( volume )
+	{
+		this.video.volume = vol;
+	};
+	this.video.prototype.setLooping = function( loop )
+	{
+		this.video.loop = loop;
+	};
+	this.video.prototype.setControls = function( controls )
+	{
+		this.video.controls = controls;
+	};
+	this.video.prototype.setPlayrate = function( playrate )
+	{
+		if ( time < 0 )
+			throw 'illegal_function_call';
+		this.video.playbackRate = playrate;
+	};
+	this.video.prototype.seek = function( time )
+	{
+		if ( time < 0 )
+			throw 'illegal_function_call';
+		this.video.currentTime = time / 1000;
+	}
+	this.video.prototype.setUrl = function( url )
+	{
+		this.loaded = false;
+		var self = this;
+		this.video.addEventListener( 'loadeddata', function (e)
+		{
+			self.video.removeEventListener( 'loadeddata', arguments.callee, false );
+			self.loaded = true;
+			self.show( self.visible );
+		}, false);
+		this.video.src = url;
+		this.video.load();
+	}
+
+}
+
+
+// List of instructions and functions
+///////////////////////////////////////////////////////////////////////////
+Instruction "video open", _index, _x, _y, _url$, _tags
+{
+	#errors
+	var video=new this.aoz.videos.video( %_number,{x:%_x,y:%_y},%_url$,%_tags);
+	this.aoz.videos.context.addElement(this.aoz.currentContextName,video,%_index);
+	this.aoz.videos.currentVideo = video;
+}
+End Instruction 
+Instruction "video close", _number
+{
+	#errors
+	this.aoz.videos.close(%_number);
+}
+End Instruction 
+Instruction "video play", _number
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).play();
+}
+End Instruction 
+Instruction "video stop", _number
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).stop();
+}
+End Instruction 
+Instruction "video pause", _number
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).pause();
+}
+End Instruction 
+Instruction "video loop", _number, _loop
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setLooping(%_loop);
+}
+End Instruction 
+Instruction "video controls", _number, _onOff
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setControls(%_onOff);
+}
+End Instruction 
+Instruction "video volume", _number, _onOff
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setControls(%_onOff);
+}
+End Instruction 
+Instruction "video playrate", _number, _playrate
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setPlayrate(%_playrate);
+}
+End Instruction 
+Instruction "video url", _number, _url$
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setUrl(%_url$);
+}
+End Instruction 
+Instruction "video position", _number, _x, _y
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setPosition({x:%_x,y:%_y});
+}
+End Instruction 
+Instruction "video size", _number, _width, _height0
+{
+	#errors
+	this.aoz.videos.getCurrent(%_number).setSize({width:%_width,height:%_height});
+}
+End Instruction 
+
+Function "video width", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).rectangle.width} )
+Function "video height", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).rectangle.height} )
+Function "video x", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).rectangle.x} )
+Function "video y", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).rectangle.y} )
+Function "video url$", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).video.src} )
+Function "video rate", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).video.playbackRate} )
+Function "video volume", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).video.volume} )
+Function "video time", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).video.currentTime*1000} )
+Function "video duration", _index
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).video.duration*1000} )
+Function "video can play", _index, _type$
+{
+	#errors
+}
+End Function( {this.aoz.videos.getCurrent(%_index).video.canPlayType(%_type$)} )
+

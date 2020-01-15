@@ -1,0 +1,434 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Text Window Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+
+//
+// Initialization
+//
+{
+}
+
+Instruction "wind open", _number, _x, _y, _width, _height, _border, _tags$
+{
+	#errors
+	this.aoz.currentScreen.windOpen(%_number,{x:%_x,y:%_y,width:%_width,height:%_height},%_border,%_tags$);
+}
+End Instruction
+
+Instruction "wind close"
+{
+	#errors
+	this.aoz.currentScreen.windClose();
+}
+End Instruction
+
+Instruction "wind save"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.windSave();
+}
+End Instruction
+
+Instruction "wind move", _dx, _dy
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.windMove({x:%_dx,y:%_dy});
+}
+End Instruction
+
+
+Instruction "wind size", _width, _height
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.windSize({x:%_width,y:%_height});
+}
+End Instruction
+
+Instruction "window", _number
+{
+	#errors
+	this.aoz.currentScreen.setWindow(%_number);
+}
+End Instruction
+
+Function "windon"
+{
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.number} )
+
+Instruction "locate", _x, _y 
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.locate({x:%_x,y:%_y});
+}
+End Instruction
+
+Instruction "clw"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.clw();
+}
+End Instruction
+
+Instruction "home"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.home();
+}
+End Instruction
+
+Instruction "curs pen", _color
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setCursPen(%_color);
+}
+End Instruction
+
+Function "pen$", _color
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.pen$(%_color)} )
+
+Function "paper$", _color
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.paper$(%_color)} )
+
+Function "at", _x, _y
+{
+	#errors
+	#returnstring
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.at$({x:%_x,y:%_y})} )
+
+Instruction "pen", _color
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setPen(%_color);
+}
+End Instruction
+
+Instruction "paper", _color
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setPaper(%_color);
+}
+End Instruction
+
+Instruction "centre", _text$
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.centre(%_text$);
+}
+End Instruction
+
+Instruction "border", _bord, _paper, _pen
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setBorder(%_bord,%_paper,%_pen);
+}
+End Instruction
+
+
+Instruction "writing", _style1, _style2
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.writing(%_style1,%_style2);
+}
+End Instruction
+
+Instruction "title top", _title$
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setTitleTop(%_title$);
+}
+End Instruction
+
+Instruction "title bottom", _title$
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setTitleBottom(%_title$);
+}
+End Instruction
+
+Instruction "curs off"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setCursor(false);
+}
+End Instruction
+
+Instruction "curs on"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setCursor(true);
+}
+End Instruction
+
+Instruction "inverse off"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setInverse(false);
+}
+End Instruction
+
+Instruction "inverse on"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setInverse(true);
+}
+End Instruction
+
+Instruction "under off"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setUnder(false);
+}
+End Instruction
+
+Instruction "under on"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setUnder(true);
+}
+End Instruction
+
+Instruction "shade off"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setShade(false);
+}
+End Instruction
+
+Instruction "shade on"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setShade(true);
+}
+End Instruction
+
+Instruction "scroll off"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setScroll(false);
+}
+End Instruction
+
+Instruction "scroll on"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setScroll(true);
+}
+End Instruction
+
+Function "cup$"
+{
+}
+End Function( {"$(COMDY-1COM)$"} )
+
+Function "cdown$"
+{
+}
+End Function( {"$(COMDY1COM)$"} )
+
+Function "cleft$"
+{
+}
+End Function( {"$(COMDX-1COM)$"} )
+
+Function "cright$"
+{
+}
+End Function( {"$(COMDX1COM)$"} )
+
+Instruction "cup"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.cursorUp();
+}
+End Instruction
+
+Instruction "cdown"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.cursorDown();
+}
+End Instruction
+
+Instruction "cleft"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.cursorLeft();
+}
+End Instruction
+
+Instruction "cright"
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.cursorRight();
+}
+End Instruction
+
+Instruction "memorize x"
+{
+	this.aoz.currentScreen.currentTextWindow.memoryX=this.aoz.currentScreen.currentTextWindow.xCursor;
+}
+End instruction
+
+Instruction "memorize y"
+{
+	this.aoz.currentScreen.currentTextWindow.memoryY=this.aoz.currentScreen.currentTextWindow.yCursor;
+}
+End Instruction
+
+Instruction "remember x"
+{
+	this.aoz.currentScreen.currentTextWindow.locate(this.aoz.currentScreen.currentTextWindow.memoryX);
+}
+End Instruction
+Instruction "remember y"
+{
+	this.aoz.currentScreen.currentTextWindow.locate(undefined,this.aoz.currentScreen.currentTextWindow.memoryY);
+}
+End Instruction
+
+Function "cmove$", _dx, _dy
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.move$({x:%_dx,%_y:dy})} )
+
+Instruction "cmove", _x, _y
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.cursorMove({x:%_x,y:%_y});
+}
+End Instruction
+
+Instruction "cline", _length
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.cLine(%_length);
+}
+End Instruction
+
+Instruction "hscroll", _dx
+{
+	#errors
+	this.aoz.currentScreen.currentcurrentTextWindowWindow.hScroll(%_dx);
+}
+End Instruction
+
+Instruction "vscroll", _dy
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.vScroll(%_dy);
+}
+End Instruction
+
+Instruction "set tab", _tab
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setTab(%_tab);
+}
+End Instruction
+
+Instruction "set curs", _b1, _b2, _b3, _b4, _b5, _b6, _b7, _b8
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setCurs([%_b1,%_b2,%_b3,%_b4,%_b5,%_b6,%_b7,%_b8]);
+}
+End Instruction
+
+Function "x curs"
+{
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.xCursor} )
+
+Function "y curs"
+{
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.yCursor} )
+
+Function "x graphic", _x
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.xGraphic(%_x)} )
+
+Function "y graphic", _y 
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.yGraphic(%_y)} ) 
+
+Function "border$", _text$, _number
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.border$(%_text$,%_number)} ) 
+
+Function "x text", _coord
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.xText(%_coord)} ) 
+Function "y text", _coord
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.yText(%_coord)} ) 
+
+Function "text styles"
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.getTextStyle()} ) 
+
+Instruction "set text", _number
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setText(%_number);
+}
+End Instruction
+
+Instruction "set text", _style
+{
+	#errors
+	this.aoz.currentScreen.currentTextWindow.setText(%_style);
+}
+End Instruction
+
+Function "text styles"
+{
+	#errors	
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.getTextStyle()} )
+

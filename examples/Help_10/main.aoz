@@ -1,0 +1,93 @@
+'**********************************  
+'*    AMOS Professional HELP 10   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *               Flip$   (line 12)
+'*                                *               Space$  (line 21)
+'*         Ronnie Simpson         *               String$ (line 30)
+'**********************************               Chr$    (line 39)
+'                                                 Asc     (line 48)
+'
+'
+'------------------------------------------- 
+'Flip$ 
+'------------------------------------------- 
+'Used to reverse the order of the characters held in a string
+'
+'eg.     A$="AMOS Professional"
+'        Print Flip$(A$) 
+'
+'        Will print lanoisseforP SOMA
+'------------------------------------------- 
+'Space$
+'------------------------------------------- 
+'Used to place (x) number of spaces into a string
+'
+'eg.     A$="AMOS" : B$="Professional" : S$=Space$(10) 
+'        Print A$+S$+B$
+'
+'        Will print AMOS          Professional 
+'------------------------------------------- 
+'String$ 
+'------------------------------------------- 
+'Used to create multiple copies of the first character in a string 
+'
+'eg.     A$="AMOS Professional"
+'        Print String$(A$,15)
+'
+'        Will print AAAAAAAAAAAAAAA  
+'------------------------------------------- 
+'Chr$
+'------------------------------------------- 
+'A function used to create a string of the character of the Ascii number (x) 
+'
+'eg.     A$=Chr$(65)+Chr$(77)+Chr$(79)+Chr$(83)
+'        Print A$
+'
+'        Will print AMOS 
+'------------------------------------------- 
+'Asc 
+'------------------------------------------- 
+'Used to convert the first character of a string to the internal Ascii number
+'
+'eg. 
+'        Print Asc("A"),Asc("M"),Asc("O"),Asc("S") 
+'
+'        Will print 65   77   79   83
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** Open screen and tidy up
+Screen Open 0,640,200,8,Hires : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70
+'
+Rem *** Start main loop
+Repeat 
+   Cls 0 : Home : Paper 0 : Pen 1
+   '
+   Rem *** Get user to input a string to work with  
+   Print "Please enter somebody's first name then press return" : Print 
+   Pen 5 : Input "";F$ : Print 
+   Pen 1 : Print "Please enter somebody's surname then press return" : Print 
+   Pen 5 : Input "";S$ : Cls 0 : Locate 0,2 : Curs Off 
+   '
+   Rem *** Join the forename to the surname 
+   A$=F$+" "+S$
+   Pen 2 : Inverse On : Centre "A$="+A$ : Inverse Off : Print : Print 
+   '
+   Rem *** Do the string manipulations and print results to screen
+   Pen 4 : Centre "Flip$(A$)-----"+Flip$(A$) : Print : Print 
+   Centre "F$+Space$(5)+S$-----"+F$+Space$(5)+S$ : Print : Print 
+   Centre "String$(A$,15)-----"+String$(A$,15) : Print : Print 
+   Pen 1 : Centre "Chr$(Rnd(31)+65)-----"+Chr$(Rnd(31)+65) : Print : Print 
+   Pen 7 : Centre "Asc(A$)-----"+Str$(Asc(A$)) : Print : Print 
+   '
+   Rem *** Check for end of program or repeat 
+   Pen 6 : Locate 0,19 : Centre "LEFT MOUSE KEY TO GO AGAIN"
+   Pen 5 : Locate 0,21 : Centre "RIGHT MOUSE KEY TO QUIT"
+   Do 
+      M=Mouse Key
+      Exit If M>0
+   Loop 
+Until M=2
+'
+Edit 

@@ -1,0 +1,145 @@
+'********************************* 
+'*    AMOS Professional HELP 4   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *                 Len   (line 10) 
+'*                               *                 Val   (line 20) 
+'*         Ronnie Simpson        *                 Str$  (line 32) 
+'*********************************                 Sort  (line 44) 
+'                                                  Match (line 58) 
+'------------------------------------------- 
+'Len 
+'------------------------------------------- 
+'A function which returns the number of characters in a string 
+'
+'eg.     A$="AMOS Professional"
+'        Print Len(A$),Len("12345")  
+'
+'Prints the amswers 17   5 
+'
+'------------------------------------------- 
+'Val 
+'------------------------------------------- 
+'A function which attempts to convert a string to a number 
+'
+'eg.     A$="12345":B$="3.142":C$="A*2+3": 
+'        Print Val(a$),Val(B$),Val(C$) 
+'
+'Prints the amswers 12345    3.142    0    
+'
+'This function does not attempt to evaluate expressions within a string and
+'will return 0 if it fails for any reason (as in the example Val(C$) above)  
+'------------------------------------------- 
+'Str$
+'------------------------------------------- 
+'A function to convert a integer into a string 
+'
+'eg.     A=12345 : B=3 : C=2*10  
+'        Print Str$(A),Str$(B),Str$(C) 
+'
+'would print the following 12345    3     20 
+'
+'Only works with integers. 
+'Ideal for use with Centre eg.     Centre "BYTES FREE="+Str$(Chip Free)
+'------------------------------------------- 
+'Sort
+'------------------------------------------- 
+'Arranges the contents of an array in ascending order
+'
+'eg.     Dim A(5)
+'        A(1)=5 : A(2)=1 : A(3)=4 : A(4)=2 : A(5)=3
+'        Sort A(0) 
+'        Print A(1),A(2),A(3),A(4),A(5)
+'
+'would print the following    1   2   3   4   5  
+'
+'Works equally well with string$ [Sort a$(0)] and real numbers [Sort A#(0)]  
+'The (0) parameter must always be set to 0 
+'------------------------------------------- 
+'Match 
+'------------------------------------------- 
+'Search through a sorted Array for a particular value
+'
+'eg.     Dim A(5)
+'        A(1)=55 : A(2)=21 : A(3)=43 : A(4)=2 : A(5)=87  
+'        Sort A(0) 
+'        Print A(1),A(2),A(3),A(4),A(5)
+'        M=Match(A(0),55)
+'        Print M 
+'would print the following   2   21   43   55   87     
+'                            4 
+'
+'Array must be sorted using Sort before using this function. 
+'Only arrays with a single element can be tested.
+'If the exact match is not found the number returned will be negative and
+'taking the absolute value of this number you can find the element which was 
+'closest to the origonal search number eg. If M<0 then M=Abs(M). 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Dim A$(9),A(10)
+Rem *** Open screen and tidy up  
+Screen Open 0,640,200,8,Hires : Curs Off : Flash Off : Hide 
+Palette $0,$FA6,$F0,$F8,$FF0,$7FF,$BBB,$7F0
+Repeat 
+   Cls 0 : Pen 5 : Paper 0 : Restore 
+   '
+   Rem *** Read data and set out the screen text
+   Locate 10,0 : Print "ORIGINAL ARRAY"
+   '
+   Rem *** Read the data and print it to the screen 
+   For Z=1 To 9
+      Read A$(Z)
+      Locate 12,Z : Print Str$(Z)+"-"+A$(Z)
+   Next 
+   '
+   Rem *** Get user to enter a number to work with  
+   Pen 4 : Locate 0,12 : Centre "ENTER A NUMBER BETWEEN 1 and 9"
+   Do 
+      A=0 : K$=Inkey$
+      A=Val(K$)
+      Exit If A>0 and A<10
+   Loop 
+   Locate 0,12 : Centre "YOU HAVE SELECTED THE NUMBER"+Str$(A)
+   '
+   Rem *** Sort the array and print to screen 
+   Pen 1 : Locate 0,14 : Centre "IN THE ORIGINAL ARRAY THIS WAS THE "+A$(A)
+   Sort A$(0)
+   Pen 5 : Locate 52,0 : Print "SORTED ARRAY"
+   For Z=1 To 9
+      Locate 52,Z : Print Str$(Z)+"-"+A$(Z)
+   Next 
+   Pen 1 : Locate 0,16 : Centre "IN THE SORTED ARRAY THIS IS THE "+A$(A)
+   '
+   Rem *** Get the length of the string 
+   L=Len(A$(A))
+   Pen 5 : Locate 0,18 : Centre "THE WORD "+A$(A)+" HAS"+Str$(L)+" LETTERS"
+   '
+   Rem *** Get user to input a string to work with  
+   Pen 4 : Locate 0,20 : Centre "ENTER THE NAME OF ANY ANIMAL THEN PRESS RETURN"
+   Pen 5 : Locate 35,22 : Input I$ : I$=Upper$(I$) : Pen 6
+   '
+   Rem *** find the nearest match 
+   M=Match(A$(0),I$)
+   If M>0
+      Locate 0,20
+      Centre "I HAVE MATCHED THIS WITH THE ELEMENT NUMBER"+Str$(M)+" IN THE SORTED ARRAY"
+   Else 
+      M=Abs(M)-1
+      If M<1
+         M=1
+      End If 
+      Locate 0,20 : Centre "THE NEAREST I CAN MATCH THIS WITH IS "+A$(M)+" FROM THE SORTED ARRAY"
+   End If 
+   '
+   Rem *** Test for repeat or end 
+   Curs Off 
+   Pen 7 : Locate 0,24 : Centre "LEFT MOUSE KEY TO TRY AGAIN    RIGHT MOUSE KEY TO QUIT"
+   Do 
+      Exit If Mouse Key
+   Loop 
+Until Mouse Key=2
+'
+Edit 
+'
+Data "ZEBRA","BEAR","SNAKE","TIGER","HIPPO","LION","PUMA","MONKEY","ELEPHANT"

@@ -1,0 +1,30 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ - Google Font Definition
+ *
+ */	
+<FONT_FACE-START>
+/* trocchi-regular - latin */
+@font-face {
+  font-family: 'Trocchi';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/trocchi-v8-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Trocchi Regular'), local('Trocchi-Regular'),
+       url('../fonts/trocchi-v8-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('../fonts/trocchi-v8-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('../fonts/trocchi-v8-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('../fonts/trocchi-v8-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('../fonts/trocchi-v8-latin-regular.svg#Trocchi') format('svg'); /* Legacy iOS */
+}
+<FONT_FACE-END>

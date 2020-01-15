@@ -1,0 +1,30 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ Runtime
+ *
+ * Extension font bank
+ *
+ * @author FL (Francois Lionet)
+ * @date first pushed on 12/08/2019
+ */
+
+<GOOGLEFONTS-START>
+INSERT_GOOGLEFONTS<GOOGLEFONTS-END>
+
+<GOOGLEFONTSFAMILIES-START>INSERT_GOOGLEFAMILIES<GOOGLEFONTSFAMILIES-END>
+
+<GOOGLEFONTSFACES-START>
+INSERT_GOOGLEFACES<GOOGLEFONTSFACES-END>
+
+<AMIGAFONTSCHARS-START>
+INSERT_AMIGAFONTS<AMIGAFONTSCHARS-END>

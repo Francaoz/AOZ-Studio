@@ -1,0 +1,158 @@
+'**********************************  
+'*    AMOS Professional HELP 13   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *             Repeat...Until (line 11) 
+'*                                *             Do...Loop      (line 24) 
+'*         Ronnie Simpson         *             Exit           (line 36) 
+'**********************************             End            (line 48) 
+'                                               On... Goto     (line 55) 
+'                                               On... Gosub    (line 64) 
+'------------------------------------------- 
+'Repeat...Until
+'------------------------------------------- 
+'Repeat a section of code (with the test at the end of the loop) 
+'
+'eg.            Repeat 
+'               Inc X
+'               Until X>1000 
+'
+'Since the test is at the end of the loop it is worth bearing in mind that 
+'this type of loop is always preformed at least once.  
+'Each REPEAT must have its own coresponding UNTIL. 
+'
+'------------------------------------------- 
+'Do...Loop 
+'------------------------------------------- 
+'Repeat a section of code unconditionally
+'
+'eg.         Print "PRESS ANY MOUSE KEY" 
+'            Do
+'            Exit If Mouse Key 
+'            Loop
+'
+'The only way out of a Do...Loop is by use of the Exit or Exit If commands 
+'
+'------------------------------------------- 
+'Exit
+'------------------------------------------- 
+'Exit from a loop  
+'
+'eg.  (1) If Mouse Key=1 Then Exit   (2) If Mouse Key=2 Then Exit 2
+'
+'In example (2) above the extended form is used and the number following 
+'the Exit instructs the program to exit from that number of loops. 
+'The Exit instruction will work equally well with any combination of 
+'types of loop.   ie. For...Next , Repeat...Until , While...Wend , Do...Loop         
+'
+'------------------------------------------- 
+'End 
+'------------------------------------------- 
+'Stop program execution
+'
+'After an end instruction the user is given the option of returning
+'to the editor or direct modes.
+'------------------------------------------- 
+'On Goto 
+'------------------------------------------- 
+'Jump to one of several line numbers or lables 
+'
+'eg.      On N Goto NORTH,SOUTH,EAST,WEST,5,6,7    
+'
+'The value of the variable must be an integer between 1 and the total
+'number of choices.
+'------------------------------------------- 
+'On Gosub
+'------------------------------------------- 
+'Jump to one of several procedures 
+'
+'On...Gosub is identical to On...Goto with the exception that a
+'subroutine is called. 
+'When the subroutine is completed the program will jump to the instruction 
+'immidiately following the On...Gosub statement. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Dim X(40),Y(40)
+'
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Gr Writing 2 : Ink 1,0
+Reserve Zone 2
+'
+Rem *** Print the information
+Pen 1 : Locate 0,2 : Centre "THIS IS A LITTLE EXAMPLE OF....."
+Pen 2 : Locate 3,5 : Print "REPEAT....UNTIL"
+Pen 3 : Locate 63,5 : Print "DO....LOOP"
+Pen 7 : Locate 50,9 : Print "EXIT"
+Pen 5 : Locate 25,9 : Print "END"
+Pen 9 : Locate 27,14 : Centre "and ON...GOSUB"
+Pen 8 : Locate 2,18 : Print Border$(Zone$("LESS SNOW",1),2)
+Locate 69,18 : Print Border$(Zone$("MORE SNOW",2),2)
+Pen 10 : Locate 0,21 : Centre "click with left mouse key in the weather boxes"
+Pen 4 : Locate 0,23 : Centre "click right mouse key to quit"
+Draw 0,134 To 640,134
+Draw 0,161 To 640,161
+'
+Rem *** set the start positions of snowflakes
+For N=1 To 40
+   X(N)=Rnd(600)+20 : Y(N)=Rnd(20)-22
+   Plot X(N),Y(N)
+Next N
+'
+Rem *** reset the counters 
+COUNT=0 : N=(0)
+'
+Rem *** start outer loop 
+AMOUNT=10
+Do 
+   Rem *** check the weather
+   M=Mouse Zone
+   If Mouse Key=1 and M=1 and AMOUNT>2
+      Plot X(AMOUNT),Y(AMOUNT)
+      Dec AMOUNT
+   End If 
+   If Mouse Key=1 and M=2 and AMOUNT<39
+      Plot X(AMOUNT),Y(AMOUNT)
+      Inc AMOUNT
+   End If 
+   '
+   Rem *** start inner loop 
+   Repeat 
+      If Mouse Key=2 Then Exit 2
+      '
+      Rem *** erase and plot snowflakes using Gr Writing=2 (Xor) 
+      Plot X(N),Y(N)
+      Add X(N),Rnd(2)-1 : Inc Y(N)
+      Plot X(N),Y(N)
+      '
+      Rem *** check if snow has landed on anything 
+      If Point(X(N),Y(N)+1)>0 or X(N)<-1 or X(N)>640
+         X(N)=Rnd(600)+20 : Y(N)=-1
+         Plot X(N),Y(N)
+      End If 
+      '
+      Rem *** 'next snowflake' 
+      Inc N
+   Until N=AMOUNT
+   N=1
+   '
+   Rem *** print the next line of text every 30th. pass of the inner loop 
+   Inc COUNT : If COUNT=30 Then COUNT=1 : Inc J
+   If J=12 Then J=1
+   Pen 6 : Locate 0,18
+   On J Gosub 1,2,3,4,5,5,1,6,7,8,8
+   Wait VBL
+Loop 
+'
+End 
+'
+1 Centre " I'M DREAMING OF A WHITE CHRISTMAS " : Return 
+2 Centre " JUST LIKE THE ONES I USED TO KNOW " : Return 
+3 Centre "    WHERE THE TREE TOPS GLISTEN    " : Return 
+4 Centre "        AND CHILDREN LISTEN        " : Return 
+5 Centre " TO HEAR SLEIGH BELLS IN THE SNOW  " : Return 
+6 Centre "   WITH EVERY XMAS CARD I WRITE    " : Return 
+7 Centre "MAY YOUR DAYS BE MERRY AND BRIGHT" : Return 
+8 Centre " AND MAY ALL YOUR XMAS'S BE WHITE  " : Return 

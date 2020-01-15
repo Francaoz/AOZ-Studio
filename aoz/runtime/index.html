@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style type="text/css">
+		INSERT_GOOGLEFONTS_FACES
+		html
+		{
+			height: 100%;
+		}
+		body
+		{
+			height: 100%;
+			min-height: 100%;
+			margin: 0;
+			background-color:BODYCOLOR;
+			overflow: hidden;
+			INSERT_GOOGLEFONTS_CSS
+		}
+		h1 
+		{
+			font-family: Arial, Helvetica, sans-serif;
+			color: #ffffff;
+			font-size: 25px;
+		}
+		p {
+			font-family: Arial, Helvetica, sans-serif;
+			color: #777;
+			font-size: 12px;
+		}
+		#bloctxt
+		{
+			border-left-width: 5px;
+			border-left-style: solid;
+			border-left-color: #962300;
+			padding-left: 10px;
+			position: absolute;
+			top:5%;
+			left: 50%;
+			width: 600px;
+			margin-left: -260px
+		}
+		#div
+		{
+ 			width:100%;
+ 			height:100vh;
+ 			position:relative;
+		}
+		#AOZCanvas
+		{
+			background-color:#000;	
+			position:absolute;
+ 			top:0;bottom:0;right:0;left:0;
+			margin:auto;
+			width:CANVASWIDTHpx;
+			height:CANVASHEIGHTpx;
+		}
+		#bg 
+		{
+			position: fixed; 
+			top: -50%; 
+			left: -50%; 
+			width: 200%; 
+			height: 200%;
+		}
+		#bg img 
+		{
+			position: absolute; 
+			top: 0; 
+			left: 0; 
+			right: 0; 
+			bottom: 0; 
+			margin: auto; 
+			min-width: 50%;
+			min-height: 50%;
+		}
+		</style>
+
+		<title>AOZ Runtime</title>
+INSERTFILES
+	</head>
+
+	<body>
+BODYIMAGE
+		<h1 align="center">APPLICATIONNAME</h1>
+		<p align="center">Made with AOZ Studio</p>		
+		<canvas id="AOZCanvas" width="CANVASWIDTH" height="CANVASHEIGHT">
+			<p>Your browser does not support Canvas.</p>
+		</canvas>
+		<script>
+			window.addEventListener( "load", function()
+			{
+				window.application = new Application( 'AOZCanvas' );
+			}, false );
+		</script>
+	</body>
+</html>

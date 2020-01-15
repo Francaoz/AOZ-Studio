@@ -1,0 +1,302 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Rainbow Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+
+//
+// Initialization
+//
+{
+}
+
+Instruction "ins bob", _number
+{
+	#errors
+	this.aoz.banks.insertImage(%_number);
+}
+End Instruction
+Instruction "ins bob", _theStart To _theEnd
+{
+	#errors #errors
+	this.aoz.banks.insertImageRange(%_theStart,%_theEnd);
+}
+End Instruction
+
+Instruction "bob", _number, _image
+{
+	#errors
+	this.aoz.currentScreen.bob(%_number, {}, %_image);
+}
+End Instruction
+Instruction "bob", _number, _image$
+{
+	#errors
+	this.aoz.currentScreen.bob(%_number, {}, %_image$);
+}
+End Instruction
+Instruction "bob", _number, _x, _y, _image
+{
+	#errors
+	this.aoz.currentScreen.bob(%_number,{x:%_x,y:%_y},%_image);
+}
+End Instruction
+Instruction "bob", _number, _x, _y, _image$
+{
+	#errors
+	this.aoz.currentScreen.bob(%_number,{x:%_x,y:%_y},%_image$);
+}
+End Instruction
+
+Instruction "bob off", _number
+{
+	#errors
+	this.aoz.currentScreen.bobOff(%_number);
+}
+End Instruction
+
+Instruction "bob update off"
+{
+	#errors
+	this.aoz.setBobsUpdate(false);
+}
+End Instruction
+
+Instruction "bob update on"
+{
+	#errors
+	this.aoz.setBobsUpdate(true);
+}
+End Instruction
+
+Instruction "bob clear"
+{
+	#errors
+	this.aoz.bobsUpdate(true);
+}
+End Instruction
+
+Instruction "bob clear"
+{		
+}
+End Instruction
+
+Instruction "bob draw"
+{
+}
+End Instruction
+
+Instruction "limit bob"
+{
+	#errors
+	this.aoz.currentScreen.limitBobOff();
+}
+End Instruction
+Instruction "limit bob", _x1, _y1 To _x2, _y2
+Instruction "limit bob", _number, _x1, _y1 To _x2, _y2
+{
+	#errors
+	this.aoz.currentScreen.limitBob(#number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)});
+}
+End Instruction
+Instruction "limit bob", _x1, _y1, _width, _height
+{
+	#errors
+	this.aoz.currentScreen.limitBob(undefined,{x:%_x1,y:%_y1,width:%_width,height:%_height});
+}
+End Instruction
+Instruction "limit bob", number, _x1, _y1, _width, _height
+{
+	#errors
+	this.aoz.currentScreen.limitBob(#number,{x:%_x1,y:%_y1,width:%_width,height:%_height});
+}
+End Instruction
+
+Instruction "set bob", _x, _y, _width, _height
+{
+	#notimplemented
+}
+End Instruction
+
+Instruction "bob show", _number
+{
+	#errors
+	this.aoz.currentScreen.bobShow(true,%_number);
+}
+End Instruction
+
+Instruction "bob hide", _number
+{
+	#errors
+	this.aoz.currentScreen.bobShow(false,%_number);
+}
+End Instruction
+
+Instruction "bob scale", _number, _scaleX, _scaleY
+{
+	#errors
+	this.aoz.currentScreen.bobScale(%_number,{x:%_scaleX,y:%_scaleY});
+}
+End Instruction
+
+Instruction "bob rotate", _number, _angle
+{
+	#errors
+	this.aoz.currentScreen.bobRotate(%_number,%_angle*this.aoz.degreeRadian);
+}
+End Instruction
+
+Instruction "bob skew", _number, _x, _y
+{
+	#errors
+	this.aoz.currentScreen.bobSkew(%_number,{x:%_x,y:%_y});
+}
+End Instruction
+
+
+Instruction "get bob", number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get bob", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get bob", _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get bob", _screenNumber, _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+
+Instruction "del bob", _number
+{
+	#errors
+	this.aoz.banks.deleteImage(%_number);
+}
+End Instruction
+Instruction "del bob", _number1 To _number2
+{
+	#errors
+	this.aoz.banks.deleteImageRange(%_number1,%_number2);
+}
+End Instruction
+
+Instruction "put bob", _number
+{
+	#errors
+	this.aoz.currentScreen.putBob(%_number);
+}
+End Instruction
+
+Instruction "paste bob", _x, _y, _number, _scaleX, _scaleY, _angle, _tags
+{
+	#errors
+	this.aoz.currentScreen.pasteBob(%_number,%_x,%_y,%_scaleX,%_scaleY,%_angle*this.aoz.degreeRadian,%_tags);
+}
+End Instruction
+
+Instruction "priority on"
+{
+	#errors
+	this.aoz.currentScreen.setBobsPriority(true);
+}
+End Instruction
+
+Instruction "priority off"
+{
+	#errors
+	this.aoz.currentScreen.setBobsPriority(false);
+}
+End Instruction
+
+Function "x bob", _number
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.xBob(%_number)} )
+
+Function "y bob", _number
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.yBob(%_number)} )
+
+Function "i bob", _number
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.iBob(%_number)} )
+
+Instruction "get bob palette", _mask
+{
+	#errors
+	this.aoz.currentScreen.getBobPalette(%_mask);
+}
+End Instruction
+
+Instruction "priority reverse on"
+{
+	#errors
+	this.aoz.currentScreen.setBobsPriorityReverse(true);
+}
+End Instruction
+
+Instruction "priority reverse off"
+{
+	#errors
+	this.aoz.currentScreen.setBobsPriorityReverse(false);
+}
+End Instruction
+
+Function "bob col", _bobNumber, _bob1 To _bob2
+{
+	#errors 
+}
+End Function( {this.aoz.sprites.bobCol(%_bobNumber,this.aoz.currentScreen,%_bob1,%_bob2)} )
+
+Function "bobsprite col", _bobNumber, _sprite1 To _sprite2
+{
+	#errors 
+}
+End Function( {this.aoz.sprites.bobSpriteCol(%_bobNumber,this.aoz.currentScreen,%_sprite1,%_sprite2)} )
+
+
+
+
+
+
+

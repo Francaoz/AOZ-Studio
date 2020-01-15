@@ -1,0 +1,130 @@
+'********************************* 
+'*    AMOS Professional HELP 5   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *               Ink         (line 10) 
+'*                               *               Colour      (line 24) 
+'*         Ronnie Simpson        *               =Colour     (line 38) 
+'*********************************               Colour Back (line 51) 
+'                                                Palette     (line 62) 
+'------------------------------------------- 
+'Ink 
+'------------------------------------------- 
+'Sets the colours for all graphic operations 
+'
+'        +----->The command  
+'        |  +----->Colour used by all drawing operations 
+'        |  | +----->The paper or fill colour
+'        |  | | +----->The border or outline colour to be used 
+'        |  | | |
+'        ^  ^ ^ ^
+'       Ink C,P,B
+'
+'Please note that any of the parameters may be omitted  eg. Ink 1    Ink ,,2 
+'------------------------------------------- 
+'Colour
+'------------------------------------------- 
+'Used to assign a colour value to any of the Amiga's colour registers
+'
+'eg.     Colour 8,$FFF             Colour 2,$777             Colour 3,$C   
+'               |                         |                         |
+'               |                         |                         |
+'    Set Colour 8 to White     Set Colour 2 to Grey      Set Colour 3 to Red 
+'
+'The expression $xxx sets each of the strengths of the red,green and 
+'blue components of the colour--the higher the number the brighter the 
+'component. (range 0 to F in hexadecimal)
+'
+'------------------------------------------- 
+'=Colour 
+'------------------------------------------- 
+'A function to return the colour value of an Amiga's colour register 
+'
+'eg.     C=Colour(1) 
+'        Print Hex$(c)   
+'        Print C 
+'
+'Would print the following 
+'from the default screen 
+'Palette---- $A40  
+'            2624  
+'------------------------------------------- 
+'Colour Back 
+'------------------------------------------- 
+'Sets the colour of the unused areas of the screen 
+'
+'eg.     Colour Back $FFF
+'
+'Would set the background outside the screen area to white     
+'
+'Please note that this colour is not affected by the fade command. 
+'Only updated when the copper is re-calculated.
+'------------------------------------------- 
+'Palette 
+'------------------------------------------- 
+'An extended form of the Colour instruction  
+'
+'eg.     Palette $0,$FFF,$666
+'        
+'Would set the first three colours of a palette to black,white and grey. 
+'
+'
+'
+'        Palette ,,$F00,,$F0,,$F 
+'        
+'Would set colours 2,4 and 6 to red,green and blue and leave all other 
+'colours in the palette unaffected.  
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** Open screen and tidy up
+Screen Open 0,320,200,16,Lowres : Curs Off : Flash Off : Cls 0 : Pen 10 : Paper 11
+'
+Rem *** Set up a starting palette  
+Palette $0,$F00,$F0,$F,,,,,$FFF,$0,$FF0,$F
+'
+Rem *** Reserve some memory and draw the dialogue boxes  
+Reserve Zone 4
+Locate 1,22 : Print Border$(Zone$("CLICK HERE",1),2)
+Locate 29,22 : Print Border$(Zone$(" AND HERE ",2),2)
+Locate 1,2 : Print Border$(Zone$("QUIT",3),6)
+Locate 35,2 : Print Border$(Zone$("QUIT",4),6)
+'
+Rem *** Set the colour beyond the screen boundary  
+Colour Back $5A
+'
+Rem *** Draw three large circles and fill them with colours 1,2 and 3  
+Ink 8,9 : Circle 120,70,70 : Circle 200,70,70 : Circle 160,129,70
+Ink 1 : Paint 120,70,1 : Ink 2 : Paint 200,70,1 : Ink 3 : Paint 160,129,1
+'
+Rem *** start the main loop
+Do 
+   '
+   Rem *** Calculate the colours where the circles overlap and fill them  
+   C1= Colour(1) : C2= Colour(2) : C3= Colour(3)
+   C4=C1+C3 : C5=C2+C3 : C6=C1+C2 : C7=C1+C2+C3
+   Colour 4,C4 : Colour 5,C5 : Colour 6,C6 : Colour 7,C7
+   Ink 4 : Paint 110,120,1 : Ink 5 : Paint 190,100,1 : Ink 6 : Paint 160,30,1 : Ink 7 : Paint 160,100,1
+   '
+   Rem *** Check if the user has clicked in any of the boxes  
+   Do 
+      M=Mouse Zone
+      '
+      Rem *** Return to editor if quit button is pressed 
+      If Mouse Key and M>2 Then Edit 
+      '
+      '
+      If Mouse Key and M>0 Then Exit 
+   Loop 
+   Rem *** Set a random screen background colour
+   If M=2 Then Colour Back Rnd(4095) : Screen Display 0,,,,
+   '
+   Rem *** Set three new colours for the large circles and repeat 
+   If M=1
+      For Z=1 To 3
+         Colour(Z),Rnd(4095)
+      Next 
+   End If 
+   '
+   '
+Loop 
+Edit 

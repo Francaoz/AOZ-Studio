@@ -1,0 +1,73 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ - Google Font Definition
+ *
+ *
+ * Watch the explanatory video at:
+ *
+ * HOW TO IMPORT A NEW GOOGLE-FONT into AOZ?
+ * --------------------------------------------
+ *
+ * 1. Connect to Google Webfont Helper website:
+ *    https://google-webfonts-helper.herokuapp.com/fonts
+ *
+ * 2. Choose your font, choose its attributes, remember its name
+ *
+ * 3. Copy the folder 'aoz/templates/google font' into the 'aoz/fonts/google' folder
+ *
+ * 4. Rename the copied folder to the exact name of your font, all lowercase, 
+ *    respect spaces, check no space at the end
+ *
+ * 5. Edit the file 'font.definition' that you will find in the folder
+ *
+ * 6. Copy the CSS code from Google Webfont Helper into the clipboard
+ *
+ * 7. Paste it in the font.definition file between the < FONT_FACE-START > and < FONT_FACE-END > markers
+ *
+ * 8. Save the font.definition file
+ *
+ * 9. Go back to Google Webfont Helper and click on 'Download files'
+ *
+ * 10. Unzip all the files into the new folder, aside the font.definition file.
+ *
+ * 11. You will then be able to add the new font to your applications.
+ *
+ * 
+ * HOW TO ADD A GOOGLE FONT TO YOUR APPLICATION?
+ * ---------------------------------------------
+ *
+ * 1. Open the manifest of your application
+ *
+ * 2. Locate the entry 'fonts:'
+ *
+ * 3. Add the name of the font in lowercase to the list, respecting punctuation
+ *
+ * 4. Upon compilation of your app, the new font will be copied into the 'html/resources/fonts'
+ *    folder of your application, and it will work off-line.
+ *
+ * 5. Please note that you must choose a monospace font if you want to replace the
+ *    font used in the default text window of screens.
+ *
+ *
+ * IMPORTANT!
+ * ----------
+ *
+ * Remember that many of the fonts listed on the Webfont Helper website are NOT free. 
+ * Please read the licence before distributing it with your application. 
+ * In no case, I, Francois Lionet, can be hold responsible of any copyright infringment.
+ *
+ */	
+
+<FONT_FACE-START>
+
+<FONT_FACE-END>

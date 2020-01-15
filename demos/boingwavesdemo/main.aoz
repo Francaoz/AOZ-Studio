@@ -1,0 +1,391 @@
+//
+// AOZ Boing Waves Demo
+// By Francois Lionet
+//
+#nobank:"images"
+
+'
+' IMPORTANT POLITICALLY CORRECT NOTE ;)
+' ------------------------------------------------------------------
+'
+' The "BOOB" Instruction is just a joke, and was not intended to
+' offense anyone. Just an adolescent joke. The name "Boob" was chosen
+' before the real "Bob" instruction was implemented, and just
+' because it sounded similar and was funny.
+'
+' It will not, of course, be included in the final version of AOZ-2
+'
+' It represent a good demonstration of the possibility to create
+' your very own set of instructions and functions, using the
+' language itself.
+'
+' ------------------------------------------------------------------
+'
+
+// Note: music will not play if the demo is run locally (needs a real server)
+//Sound Load "music.mp3"
+//Sound Position 5
+//Sound Play
+
+// Load the images
+Boob Load "amigaball.js", 1
+Boob Load "aoz.js", 2
+
+// Variable initialization
+degree
+minPerspective# = 0.15
+maxPerspective# = 0.75
+yAmplitude = 50
+angle = 0
+minZoom# = 8 / 256
+maxZoom# = 64 / 256
+numberOfLines = 30
+angleBase = 0
+yBase = 100
+yHeight = 200 - yBase
+
+// Screen initialization
+Curs Off
+Paper 0
+Pen 2
+Fix 2
+Timer = 0
+timeAOZ = 2 * 50
+yAOZ = -50
+
+// Turn off automatic rendering
+Double Buffer
+
+' Information
+Info$ = "                          AOZ 2 Graphic Demo!                        "
+Info$ = Info$ + ">>> AOZ 2 <<<                        The simplicity of AOZ, the speed of Javascript!"
+Info$ = Info$ + "                              Please support me on Patreon : www.patreon/francoislionet :)                       Press any key to play with the parameters..."
+Scroll Off
+scrollingSpeed = 2
+timeScrolling = 5 * 50
+
+// First part
+Do
+	For angleBase = 0 To 350 Step 10
+
+		// Draw a wave
+		Clw
+		Gosub DrawWaves
+
+		// Display AOZ logo
+		If Timer > timeAOZ
+			If yAOZ < 40 Then Inc yAOZ
+			Boob 0, 160, yAOZ, 2
+			Boob Set Hotspot 0, "center", "middle"
+			zoomAOZ# = Sin( Timer / 10 ) * 0.025 + 0.3
+			Boob Zoom 0, zoomAOZ#, zoomAOZ#
+		End If
+
+		// Draw all boobs into hidden screen
+		Boob Draw 4
+
+		// Display the scrolling information
+		If Timer > timeScrolling
+			If Info + 40 < Len( Info$ )
+				A$ = Mid$( Info$, Info + 1, 40 )
+			Else
+				A$ = Mid$( Info$, Info + 1, Len( Info$ ) - Info ) + Left$( Info$, 40 - ( Len( Info$ ) - Info ) )
+			End If
+			Locate 0, 24
+			Pen 1
+			Centre A$
+			If Int( Timer / scrollingSpeed ) <> timeScroll
+				timeScroll = Timer / scrollingSpeed
+				Inc Info
+				If Info > Len( Info$ ) Then Info = 0
+			End If
+		End If
+
+		// Force rendering to display
+		Screen Swap
+		Wait Vbl
+	Next
+	if Inkey$ <> "" Then Exit
+Loop
+
+Boob Off
+Clw
+
+// Second part: have fun!
+Do
+	For angleBase = 0 To 350 Step 10
+		Clw
+		Gosub DrawWaves
+		Boob Draw 4
+		Home
+		Print "Number of lines (-/+) :";numberOfLines
+		Print "Amplitude (4/7):";yAmplitude
+		Fix 2
+		Print "Min perspective (5/8):";minPerspective#
+		Print "Max perspective (6/9):";maxPerspective#
+		Fix 0
+		Print "Number of bobs:";number
+		Print "Press space to end";
+		Screen Swap
+		Wait Vbl
+		k$ = Inkey$
+		If k$ = "+" Then Inc numberOfLines
+		If k$ = "-" Then numberOfLines = Max( 0, numberOfLines - 1 )
+		If k$ = "7" Then Inc yAmplitude
+		If k$ = "4" Then yAmplitude = Max( 0, yAmplitude - 1 )
+		If k$ = "8" Then minPerspective# = minPerspective# + 0.01
+		If k$ = "5" Then minPerspective# = Max( 0.05, minPerspective# - 0.01 )
+		If k$ = "9" Then maxPerspective# = maxPerspective# + 0.01
+		If k$ = "6" Then maxPerspective# = Max( 0.05, maxPerspective# - 0.01 )
+		If k$ = " " Then End
+		If k$ <> "" Then Boob Off
+	Next
+Loop
+
+//
+// Wave routine
+//
+DrawWaves:
+number = 1					// Leave boob 0 for AOZ logo!
+For line = 1 To numberOfLines
+
+	y = line * ( yHeight / numberOfLines )
+	perspective# = ( line / numberOfLines ) * ( maxPerspective# - minPerspective# ) + minPerspective#
+	currentZoom# = ( 64 / 256 ) * perspective#
+	width = 256 * currentZoom#
+	angle = angleBase
+
+	For x = 0 To 160 + width Step width
+
+		xx = 160 - x
+		yy = yBase + y * perspective# - sin( angle ) * yAmplitude * perspective#
+		Boob number, xx, yy, 1
+		Boob Set Hotspot number, "center", "middle"
+		Boob Zoom number, currentZoom#, currentZoom#
+		inc number
+
+		If x <> 0
+			xx = 160 + x
+			yy = yBase + y * perspective# + sin( angle + 180 ) * yAmplitude * perspective#
+			Boob number, xx, yy, 1
+			Boob Set Hotspot number, "center", "middle"
+			Boob Zoom number, currentZoom#, currentZoom#
+			inc number
+		End If
+
+		angle = angle + 360 * currentZoom#
+
+	Next x
+Next line
+Return
+
+//
+// Now come new instructions specially created to
+// display bobs in AOZ 2 until the real Bob and Sprites instructions
+// are implemented: boobs!
+// With 'Instruction' and 'Function' keywords, new in AOZ 2,
+// you can program your own instruction set in Basic! (I used Javascript
+// here, but it can be in AOZ).
+// The language is now expandable, in a much better and more open
+// system than extensions.
+// Who wants to do AOZ 3D instruction set? (no kidding! In Basic it will
+// be fast and simple to program...)
+//
+// "Boob" set of instructions, like Bobs but more sexy!
+//
+Instruction "Boob Load", imageName$, number
+	WAITING = 0
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobImages )
+			this.aoz.boobImages = [];
+
+		var self = this;
+		var path = 'resources/images/' + this.vars.imageName$;
+		this.aoz.utilities.loadUnlockedImage( path, 'image/png', {}, function( response, image, name )
+		{
+			if ( response )
+			{
+				self.aoz.boobImages[ self.vars.number ] = image;
+				self.vars.WAITING = 1;
+			}
+		} );
+	}
+	While( WAITING = 0 )
+		Wait 1
+	Wend
+End Instruction
+
+Instruction "Boob Off"
+	{
+		this.aoz.boobs = []
+	}
+End Instruction
+
+Instruction "Boob", number, x, y, image
+
+	If number < 0 Then Error 23
+	If image < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			this.aoz.boobs = [];
+		if ( !this.aoz.boobImages )
+			throw 'illegal_function_call';
+		var image = this.aoz.boobImages[ this.vars.image ];
+		if ( !image )
+			throw 'illegal_function_call';
+		var canvas = document.createElement( 'canvas' );
+		canvas.width = image.width;
+		canvas.height = image.height;
+		this.aoz.boobs[ this.vars.number ] =
+		{
+			image: this.vars.image,
+			x: this.vars.x,
+			y: this.vars.y,
+			hotSpotX: 0,
+			hotSpotY: 0,
+			zoomX: 1,
+			zoomY: 1,
+			canvas: canvas,
+			context: canvas.getContext( '2d' )
+		}
+	}
+End Instruction
+
+Instruction "Boob Zoom", number, zoomX, zoomY
+
+	If number < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			throw 'illegal_function_call';
+		var boob = this.aoz.boobs[ this.vars.number ];
+		if ( !boob )
+			throw 'illegal_function_call';
+		boob.zoomX = typeof this.vars.zoomX == 'undefined' ? boob.zoomX : this.vars.zoomX;
+		boob.zoomY = typeof this.vars.zoomY == 'undefined' ? boob.zoomY : this.vars.zoomY;
+	}
+End Instruction
+
+Instruction "Boob Set Hotspot", number, xPosition$, yPosition$
+
+	If number < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			throw 'illegal_function_call';
+		var boob = this.aoz.boobs[ this.vars.number ];
+		if ( !boob )
+			throw 'illegal_function_call';
+		var image = this.aoz.boobImages[ boob.image ];
+		if ( !image )
+			throw 'illegal_function_call';
+		switch ( this.vars.xPosition$ )
+		{
+			case 'left':
+				boob.hotSpotX = 0;
+				break;
+			case 'center':
+				boob.hotSpotX = image.width / 2;
+				break;
+			case 'left':
+				boob.hotSpotX = image.width;
+				break;
+		}
+		switch ( this.vars.yPosition$ )
+		{
+			case 'top':
+				boob.hotSpotY = 0;
+				break;
+			case 'middle':
+				boob.hotSpotY = image.height / 2;
+				break;
+			case 'bottom':
+				boob.hotSpotY = image.height;
+				break;
+		}
+	}
+End Instruction
+
+Instruction "Boob Draw", scale
+{
+	if ( this.aoz.boobs )
+	{
+		for ( var b = 0; b < this.aoz.boobs.length; b++ )
+		{
+			var boob = this.aoz.boobs[ b ];
+			if ( boob )
+			{
+				var image = this.aoz.boobImages[ boob.image ];
+				if ( image )
+					this.aoz.currentScreen.context.drawImage( image, 0, 0, image.width, image.height, ( boob.x - boob.hotSpotX * boob.zoomX ) * this.vars.scale, ( boob.y - boob.hotSpotY * boob.zoomY ) * this.vars.scale, ( image.width * boob.zoomX ) * this.vars.scale, ( image.height * boob.zoomY ) * this.vars.scale );
+			}
+		}
+		this.aoz.currentScreen.setModified();
+	}
+}
+End Instruction
+
+Instruction "Boob Save"
+{
+	if ( this.aoz.boobs && this.aoz.boobImages )
+	{
+		for ( var b = 0; b < this.aoz.boobs.length; b++ )
+		{
+			var boob = this.aoz.boobs[ b ];
+			var image = this.aoz.boobImages[ boob.image ];
+			if ( boob && image)
+			{
+				boob.canvas.width = image.width * boob.zoomX;
+				boob.canvas.height = image.height * boob.zoomY;
+				boob.context.drawImage( this.aoz.currentScreen.canvas, boob.x - boob.hotSpotX * boob.zoomX, boob.y - boob.hotSpotY * boob.zoomY, image.width * boob.zoomX, image.height * boob.zoomY, 0, 0, boob.canvas.width, boob.canvas.height );
+			}
+		}
+	}
+}
+End Instruction
+
+Instruction "Boob Clear"
+{
+	if ( this.aoz.boobs && this.aoz.boobImages )
+	{
+		for ( var b = 0; b < this.aoz.boobs.length; b++ )
+		{
+			var boob = this.aoz.boobs[ b ];
+			var image = this.aoz.boobImages[ boob.image ];
+			if ( boob && image )
+			{
+				this.aoz.currentScreen.context.drawImage( boob.canvas, 0, 0, boob.canvas.width, boob.canvas.height, boob.x - boob.hotSpotX * boob.zoomX, boob.y - boob.hotSpotY * boob.zoomY, image.width * boob.zoomX, image.height * boob.zoomY );
+			}
+		}
+	}
+}
+End Instruction
+
+//
+// Some simple sound instructions, but the music
+// will only play if the application is located on a real
+// web server... (stupid DOM protection of browsers)
+//
+Instruction "Sound Load", name$
+{
+	this.aoz.audio = new Audio( 'resources/' + this.vars.name$ );
+}
+End Instruction
+Instruction "Sound Play"
+{
+	if ( this.aoz.audio )
+		this.aoz.audio.play();
+}
+End Instruction
+Instruction "Sound Position", position
+{
+	if ( this.aoz.audio )
+		this.aoz.audioCurrentTime = this.vars.position;
+}
+End Instruction

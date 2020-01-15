@@ -1,0 +1,55 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Websocket extension
+ * By Francois Lionet
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+#need_module:"filesystem"
+
+//
+// Initialization
+//
+{
+    this.aoz.picpac = this;
+
+    this.unpack = function( screen, bank )
+    {
+        var bank = this.aoz.banks.getBank( bank, 1 );
+       	if ( !bank.isType( 'picpac' ) )
+           throw 'bank_type_mismatch';
+
+        var converted = this.aoz.thisFileSystem.convert_pacpic( 'Essai', bank.getElement( undefined, 1 ), { convert: true } );
+        //var context = canvas.getContext( '2d' );
+		//context.fillStyle = screen.getColorString( 1 );
+		//context.fillRect( 0, 0, canvas.width, canvas.height );
+        
+        //screen.pasteCanvas( canvas, {} );
+        screen.setPalette( converted.palette );
+    }
+}
+
+Instruction "unpack", _bank To _screen
+{
+    #errors
+    this.aoz.picpac.unpack(this.aoz.getScreen(%_screen),%_bank);
+}
+End Instruction

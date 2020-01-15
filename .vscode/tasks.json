@@ -1,0 +1,79 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+			// Definition of the TEST task
+            "label": "aoz_test",
+            "type": "shell",
+			"command": "${workspaceFolder}/aoz/aoz-x64.exe",
+			"isBackground": false,
+
+			// The command to call the compiler, if you are using a 32 bits
+			// version of your OS, replace "x64" by "x86"...
+            "windows": {
+                "command": "${workspaceFolder}/aoz/aoz-x64.exe"
+            },
+            "linux": {
+                "command": "${workspaceFolder}/aoz/aoz-linux-x64"
+            },
+            "osx": {
+                "command": "${workspaceFolder}/aoz/aoz-macos"
+            },
+            "group": "build",
+            "presentation": {
+				"reveal": "always",
+				"echo": true,
+                "panel": "dedicated"
+			},
+			"args": [
+				"${fileDirname}"
+			  ],
+			"options": {
+				"cwd": "${workspaceFolder}/aoz"
+			},
+			"problemMatcher": {
+				"owner": "aoz",
+				"fileLocation": ["relative", "${fileDirname}"],
+				"pattern": {
+					"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+					"file": 1,
+					"line": 2,
+					"column": 3,
+					"severity": 4,
+					"message": 5
+				}
+			}
+		},
+		{
+			// The RUN task
+            "label": "aoz_run",
+            "type": "shell",
+			"command": "runchrome.bat",
+			"isBackground": false,
+
+			// Calls a batch file that launches Chrome on the current compiled
+			// application. Linux and Mac users, please provide me with scripts,
+			// and I will integrate them in the distribution
+            "windows": {
+				"command": "${workspaceFolder}/aoz/runchrome.bat"
+            },
+            "linux": {
+                "command": "${workspaceFolder}/aoz/run.sh"
+            },
+            "osx": {
+				"command": "${workspaceFolder}/aoz/run.sh"
+			},
+            "group": "build",
+            "presentation": {
+				"reveal": "always",
+				"echo": false,
+                "panel": "dedicated"
+			},
+			"args": [
+				"${fileDirname}/html/index.html"
+			  ]
+        },
+    ]
+}

@@ -1,0 +1,524 @@
+'
+'
+'     Tomas Stenström 2020
+'
+'     W is throttle, S,D to turn, space to shoot some
+'
+'
+'
+
+Set Buffer 200
+Screen Open 2,320,256,32,Lowres
+Cls 0
+
+
+Screen Open 1,320,256,32,Lowres
+
+palette $0,$fff,$999,$333
+
+Hide 
+
+Double Buffer 
+Autoback 0
+
+
+Dim SHIP#(36)
+Dim ROK#(36)
+MAXENTS=200
+BGSTARS=80
+
+
+
+Dim BSTARS#(BGSTARS,3)
+
+For t=0 to BGSTARS-1
+   BSTARS#(t,2)=Rnd(4)+2
+   BSTARS#(t,0)=10000+Rnd(320*BSTARS#(t,2))
+   BSTARS#(t,1)=10000+Rnd(256*BSTARS#(t,2))
+next t
+
+
+
+Dim ENTX#(MAXENTS)
+Dim ENTY#(MAXENTS)
+Dim ENTMX#(MAXENTS)
+Dim ENTMY#(MAXENTS)
+Dim ENTTYPE(MAXENTS)
+Dim ENTROT(MAXENTS)
+Dim ENTTIME(MAXENTS)
+
+Dim LEVELENTX#(MAXENTS)
+Dim LEVELENTY#(MAXENTS)
+Dim LEVELENTMX#(MAXENTS)
+Dim LEVELENTMY#(MAXENTS)
+Dim LEVELENTTYPE(MAXENTS)
+Dim LEVELENTTIME(MAXENTS)
+NUMLEVELENT=0
+
+SHIPX#=160
+SHIPY#=128
+ROT=90
+BURN#=0
+AIR#=0.01
+MAXSPEED=5
+ZO=6
+GRAV=20
+ENGINE=5
+NUMENT=0
+SHIPX#=160
+SHIPY#=128
+SHIPXY#=0
+OFFSETX#=10000
+OFFSETY#=10000
+GROUNDED=False
+SDELAY=0
+CDIST#=0
+CHECKY#=0
+BX#=0
+BY#=0
+
+Degree 
+
+NUMLEVELENT=5
+LEVELENTX#(0)=10200
+LEVELENTY#(0)=10000
+LEVELENTTYPE(0)=1
+LEVELENTTIME(0)=100
+LEVELENTX#(1)=10000
+LEVELENTY#(1)=10400
+LEVELENTTYPE(1)=1
+LEVELENTTIME(1)=90
+LEVELENTX#(2)=10100
+LEVELENTY#(2)=10400
+LEVELENTTYPE(2)=1
+LEVELENTTIME(2)=90
+LEVELENTX#(3)=10200
+LEVELENTY#(3)=10400
+LEVELENTTYPE(3)=1
+LEVELENTTIME(3)=90
+LEVELENTX#(4)=10300
+LEVELENTY#(4)=10400
+LEVELENTTYPE(4)=1
+LEVELENTTIME(4)=90
+
+MAXENTS=MAXENTS-1
+
+set paint 0
+Cls 0
+Timer=0
+EDMODE=False
+
+For T=0 To 5
+    ENT=30
+    Gosub SPAWNENT
+Next T
+
+
+Repeat 
+   cls 0
+   A=Timer
+   A$=Inkey$
+   If Upper$(A$)="E"
+
+      If EDMODE=False
+         EDMODE=True
+         Show 
+      Else 
+         EDMODE=False
+         Hide 
+      End If 
+      Wait 4
+      Locate 1,1 : Print Scancode
+      Locate 1,2 : Print ROT
+   End If 
+   Rem Scancode 
+   If Mouse Key=1
+      X=X Screen(X Mouse)
+      Y=Y Screen(Y Mouse)
+      Rem Text 10,40,Str$(X)+","+Str$(Y) 
+      OFFSETX#=OFFSETX#-(SHIPX#-X)
+      OFFSETY#=OFFSETY#-(SHIPY#-Y)
+      While Mouse Key=1 : Wend 
+   End If 
+
+   If A>0
+      If Key State(80)
+         PAUSE=True
+      End If 
+      If Key State(81)
+         PAUSE=False
+      End If 
+      If Key State(32)
+         If ROT>0 : ROT=ROT-5
+         Else 
+            ROT=ROT+360
+         End If 
+      End If 
+      If Key State(34)
+         If ROT<360 : ROT=ROT+5
+         Else 
+            ROT=ROT-360
+         End If 
+      End If 
+      If key State(17)
+         GROUNDED=False
+         If Abs(BX#+Cos(ROT)/ENGINE)<MAXSPEED and Abs(BY#+Sin(ROT)/ENGINE)<MAXSPEED
+            BX#=BX#+Cos(ROT)/ENGINE
+            BY#=BY#+Sin(ROT)/ENGINE
+         End If
+         For T=0 To 4
+            ENT=11
+            Gosub SPAWNENT
+         Next T
+      End If 
+      If Key State(64) and SDELAY<0
+         ENT=20 : SDELAY=2
+         Gosub SPAWNENT
+      End If 
+      If GRAV>0 and GROUNDED=False and EDMODE=False
+      
+       If Abs(BX#+Cos(270)/GRAV)<MAXSPEED and Abs(BY#+Sin(270)/GRAV)<MAXSPEED
+         BX#=BX#+Cos(270)/GRAV
+         BY#=BY#+Sin(270)/GRAV
+      End If
+       If BX#>0 And BX#-AIR#<MAXSPEED
+          BX#=BX#-AIR#
+       Else 
+         If BX#+AIR#<MAXSPEED
+          BX#=BX#+AIR#
+         End If
+       End If 
+         If BY#>0 and BY#-AIR#<MAXSPEED
+            BY#=BY#-AIR#
+         Else 
+            If BY#+AIR#<MAXSPEED
+            BY#=BY#+AIR#
+            End If
+         End If 
+      Else
+         If GROUNDED=True
+            If Abs(BX#)<0.3 and Abs(BY#)<0.3
+               BX#=0 : BY#=0 : ROT=90
+            End If
+         End IF
+      End If 
+
+      'Ink 0
+      'Bar SHIPX#-(ZO+2),SHIPY#-(ZO+2) To SHIPX#+(ZO+2),SHIPY#+(ZO+2) 
+      If GROUNDED=False
+      OFFSETX#=OFFSETX#-BX#
+      OFFSETY#=OFFSETY#-BY#
+      End If
+      
+      'Screen Copy 2 To Logic(1) 
+
+      Rem Gosub _CLEARENTS 
+      
+      Gosub _UPDATEBACKGROUND
+      Gosub _UPDATEENTS
+     
+
+      
+      
+      RX#=Cos(ROT)*ZO
+      RY#=Sin(ROT)*ZO
+      RX2#=Cos(ROT+140)*ZO
+      RY2#=Sin(ROT+140)*ZO
+      RX3#=Cos(ROT-140)*ZO
+      RY3#=Sin(ROT-140)*ZO
+      
+      Ink 4,0
+      Rem Draw SHIPX#,SHIPY# To SHIPX#-RX#,SHIPY#-RY#,4
+       draw SHIPX#-RX2#,SHIPY#-RY2# To SHIPX#-RX3#,SHIPY#-RY3#
+       draw SHIPX#-RX#,SHIPY#-RY# To SHIPX#-RX3#,SHIPY#-RY3#
+       draw SHIPX#-RX2#,SHIPY#-RY2# To SHIPX#-RX#,SHIPY#-RY#
+
+      Gosub _UPDATELEVELENTS
+
+      'Text 10,20,Str$(BY#)+" "
+      'Text 10,20,Str$(ROT)
+
+      
+      'For t=0 To BGSTARS
+      ''   Ink Int(BSTARS#(t,2))
+      ''   plot BSTARS#(t,0)-OFFSETX#,BSTARS#(t,1)-OFFSETY#
+      'Next t
+
+      Screen Swap 
+      Wait Vbl 
+      Timer=0
+      Dec SDELAY
+   End If 
+   
+Until Mouse Key=2
+
+End 
+
+_CLEARENTS:
+ENTPOS=0
+Repeat 
+   ENTPOS=ENTPOS+1
+   If ENTTYPE(ENTPOS)>0
+      If ENTTYPE(ENTPOS)=10
+         Ink 0
+          circle ENTX#(ENTPOS),ENTY#(ENTPOS),5-ENTTIME(ENTPOS)/2
+      End If 
+      If ENTTYPE(ENTPOS)=11
+         Ink 0
+          plot ENTX#(ENTPOS),ENTY#(ENTPOS)
+      End If 
+      If ENTTYPE(ENTPOS)=20
+         Ink 0
+          plot ENTX#(ENTPOS),ENTY#(ENTPOS)
+      End If 
+   End If 
+Until ENTPOS>MAXENTS
+Return 
+
+_UPDATEBACKGROUND:
+For t=0 To BGSTARS
+   If (BSTARS#(t,0)-OFFSETX#)<0 : BSTARS#(t,0)=BSTARS#(t,0)+320*BSTARS#(t,2) : End If
+   If (BSTARS#(t,0)-OFFSETX#)>320*BSTARS#(t,2) : BSTARS#(t,0)=BSTARS#(t,0)-320*BSTARS#(t,2) : End If
+   If (BSTARS#(t,1)-OFFSETY#)<0 : BSTARS#(t,1)=BSTARS#(t,1)+256*BSTARS#(t,2) : End If
+   If (BSTARS#(t,1)-OFFSETY#)>256*BSTARS#(t,2) : BSTARS#(t,1)=BSTARS#(t,1)-256*BSTARS#(t,2) : End If
+         Ink Int(BSTARS#(t,2)/2)
+         plot (BSTARS#(t,0)-OFFSETX#)/BSTARS#(t,2),(BSTARS#(t,1)-OFFSETY#)/BSTARS#(t,2)
+Next t
+Return
+
+_UPDATELEVELENTS:
+LPOS=0 : GROUNDED=False
+If NUMLEVELENT>0
+   Repeat 
+    If LEVELENTTYPE(LPOS)>0
+      If(LEVELENTX#(LPOS)-OFFSETX#)>-200 and(LEVELENTX#(LPOS)-OFFSETX#)+320<850
+         If(LEVELENTY#(LPOS)-OFFSETY#)>-200 and(LEVELENTY#(LPOS)-OFFSETY#)+256<800
+            If LEVELENTTYPE(LPOS)=1
+               Ink 5,0
+               Circle LEVELENTX#(LPOS)-OFFSETX#,LEVELENTY#(LPOS)-OFFSETY#,LEVELENTTIME(LPOS)
+               CHECKX#=LEVELENTX#(LPOS)-OFFSETX#
+               CHECKY#=LEVELENTY#(LPOS)-OFFSETY#
+               CSIZE#=LEVELENTTIME(LPOS)
+               If SHIPX#>CHECKX#-CSIZE#-10 and SHIPX#<CHECKX#+CSIZE#+10 and SHIPY#>CHECKY#-CSIZE#-10 and SHIPY#<CHECKY#+CSIZE#+10
+                  CDIST#=CSIZE#
+                  POSOX#=Abs(Abs(SHIPX#)-Abs(CHECKX#))
+                  POSOY#=Abs(Abs(SHIPY#)-Abs(CHECKY#))
+                  Rem Text 10,50,Str$(((POSOX#*POSOX#)+(POSOY#*POSOY#))) 
+                  
+                  If(((POSOX#*POSOX#)+(POSOY#*POSOY#))/100)<CDIST#
+                     Rem Text 10,30,"KOLLISION :"+Str$((Abs((Abs(SHIPX#)-Abs(CHECKX#))+(Abs(SHIPY#)-Abs(CHECKY#)))*3.14)/2) 
+                     Rem Text 10,40,Str$(CDIST#*2)
+                     If CHECKY#<SHIPY#
+                        If BX#>0 : BX#=0-BX#
+                        Else 
+                           BX#=Abs(BX#)
+                        End If 
+                        If BY#>0 : BY#=0-BY#
+                        Else 
+                           BY#=Abs(BY#)
+                        End If 
+                        BY#=-0.1
+                        BX#=0
+                        GROUNDED=False
+                     Else 
+                        If SHIPX#<CHECKX#                          
+                           BX#=0.2+((CHECKY#-SHIPXY#)/CDIST#)/10
+                        Else 
+                           BX#=-(0.2+((CHECKY#-SHIPXY#)/CDIST#)/10)
+                        End If 
+                        BY#=0.1
+                        Rem OFFSETX#=OFFSETX#-BX#
+                        Rem OFFSETY#=OFFSETY#-BY#
+                        If ROT>70 and ROT<120
+                           GROUNDED=True
+                           ROT=90
+                        End If
+                     End If 
+                  End If 
+               End If 
+               ENTPOS=0
+               Repeat 
+                  ENTPOS=ENTPOS+1
+                  If ENTTYPE(ENTPOS)=21
+                     CEX#=ENTX#(ENTPOS)-OFFSETX#
+                     CEY#=ENTY#(ENTPOS)-OFFSETY#
+                     POSOX#=Abs(Abs(CEX#)-Abs(CHECKX#))
+                     POSOY#=Abs(Abs(CEY#)-Abs(CHECKY#))
+                     If(((POSOX#*POSOX#)+(POSOY#*POSOY#))/100)<CDIST#
+                        If ENTMX#(ENTPOS)>0 : ENTMX#(ENTPOS)=0-ENTMX#(ENTPOS)
+                        Else : ENTMX#(ENTPOS)=Abs(ENTMX#(ENTPOS))
+                        End If 
+                        If ENTMY#(ENTPOS)>0 : ENTMY#(ENTPOS)=0-ENTMY#(ENTPOS)
+                        Else : ENTMY#(ENTPOS)=Abs(ENTMY#(ENTPOS))
+                        End If 
+                        ENTX#(ENTPOS)=ENTX#(ENTPOS)-(ENTMX#(ENTPOS)*2)
+                        ENTY#(ENTPOS)=ENTY#(ENTPOS)-(ENTMY#(ENTPOS)*2)
+                     End If 
+                  End If 
+               Until ENTPOS>MAXENTS
+               
+            End If 
+         End If 
+      End If 
+      Inc LPOS
+   End If
+   Until LPOS=NUMLEVELENT
+End If 
+
+
+
+Return 
+
+_UPDATEENTS:
+ENTPOS=0
+Repeat 
+   ENTPOS=ENTPOS+1
+   If ENTTYPE(ENTPOS)>0     
+      if ENTTIME(ENTPOS)>-2
+         ENTTIME(ENTPOS)=ENTTIME(ENTPOS)-1
+         If ENTTYPE(ENTPOS)=30
+            ENT=30
+            Gosub SPAWNENT
+            ENTTIME(ENTPOS)=0
+            ENTTYPE(ENTPOS)=0
+         End If
+      End If
+      If ENTTIME(ENTPOS)<0 and ENTTIME(ENTPOS)>-2
+         ENTTYPE(ENTPOS)=0
+      End If 
+      
+      If ENTTYPE(ENTPOS)=10
+         ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+AIR#
+         ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
+         ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
+         Ink 4,0
+          circle ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,5-ENTTIME(ENTPOS)/2
+      End If 
+      If ENTTYPE(ENTPOS)=11
+         ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+AIR#
+         ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
+         ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
+         Ink 12,0
+         '' plot ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
+         Circle ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,1
+      End If 
+      If ENTTYPE(ENTPOS)=20
+         'ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
+         'ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
+         CX=16
+         'If Point (ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#)>0
+            For TENT=1 to MAXENTS+1
+               If ENTTYPE(TENT)=30
+               If (ENTX#(ENTPOS)-OFFSETX#)>(ENTX#(TENT)-OFFSETX#) And (ENTX#(ENTPOS)-OFFSETX#)<(ENTX#(TENT)-OFFSETX#)+CX
+                  If (ENTY#(ENTPOS)-OFFSETY#)>(ENTY#(TENT)-OFFSETY#) And (ENTY#(ENTPOS)-OFFSETY#)<(ENTY#(TENT)-OFFSETY#)+CX
+                     If ENTTYPE(TENT)=30
+                        ENTTIME(TENT)=ENTTIME(TENT)+10
+                        ENTTYPE(ENTPOS)=10   
+                        ENTTIME(ENTPOS)=8
+                        ENTMX#(ENTPOS)=0
+                        ENTMY#(ENTPOS)=0
+                        'Gosub SPAWNENT                 
+                        Exit
+                     End If
+                  End If
+               End If
+               End If
+            Next TENT
+         'End If
+
+         Ink 6
+         'plot ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
+         Circle ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,1
+      End If     
+      If ENTTYPE(ENTPOS)=30
+         'ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
+         'ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
+         _DISTX#=ENTX#(ENTPOS)-(OFFSETX#+SHIPX#)
+         _DISTY#=ENTY#(ENTPOS)-(OFFSETY#+SHIPY#)
+         '_DISTTOT=((_DISTX^2+_DISTY^2)/2^2)/128^2
+         
+         '_SPEEDX=(_DISTX/_DISTTOT)*4 : _SPEEDY=(_DISTY/_DISTTOT)*4 
+         
+         _TDIST#=(abs(_DISTX#)+abs(_DISTY#))/2
+
+         _SPEEDX#=(_DISTX#/_TDIST#)/4
+         _SPEEDY#=(_DISTY#/_TDIST#)/4
+
+         ENTMX#(ENTPOS)=_SPEEDX#
+         ENTMY#(ENTPOS)=_SPEEDY#
+
+         'ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+_SPEEDX#
+         'ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+_SPEEDY#
+
+         Ink 7
+         'plot ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
+         
+         'Circlef ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,8
+         paste bob ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,1,0.1,0.1,20
+         'Paint ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY# 
+      End If  
+      ENTX#(ENTPOS)=ENTX#(ENTPOS)-ENTMX#(ENTPOS)
+      ENTY#(ENTPOS)=ENTY#(ENTPOS)-ENTMY#(ENTPOS)
+   End If 
+Until ENTPOS>MAXENTS
+
+Return 
+
+SPAWNENT:
+SPAWNENTPOS=0
+Repeat 
+   SPAWNENTPOS=SPAWNENTPOS+1
+Until ENTTYPE(SPAWNENTPOS)=0
+
+If ENT=10
+   ROTO=ROT+180
+   If ROTO>360 : ROTO=ROTO-360 : End If 
+   ENTMX#(SPAWNENTPOS)=Cos(ROTO)*2
+   ENTMY#(SPAWNENTPOS)=Sin(ROTO)*2
+   ENTTIME(SPAWNENTPOS)=6
+   ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#-ENTMX#(SPAWNENTPOS)*6
+   ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#-ENTMY#(SPAWNENTPOS)*6
+End If 
+If ENT=11
+   ROTO=ROT+170+Rnd(20)
+   If ROTO>360 : ROTO=ROTO-360 : End If 
+   ENTMX#(SPAWNENTPOS)=Cos(ROTO)*2
+   ENTMY#(SPAWNENTPOS)=Sin(ROTO)*2
+   ENTTIME(SPAWNENTPOS)=8+rnd(8)
+   ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#-ENTMX#(SPAWNENTPOS)*2
+   ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#-ENTMY#(SPAWNENTPOS)*2
+End If 
+If ENT=20
+   ROTO=ROT
+   If ROTO>360 : ROTO=ROTO-360 : End If 
+   ENTMX#(SPAWNENTPOS)=Cos(ROTO)*6
+   ENTMY#(SPAWNENTPOS)=Sin(ROTO)*6
+   ENTTIME(SPAWNENTPOS)=32
+   ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#-ENTMX#(SPAWNENTPOS)
+   ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#-ENTMY#(SPAWNENTPOS)
+End If 
+If ENT=30
+   ROTO=ROT
+    If ROTO>360 : ROTO=ROTO-360 : End If 
+   'ENTMX#(SPAWNENTPOS)=Cos(ROTO)*8
+   'ENTMY#(SPAWNENTPOS)=Sin(ROTO)*8
+   ENTMX#(SPAWNENTPOS)=0
+   ENTMY#(SPAWNENTPOS)=0
+   ENTTIME(SPAWNENTPOS)=-20
+   ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#+Rnd(600)-300
+   ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#+Rnd(600)-640
+End If
+If ENT=1
+   ENTMX#(SPAWNENTPOS)=0
+   ENTMY#(SPAWNENTPOS)=0
+   ENTTIME(SPAWNENTPOS)=4
+   ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#
+   ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#
+End If 
+ENTTYPE(SPAWNENTPOS)=ENT
+Return 
+
+_FINDENTS:
+
+
+Return 

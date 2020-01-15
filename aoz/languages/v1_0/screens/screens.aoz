@@ -1,0 +1,905 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Screen Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+*/
+
+
+//
+// Initialization
+//
+{
+}
+
+Instruction "screen open", number, width, height, numberOfColors, pixelMode
+{
+	#errors
+	this.aoz.screenOpen(%number,%width,%height,%numberOfColors,%pixelMode);
+}
+End Instruction
+
+Function "x screen", x
+{
+	#errors	
+}
+End Function( { (%x-this.aoz.currentScreen.position.x)/this.aoz.currentScreen.renderScale.x } )
+Function "x screen", screen, x
+{
+	#errors	
+	var s=this.aoz.getScreen(%screen);
+}
+End Function( { (%x-s.position.x)/s.renderScale.x } )
+
+
+Function "y screen", y
+{
+	#errors	
+}
+End Function( { (%y-this.aoz.currentScreen.position.y)/this.aoz.currentScreen.renderScale.y} )
+Function "y screen", screen, y
+{
+	#errors	
+	var s=this.aoz.getScreen(%screen);
+}
+End Function( {(%y-s.position.y)/s.renderScale.y} )
+
+
+Instruction "screen copy", source To destination, mode
+{
+	#errors
+	this.aoz.getScreen(%source).screenCopy(this.aoz.getScreen(%destination),%mode);
+}
+End Instruction
+Instruction "screen copy", source, x1, y1, x2, y2 To destination, x3, y3, mode
+{
+	#errors
+	this.aoz.getScreen(%source).screenCopy(this.aoz.getScreen(%destination),%mode,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)},{x:%x3,y:%y3});
+}
+End Instruction
+Instruction "screen copy", source, x1, y1, x2, y2 To destination, x3, y3, x4, y4, mode
+{
+	#errors
+	this.aoz.getScreen(%source).screenCopy(this.aoz.getScreen(%destination),%mode,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)},{x:%x3,y:%y3,width:(%x4)-(%x3),height:(%y4)-(%y3)});
+}
+End Instruction
+
+Instruction "screen project", source, x1, y1, x2, y2 To destination, dx1, dy1, dx2, dy2, dx3, dy3, dx4, dy4		
+{
+	#errors
+	this.aoz.getScreen(%source).screenProject(%this.aoz.getScreen(%destination),%mode,%x1,%y1,%x2,%y2,%dx1,%dy1,%dx2,%dy2,%dx3,%dy3,%dx4,%dy4);
+}
+End Instruction
+
+Instruction "screen clone", number
+{
+	#errors
+	this.aoz.screenClone(%number);
+}
+End Instruction
+
+
+
+Instruction "screen close", number
+{	
+	#errors
+	this.aoz.screenClose(%number);
+}
+End Instruction
+
+
+Instruction "screen display", number, x, y, sx, sy
+{
+	#errors
+	this.aoz.getScreen(%number).setDisplay({x:%x,y:%y,width:%sx,height:%sy});
+}
+End Instruction
+
+
+Instruction "screen center", number, x, y
+{
+	#errors
+	this.aoz.getScreen(%number).setCenter(%x,%y);
+}
+End Instruction
+
+
+Instruction "screen offset", number, x, y
+{
+	#errors
+	this.aoz.getScreen(%number).setOffset({x:%x,y:%y});
+}
+End Instruction
+
+
+Instruction "screen to front", number
+{
+	#errors
+	this.aoz.screensContext.moveToEnd(this.aoz.currentContextName,this.aoz.getScreen(%number));
+}
+End Instruction
+
+Instruction "screen to back", number
+{
+	#errors
+	this.aoz.screensContext.moveToEnd(this.currentContextName,this.aoz.getScreen(%number));
+}
+End Instruction
+
+
+Instruction "screen hide", number
+{
+	#errors
+	this.aoz.getScreen(%number).show(false);
+}
+End Instruction
+
+
+Instruction "screen show", number
+{
+	#errors
+	this.aoz.getScreen(%number).show(true);
+}
+End Instruction
+
+
+Instruction "screen swap", number
+{
+	#errors
+	this.aoz.renderer.screenSwap(%number);
+}
+End Instruction
+
+
+Instruction "screen hotspot", number, spot
+{
+	#errors
+	this.aoz.getScreen(%number).setHotspot({x:'mask',y:%spot});
+}
+End Instruction
+Instruction "screen hotspot", number, xSpot, ySpot
+{
+	#errors
+	this.aoz.getScreen(%number).setHotspot({%xSpot,%ySpot});
+}
+End Instruction
+
+
+Instruction "screen rotate", angle
+{
+	#errors
+	this.aoz.currentScreen.setAngle(%angle*this.aoz.degreeRadian);
+};
+End Instruction
+Instruction "screen rotate", number, angle
+{
+	#errors
+	this.aoz.getScreen(%number).setAngle(%angle*this.aoz.degreeRadian);
+};
+End Instruction
+
+
+Instruction "screen skew", xSkew, ySkew
+{
+	#errors
+	this.aoz.currentScreen.setSkew({x:%xSkew,y:%ySkew});
+}
+End Instruction
+Instruction "screen skew", number, xSkew, ySkew
+{
+	#errors
+	this.aoz.getScreen(%number).setSkew({x:%xSkew,y:%ySkew});
+}
+End Instruction
+
+
+Instruction "screen scale", xScale, yScale
+{
+	#errors
+	this.aoz.currentScreen.setScale({x:%xScale,y:%yScale});
+}
+End Instruction
+Instruction "screen scale", number, xScale, yScale
+{
+	#errors
+	this.aoz.getScreen(%number).setScale({x:%xScale,y:%yScale});
+}
+End Instruction
+
+
+Instruction "get palette", number, mask
+{
+	#library
+	this.aoz.currentScreen.getPalette(%number,%mask);
+}
+End Instruction
+
+
+Instruction "cls", number
+{	
+	#errors
+	this.aoz.currentScreen.cls(%number);
+}
+End Instruction
+Instruction "cls", number, x1, y1 To x2, y2
+{	
+	#errors
+	this.aoz.currentScreen.cls(%number,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "cls", number, x1, y1, width, height
+{	
+	#errors
+	this.aoz.currentScreen.cls(%number,{x:%x1,y:%y1,width:%width,height:%height});
+}
+End Instruction
+
+
+Instruction "def scroll", number, x1, y1 To x2, y2, dx, dy
+{
+	#errors
+	this.aoz.currentScreen.defScroll(%number,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)},{x:%dx,y:%dy});
+}
+End Instruction
+Instruction "def scroll", number, x1, y1, width, height, dx, dy
+{
+	#errors
+	this.aoz.currentScreen.defScroll(%number,{x:%x1,y:%y1,width:%width,height:%height},{x:%dx,y:%dy});
+}
+End Instruction
+
+
+Instruction "dual playfield", screen1, screen2
+{
+	#errors
+	this.aoz.getScreen(%screen1).setDualPlayfield(this.aoz.getScreen(%screen2));
+}
+End Instruction
+
+
+Instruction "dual priority", screen1, screen2
+{
+	#errors
+	this.aoz.getScreen(%screen1).setDualPriority(this.aoz.getScreen(%screen2));
+}
+End Instruction
+
+
+Instruction "colour", number, value
+{
+	#errors
+	this.aoz.currentScreen.setColour(%number,%value);
+}
+End Instruction
+
+
+Function "colour", number, value
+{
+	#errors
+}
+End Function( { this.aoz.currentScreen.getColour(%number,%value) } )
+
+
+Function "phybase", number
+{
+	#notimplemented
+}
+End Function( {0} )
+
+
+Function "physic", number
+{
+	#notimplemented
+}
+End Function( {0} )
+
+
+Instruction "autoback", number
+{
+}
+End Instruction
+
+
+Instruction "plot", x, y, color
+{
+	#errors
+	this.aoz.currentScreen.plot({x:%x,y:%y},%color);
+}
+End Instruction
+
+
+Function "point", x, y
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.point({x:%x,y:%y})} )
+
+
+Instruction "draw to", x, y
+{
+	#errors
+	this.aoz.currentScreen.drawTo({x:%x,y:%y});
+}
+End Instruction
+
+
+Instruction "draw", x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.draw({x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "draw", x1, y1, width, height
+{
+	#errors
+	this.aoz.currentScreen.draw({x:%x1,y:%y1,width:%width,height:%height});
+}
+End Instruction
+
+
+Instruction "ellipse", x, y, radiusX, radiusY
+{
+	#errors
+	this.aoz.currentScreen.ellipse({x:%x,y:%y,width:%radiusX,height:%radiusY});
+}
+End Instruction
+
+
+Instruction "circle", x, y, radius
+{
+	#errors
+	this.aoz.currentScreen.ellipse({x:%x,y:%y,width:%radius,height:%radius});
+}
+End Instruction
+
+Instruction "bar", x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.bar({x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "bar", x1, y1, width, height
+{
+	#errors
+	this.aoz.currentScreen.bar({x:%x1,y:%y1,width:width,height:%height});
+}
+End Instruction
+
+
+Instruction "box", x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.box({x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "box", x1, y1, width, height
+{
+	#errors
+	this.aoz.currentScreen.box({x:%x1,y:%y1,width:%width,height:%height});
+}
+End Instruction
+
+
+
+Instruction "paint", x, y, color
+{
+	#notimplemented
+}
+End Instruction
+
+
+Instruction "gr locate", x, y
+{
+	#errors
+	this.aoz.currentScreen.grLocate({x:%x,y:%y});
+}
+End Instruction
+
+
+Function "text length", text$
+{
+	#errors	
+}
+End Function( {this.aoz.currentScreen.textLength(%text$)} )
+
+
+
+Function "text base"
+{
+	#errors	
+}
+End Function( {this.aoz.currentScreen.textBase()} )
+
+
+Instruction "text", x, y, text$, tags$
+{
+	#errors
+	this.aoz.currentScreen.text({x:%x,y:%y},%text$,%tags$);
+}
+End Instruction(e)
+
+
+
+Instruction "set paint", style
+{
+	#errors
+	this.aoz.currentScreen.setPaint(%style);
+}
+End Instruction
+
+
+Instruction "set pattern", pattern
+{
+	#errors
+	this.aoz.currentScreen.setPattern(%pattern);
+}
+End Instruction
+
+
+Instruction "set line", pattern
+{
+	#errors
+	this.aoz.currentScreen.setLine(%pattern);
+}
+End Instruction
+
+
+Instruction "ink", color, pattern, number
+{
+	#errors
+	this.aoz.currentScreen.setInk(%color,%pattern,%number);
+}
+End Instruction
+
+
+Instruction "gr writing", style
+{
+	#errors
+	this.aoz.currentScreen.setWriting(%style);
+}
+End Instruction
+
+
+Instruction "clip", x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.setClip({x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "clip", x1, y1, width, height
+{
+	#errors
+	this.aoz.currentScreen.setClip({x:%x1,y:%y1,width:%width,height:%height});
+}
+End Instruction
+Instruction "clip"
+{
+	#errors
+	this.aoz.currentScreen.clipOff();
+}
+End Instruction
+
+
+Instruction "set tempras", p1, p2
+{
+	#notimplemented
+}
+End instruction
+
+
+Instruction "appear", source To destination, pixels, range
+{
+	#notimplemented
+}
+End Instruction
+
+
+Instruction "zoom", source, x1 ,y1 ,x2, y2 To destination, x3, y3, x4, y4
+{
+	#notimplemented
+}
+End Instruction
+
+
+Instruction "get cblock", number, x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.getCBlock(%number,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "get cblock", number, x, y, width, height
+{
+	#errors
+	this.aoz.currentScreen.getCBlock(%number,{x:%x,y:%y,width:%width,height:%height});
+}
+End Instruction
+
+
+Instruction "put cblock", number, x, y
+{
+	#errors
+	this.aoz.currentScreen.putCBlock(%number,{x:%x,y:%y});
+}
+End Instruction
+
+
+Instruction "del cblock", number
+{
+	#errors
+	this.aoz.currentScreen.delCBlock(%number);
+}
+End Instruction
+
+
+Instruction "get block", number, x1, y1, width, height, mask
+{
+	#errors
+	this.aoz.currentScreen.getBlock(%number,{x:%x1,y:%y1,width:%width,height:%height},%mask);
+}
+End Instruction
+Instruction "get block", number, x1, y1 To x2, y2, mask
+{
+	#errors
+	this.aoz.currentScreen.getBlock(%number,{x::%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)},%mask);
+}
+End Instruction
+
+
+Instruction "set block alpha", number, alpha
+{
+	#errors
+	this.aoz.currentScreen.setBlockAlpha(%number,%alpha);
+}
+End Instruction
+
+
+Instruction "put block", number, x, y, bitplanes, blittermode
+{
+	#errors
+	this.aoz.currentScreen.putBlock(%number,{x:%x,y:%y},%bitplanes,%blittermode);
+}
+End Instruction
+
+
+Instruction "del block", number
+{
+	#errors
+	this.aoz.currentScreen.delBlock(%number);
+}
+End Instruction
+
+
+Instruction "scroll", number
+{
+	#errors
+	this.aoz.currentScreen.scroll(%number);
+}
+End Instruction
+
+
+
+Function "xgr"
+{
+	#errors	
+}
+End Function( {this.aoz.currentScreen.grPosition.x} )
+
+
+Function "ygr"
+{
+	 #errors
+}
+End Function( {this.aoz.currentScreen.grPosition.y} )
+
+
+Instruction "reserve zone", number
+{
+	#errors
+	this.aoz.currentScreen.reserveZone(%number);
+}
+End Instruction
+
+Instruction "reset zone", number
+{
+	#errors
+	this.aoz.currentScreen.resetZone(%number);
+}
+End Instruction
+
+Function "zone$", _text$, _number
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.currentTextWindow.zone$(%_text$,%_number)} ) 
+
+Instruction "set zone", number, x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.setZone(%number,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "set zone", number, x1, y1, width, height
+{
+	#errors
+	this.aoz.currentScreen.setZone(%number,{x:%x1,y:%y1,width:%width,height:%height});
+}
+End Instruction
+
+
+Function "zone", x, y
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.zone(undefined,{x:%x,y:%y})} )
+Function "zone", number, x, y
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.zone(#number,{x:%x,y:%y})} )
+
+
+Function "hzone", x, y
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.hZone({x:%x,y:%y})} )
+Function "hzone", number, x, y
+{
+	#errors
+}
+End Function( {this.aoz.getScreen(%number).hZone({x:%x,y:%y})} )
+
+
+Function "scin", x, y
+{
+	#inline	 #errors
+}
+End Function( {this.aoz.screenIn(undefined,{x:%x,y:%y})} )
+Function "scin", number, x, y
+{
+	#inline	 #errors
+}
+End Function( {this.aoz.screenIn(%number,{x:%x,y:%y})} )
+
+
+Function "mouse screen"
+{
+	 #errors
+}
+End Function( {this.aoz.mouseScreen({x:this.aoz.xMouse,y:this.aoz.yMouse})} )
+
+
+Function "mouse zone"
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.hZone2({x:this.aoz.xMouse,y:this.aoz.yMouse})} )
+
+
+Function "screen colour"
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.numberOfColors} )
+Function "screen colour", number
+{
+	#errors	
+}
+End Function( {this.aoz.getScreen(%number).numberOfColors} )
+
+
+Function "screen base"
+{
+	#notimplemented
+}
+End Function( {0} )
+
+
+Function "screen width"
+{
+	#errors	
+}
+End Function( {this.aoz.currentScreen.dimension.width} )
+Function "screen width", number
+{
+	#errors	
+}
+End Function( {this.aoz.getScreen(%number).dimension.width} )
+
+
+Function "screen height"
+{
+	#errors	
+}
+End Function( {this.aoz.currentScreen.dimension.height} )
+Function "screen height", number
+{
+	#inline	 #errors	
+}
+End Function( {this.aoz.getScreen(%number).dimension.height} )
+
+
+Function "hires"
+{
+	
+}
+End Function( {1} )
+
+
+Function "lowres"
+{
+	
+}
+End Function( {0} )
+
+
+Function "x hard", x
+{
+	#errors
+}
+End Function( {%x*this.aoz.currentScreen.renderScale.x+this.aoz.currentScreen.position.x} )
+Function "x hard", x, screen
+{
+	#errors
+	var s=this.aoz.getScreen(%screen);
+}
+End Function( {%x*s.renderScale.x+s.x} )
+
+
+Function  "y hard", y
+{
+	#errors
+}
+End Function( {%y*this.aoz.currentScreen.renderScale.y+this.aoz.currentScreen.position.y} )
+Function  "y hard", y, screen
+{
+	#errors
+	var s=this.aoz.getScreen(%screen);
+}
+End Function( {%y*s.renderScale.y+s.y} )
+
+Function "alpha", number
+{
+	#errors
+}
+End Function( {this.aoz.currentScreen.getColorAlpha(%number)} )
+
+Instruction "remap", color1 To color2
+{
+	#errors
+	this.aoz.currentScreen.remap(%color1,%color2);
+}
+End Instruction
+Instruction "remap", color1 To color2, x1, y1 To x2, y2
+{
+	#errors
+	this.aoz.currentScreen.remap(%color1,%color2,{x:%x1,y:%y1,width:(%x2)-(%x1),height:(%y2)-(%y1)});
+}
+End Instruction
+Instruction "remap", color1 To color2, x1, y1, width, height
+{
+	#errors
+	this.aoz.currentScreen.remap(%color1,%color2,{x:%x1,y:%y1,width:%width,height:%height});
+}
+End Instruction
+
+Function "screen mode"
+{
+	#notimplemented
+}
+End Function( {0} )
+
+Instruction "screen", _number
+{
+	#errors
+	this.aoz.setScreen(%_number);
+}
+End Instruction
+
+Instruction "screen hot spot", _mask
+{
+	#errors
+	this.aoz.currentScreen.setHotspot({x:%_mask,y:"mask"});
+}
+End Instruction
+Instruction "screen hot spot", _x, _y
+{
+	#errors
+	this.aoz.currentScreen.setHotspot({x:%_x,y:%_y});
+}
+End Instruction
+Instruction "screen hot spot", _number, _x, _y
+{
+	#errors
+	this.aoz.getScreen(%_number).setHotspot({x:%_x,y:%_y});
+}
+End Instruction
+
+Instruction "flash off"
+{
+	#notimplemented
+}
+End Instruction
+Instruction "flash"
+{
+	#notimplemented
+}
+End Instruction
+
+Instruction "shift off"
+{
+	#not implemented
+}
+End Instruction
+Instruction "shift up", _delay, _first, _last, _flag
+{
+	#notimplemmented
+}
+End Instruction
+Instruction "shift down", _delay, _first, _last, _flag
+{
+	#notimplemmented
+}
+End Instruction
+
+Instruction "fade", _speed, _colour_ist
+{
+	#notimplemented
+}
+End Instruction
+
+/*
+Instruction "polyline", x1, y1 [ To x2, y2 ]
+Instruction "polyline", x1, y1 [ , width, height ]
+{
+	#errors
+	this.aoz.currentScreen.polyline1({x:%x1,y:%y1},%list);
+}
+{
+	#errors
+	this.aoz.currentScreen.polyline2({x:%x1,y:%y1},%list);
+}
+End Instruction
+
+Function "halfbright"
+{
+}
+End Function( {4} )
+
+
+//	{ token: "polygon", params: [ "I" ], compile: '#function handlePolygon', doError: true },
+Instruction "polygon", x1, y1 [ To x2, y2 ]
+Instruction "polygon", x1, y1 [ , width, height ]
+{
+	#errors
+	this.aoz.currentScreen.polygon1({x:%x1,y:%y1},%list);
+}
+{
+	#errors
+	this.aoz.currentScreen.polygon2({x:%x1,y:%y1},%list);
+}
+End Instruction
+*/
+

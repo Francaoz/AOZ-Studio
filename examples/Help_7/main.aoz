@@ -1,0 +1,125 @@
+'********************************* 
+'*    AMOS Professional HELP 7   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *               Draw      (line 11) 
+'*                               *               Box       (line 19) 
+'*         Ronnie Simpson        *               Polyline  (line 29) 
+'*********************************               Circle    (line 37) 
+'                                                Ellipse   (line 48) 
+'
+'------------------------------------------- 
+'Draw
+'------------------------------------------- 
+'Draw a straight line between two points 
+'
+'eg.   Draw 10,20 To 30,40   (draw a line starting 10x,20y ending at 30x,40y)  
+'      Draw To 50,60         (draw from current graphics coordinates)    
+'
+'------------------------------------------- 
+'Box 
+'------------------------------------------- 
+'Draw an unfilled rectangle on the screen         10,20
+'                                                   +----------------+ +--+
+'     eg.    Box 10,10 to 100,50                    |                | |  |  
+'            Box 110,10 to 124,30                   |                | +--+
+'                                                   |                |   
+'                                                   +----------------+ 
+'                                                                 100,50 
+'------------------------------------------- 
+'Polyline
+'------------------------------------------- 
+'Extended version of the draw command (multiple lines) 
+'
+'  eg.     Polyline 10,20 To 20,40 To 10,80 To 100,80..........etc.
+'          Polyline To 10,20 To 80,10 To 90,30   
+'
+'------------------------------------------- 
+'Circle
+'------------------------------------------- 
+'Draw an unfilled circle on screen 
+'
+'  eg.    Circle 100,80,60 (draw a circle of 60 pixels radius with)  
+'                          (      its centre at 100x,80y          )  
+'
+'         Plot 250,100     (       plot a point         )
+'         Circle ,,20      (then draw a circle around it)
+'
+'------------------------------------------- 
+'Elipse
+'------------------------------------------- 
+'Draw an unfilled ellipse on screen  
+'
+'
+'
+'            +----->The instruction  
+'            |     +----->screen x coordinate    
+'            |     |  +----->screen y coordinate   
+'            |     |  |  +----->horizontal radius in pixels  
+'            |     |  |  |  +----->vertical radius in pixels   
+'            |     |  |  |  |
+'         Ellipse 100,80,50,40 
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires
+Curs Off : Flash Off : Cls 0 : Pen 6 : Paper 0 : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+'
+Locate 0,24 : Print "PRESS ANY MOUSE KEY TO QUIT";
+'
+Rem *** Start main loop
+Do 
+   '
+   Rem *** Draw ten lines then clear the screen 
+   For N=1 To 10
+      X1=Rnd(639) : Y1=Rnd(180)+10 : X2=Rnd(639) : Y2=Rnd(180)+10
+      Locate 0,0 : Print "Draw"+Str$(X1)+","+Str$(Y1)+" To"+Str$(X2)+","+Str$(Y2)+"    "
+      Ink Rnd(14)+1 : Draw X1,Y1 To X2,Y2
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Draw ten boxes 
+   For N=1 To 10
+      X1=Rnd(320) : Y1=Rnd(80)+10 : X2=Rnd(320)+320 : Y2=Rnd(80)+90
+      Locate 0,0 : Print "Box"+Str$(X1)+","+Str$(Y1)+" To"+Str$(X2)+","+Str$(Y2)+"    "
+      Ink Rnd(14)+1 : Box X1,Y1 To X2,Y2
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Draw ten lines using the finish position as the start of the next
+   For N=1 To 10
+      X1=Rnd(640) : Y1=Rnd(180)+10
+      Locate 0,0 : Print "Polyline To"+Str$(X1)+","+Str$(Y1)+"     "
+      Ink Rnd(14)+1 : Polyline To X1,Y1
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Draw ten circles 
+   For N=1 To 10
+      X1=Rnd(440)+100 : Y1=Rnd(80)+60 : R1=Rnd(45)+5
+      Locate 0,0 : Print "Circle"+Str$(X1)+","+Str$(Y1)+","+Str$(R1)+"    "
+      Ink Rnd(14)+1 : Circle X1,Y1,R1
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** draw ten ellipses
+   For N=1 To 10
+      X1=Rnd(440)+100 : Y1=Rnd(80)+60 : R1=Rnd(90)+10 : R2=Rnd(45)+5
+      Locate 0,0 : Print "Ellipse"+Str$(X1)+","+Str$(Y1)+","+Str$(R1)+","+Str$(R2)+"    "
+      Ink Rnd(14)+1 : Ellipse X1,Y1,R1,R2
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+Loop 
+Edit 

@@ -1,0 +1,134 @@
+'********************************* 
+'*    AMOS Professional HELP 9   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *               Gr Writing  (line 10) 
+'*                               *               Clip        (line 39) 
+'*         Ronnie Simpson        *               Set Tempras (line 51) 
+'********************************* 
+'
+'------------------------------------------- 
+'Gr Writing
+'------------------------------------------- 
+'Set the style of the drawing mode 
+'
+'There are 4 different modes you can use or mix to produce various 
+'styles of graphic writing.
+'
+' JAM 1-(Bit 0=0 ie. Gr Writing 0 [draw only ink colour -ignore background]) 
+' JAM 2-(Bit 0=1 ie. Gr Writing 1 [default mode -overwrites everything]) 
+' XOR---(Bit 1=1 ie. Gr Writing 2 [combines with existing graphics]) 
+' INV---(Bit 2=1 ie. Gr Writing 4 [reverses image before drawing]) 
+'
+'   eg.     Gr Writing 4+1 = Gr Writing 5 (set JAM 2+INV)  
+'
+'NOTES-
+'      JAM 1 is ideal for use with the Text command as the backgrond is  
+'            ignored and text is placed neatly over existing graphics.   
+'      JAM 2 is the default condition and ink and background colours 
+'            completely overwrite anything already on the screen.  
+'        XOR combines your graphics with the screen using the logical  
+'            operation exclusive or, a good side effect of this is that  
+'            if the same operation is repeated then the screen will be 
+'            left in its origonal condition
+'        INV or inverse video will reverse the ink and background colours  
+'            before drawing them on the screen 
+'  
+'This command only affects graphic operations such as Text and Cirle and 
+'has no affect on Print and Centre (see Writing command).  
+'------------------------------------------- 
+'Clip
+'------------------------------------------- 
+'Restrict all graphic output to a section of the screen
+'
+'eg.  clip 20,20 to 280,160 - this would restrict all drawing operations 
+'     to the rectangle enclosed between top left coordinates 20x,20y and 
+'     botom right coordinates 280x,160y and only parts of the graphics 
+'     which fall within this rectangle would be drawn. 
+'
+'     To return the drawing operations to the full screen just use the Clip
+'     instruction without any parameters.  
+'------------------------------------------- 
+'Set Tempras 
+'------------------------------------------- 
+'Set the maximum amount of memory used by graphic operations 
+'
+'
+'                     +----->The address of the buffer (in this case bank 9) 
+'                     |      +----->The number of bytes you wish to reserve  
+'                     |      | 
+'     Set Tempras Start(9),2048
+'
+'The buffer must always be in chip ram.  
+'The size required is calculated by -  
+'width in pixels divided by 8 multiplied by height in pixels.
+'X coordinate for width calculations must be rounded to  
+'the nearest 16 multiple, LOWER for the left, HIGHER for the right.  
+'Minimum buffer size is 256 bytes. 
+'Only use this instruction if you are confident and do not under-estimate  
+'the size of buffer required as this would almost certainly crash the Amiga. 
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires
+Flash Off : Hide : Cls 0 : Pen 6 : Paper 0
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+'
+Locate 0,24 : Print "     PRESS LEFT MOUSE KEY TO CONTINUE               RIGHT MOUSE KEY TO QUIT";
+'
+Rem *** Set the temporary raster 
+Rem     Clipping is 60 to 580. Nearest 16 multiples are 48 and 592.
+Reserve As Chip Work 9,(592-48)/8*140
+Set Tempras Start(9),Length(9)
+'
+Rem *** Start main loop
+Do 
+   Repeat : Until Mouse Key=0
+   '
+   Rem *** Demonstrate the Gr Writing modes 
+   Cls 0,0,0 To 640,180 : Pen 6 : Paper 0
+   Curs Off : Home : Print "GRAPHIC WRITING MODES"
+   Ink 11,0 : Bar 160,20 To 320,160
+   Ink 12,0 : Bar 320,20 To 480,160
+   Ink 13,0 : Bar 480,20 To 640,160
+   For N=0 To 6
+      Gr Writing N
+      For T=0 To 5
+         Ink T
+         Text T*105,N*20+30,"Gr Writing"+Str$(N)
+   Next : Next 
+   Repeat : Until Mouse Key=0
+   '
+   Rem *** Wait for user input
+   Do 
+      M=Mouse Key
+      Exit If M=1
+      If M=2 Then Edit 
+   Loop 
+   Rem *** Demonstrate some graphics using Clip 
+   Cls 0,0,0 To 640,180 : Pen 6 : Paper 0
+   Gr Writing 1 : Set Paint 1
+   Home : Print "USING CLIP"
+   Ink 15 : Box 58,28 To 582,172
+   Clip 60,30 To 580,170
+   For N=1 To 8
+      Ink N,,12 : Bar Rnd(320),Rnd(100) To Rnd(320)+320,Rnd(100)+100
+   Next 
+   Ink 0
+   For N=1 To 15
+      X=Rnd(640) : Y=Rnd(200)
+      Ink N : Circle X,Y,Rnd(50)+50
+      Paint X,Y
+   Next 
+   '
+   Rem *** Wait for user input
+   Do 
+      M=Mouse Key
+      Exit If M=1
+      If M=2 Then Edit 
+   Loop 
+   '
+   Rem *** Reset Clip to full screen
+   Clip : Set Paint 0
+   '
+Loop 

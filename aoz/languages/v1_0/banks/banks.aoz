@@ -1,0 +1,112 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Music Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+
+//
+// Initialization
+//
+{
+    this.banks = this.aoz.banks;
+}
+
+Instruction "bank swap", _number1, _number2
+{
+    #error
+    this.aoz.banks.bankSwap(%_number1,%_number2);
+}
+End Instruction
+
+Instruction "bank shrink", _number, _length
+{
+    #error
+    this.aoz.banks.bankShrink(%_number,%_length);
+}
+End Instruction
+
+Function "start", _number
+{
+    #error
+}
+End Function( {this.aoz.banks.getStart(%_number)} )
+
+Function "length", _number
+{
+    #error
+}
+End Function( {this.aoz.banks.getLength(%_number)} )
+
+Instruction "erase", _number
+{
+    #error
+    this.aoz.banks.erase(%_number);
+}
+End Instruction
+
+Instruction "list bank", _number
+{
+    #error
+    this.aoz.banks.listBank();
+}
+End Instruction
+
+Instruction "reserve as work", _number, _length
+{
+    #error
+    this.aoz.banks.reserve(%_number,"work",%_length);
+}
+End Instruction
+Instruction "reserve as chip work", _number, _length
+{
+    #error
+    this.aoz.banks.reserve(%_number,"work",%_length);
+}
+End Instruction
+
+Instruction "reserve as data", _number, _length
+{
+    #error
+    this.aoz.banks.reserve(%_number,"data",%_length);
+}
+End Instruction
+Instruction "reserve as chip data", _number, _length
+{
+    #error
+    this.aoz.banks.reserve(%_number,"data",%_length);
+}
+End Instruction
+
+Function "image width", _image
+{
+	#errors
+}
+End Function( {this.aoz.banks.getImageWidth(%_image)} )
+Function "image height", _image
+{
+	#errors
+}
+End Function( {this.aoz.banks.getImageHeight(%_image)} )

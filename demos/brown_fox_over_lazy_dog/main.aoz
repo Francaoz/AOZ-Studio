@@ -1,0 +1,114 @@
+screenWidth = Screen Width
+
+//
+// The Quick Fox Jumps Over the Lazy Dog
+//
+// Demonstration of new font support in AOZ
+// FL - 2019 - Public domain
+//
+
+Degree
+
+screenWidth = Screen Width
+
+Curs Off
+Palette $000000, $FFFFFF, $404040
+Cls 0
+Paper 0
+Pen 1
+Hot Spot 1, $11
+Hot Spot 2, $11
+Hot Spot 3, $11
+Hot Spot 4, $11
+
+number_of_fonts = Get Font Number()
+sentence$ = "The quick brown fox jumps over the lazy dog."
+title$ = "A demonstration of Google Fonts support in AOZ"
+
+// Scrolling screen
+scroll_width = screenWidth * 3
+Screen Open 1, scroll_width, 128, 32, lowres
+Curs Off
+Palette $000000, $FFFFFF, $400000, $000040
+Set Transparent 0
+Cls 0
+Ink 1
+Screen 0
+
+// Info screen
+Screen Open 2, screenWidth, 256, 32, lowres
+Curs Off
+Palette $000000, $E0E000, $C0C080, $00E0E0
+Set Transparent 0
+Cls 0
+y = 24
+font_name$ = "finger paint"  //"snowburst one"
+Set Font font_name$, 24 : Ink 1 : Text screenWidth / 2, y, "AOZ Studio: Rediscover the joy of programming!", "#center"
+Set Font font_name$, 13 : Add y, 26 : Ink 3 : Text screenWidth / 2, y, "Download the latest version, get the source-code at : https://www.aoz.studio", "#center"
+Set Font font_name$, 13 : Add y, 18 : Ink 3 : Text screenWidth / 2, y, "Support the project on Patreon! www.patreon.com/francoislionet", "#center"
+Screen Display 2, 0, 620, 1024, 256
+Screen To Front 2
+
+// Title page
+Screen 0
+Cls 0
+aoz_x = screenWidth / 2
+aoz_y = 85
+aoz_scale# = 0.3
+aoz_scale_latitude# = 0.08
+aoz_angle = 0
+back_angle# = 0
+back_angle_speed# = 0.25
+scale# = 0
+count = 0
+text_x = scroll_width / 4
+text_y = 56
+font_height = 40
+scroll_x = 0
+scroll_y = 530
+logo_angle# = 90
+logo_speed# = 5
+logo_x = screenWidth / 2
+logo_y = Screen Height / 2 - 16
+
+Screen 1
+Set Font Rnd( number_of_fonts - 1 ), font_height
+Text text_x, text_y, title$, "#center"
+Set Font Rnd( number_of_fonts - 1 ), font_height
+Text text_x + scroll_width / 2, text_y, title$, "#center"
+
+Screen 0
+Do
+    Wait Vbl
+
+    Add scroll_x, -8
+    If scroll_x = -( scroll_width / 2 )
+        Screen 1
+        Cls 0, 0, 0 To scroll_width / 2, 128
+        Screen Copy 1, scroll_width / 2, 0, scroll_width, 128 To 1, 0, 0
+        Cls 0, scroll_width / 2, 0 To scroll_width, 128
+        Set Font Rnd( number_of_fonts - 1 ), font_height
+        Text text_x + scroll_width / 2, text_y, title$, "#center"
+        Screen 0
+        scroll_x = 0
+    End If
+    Screen Display 1, scroll_x, scroll_y, scroll_width, 128
+
+    Bob 1, Screen Width / 2, Screen Height / 2, 4
+    Bob Rotate 1, back_angle#
+    Bob Scale 1, 0.5, 0.5
+    Add back_angle#, back_angle_speed#
+
+    scale# = aoz_scale# + Sin( aoz_angle ) * aoz_scale_latitude#
+    Add aoz_angle, 1
+    Bob 2, aoz_x, aoz_y, 2
+    Bob Scale 2, scale#, scale#
+
+    Bob 3, logo_x, logo_y, 3
+    Bob Rotate 3, Cos( logo_angle# ) * 4
+    Bob Scale 3, 0.75, 0.75
+    Add logo_angle#, logo_speed#
+
+    //k$ = Inkey$
+    //If k$ <> "" Then Exit
+Loop

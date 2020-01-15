@@ -1,0 +1,836 @@
+{
+  name: music
+  instructions:
+  {
+    boom:
+    {
+      name: boom
+      type: instruction
+      syntaxes: []
+    }
+    shoot:
+    {
+      name: shoot
+      type: instruction
+      syntaxes: []
+    }
+    bell:
+    {
+      name: bell
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _frequency
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    sam_play:
+    {
+      name: sam_play
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _index
+          ]
+          parameterSeparators: []
+        }
+        {
+          parameterTypes:
+          [
+            "2"
+          ]
+          parameterNames:
+          [
+            _name$
+          ]
+          parameterSeparators: []
+        }
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _voices
+            _index
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+        {
+          parameterTypes:
+          [
+            "0"
+            "2"
+          ]
+          parameterNames:
+          [
+            _voices
+            _name$
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _voices
+            _index
+            _frequency
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+          ]
+        }
+        {
+          parameterTypes:
+          [
+            "0"
+            "2"
+            "0"
+          ]
+          parameterNames:
+          [
+            _voices
+            _name$
+            _frequency
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    sam_stop:
+    {
+      name: sam_stop
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _voices
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    volume:
+    {
+      name: volume
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _level
+          ]
+          parameterSeparators: []
+        }
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _level
+            _voice
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    voice:
+    {
+      name: voice
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _voices
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    play:
+    {
+      name: play
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _pitch
+            _delay
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+            _pitch
+            _delay
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    play_off:
+    {
+      name: play_off
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    set_wave:
+    {
+      name: set_wave
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+            _shape
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    wave:
+    {
+      name: wave
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+            _shapes
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    noise_to:
+    {
+      name: noise_to
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    sample:
+    {
+      name: sample
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+            _voice
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    del_wave:
+    {
+      name: del_wave
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    set_envel:
+    {
+      name: set_envel
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+            _phase
+            _duration
+            _volume
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    led_on:
+    {
+      name: led_on
+      type: instruction
+      syntaxes: []
+    }
+    led_off:
+    {
+      name: led_off
+      type: instruction
+      syntaxes: []
+    }
+    sam_bank:
+    {
+      name: sam_bank
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    sam_raw:
+    {
+      name: sam_raw
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+            _address
+            _length
+            _frequency
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    sam_loop_on:
+    {
+      name: sam_loop_on
+      type: instruction
+      syntaxes: []
+    }
+    sam_loop_off:
+    {
+      name: sam_loop_off
+      type: instruction
+      syntaxes: []
+    }
+    sload:
+    {
+      name: sload
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _channel
+            _address
+            _length
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    ssave:
+    {
+      name: ssave
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _channel
+            _start
+            _end
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    sam_swap:
+    {
+      name: sam_swap
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+            _address
+            _length
+          ]
+          parameterSeparators:
+          [
+            ","
+            ","
+          ]
+        }
+      ]
+    }
+    music:
+    {
+      name: music
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _number
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    music_stop:
+    {
+      name: music_stop
+      type: instruction
+      syntaxes: []
+    }
+    music_off:
+    {
+      name: music_off
+      type: instruction
+      syntaxes: []
+    }
+    mvolume:
+    {
+      name: mvolume
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _volume
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    tempo:
+    {
+      name: tempo
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _tempo
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    track_load:
+    {
+      name: track_load
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "2"
+            "0"
+          ]
+          parameterNames:
+          [
+            _module$
+            _bank
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    track_play:
+    {
+      name: track_play
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _bank
+            _pattern
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    track_loop_on:
+    {
+      name: track_loop_on
+      type: instruction
+      syntaxes: []
+    }
+    track_loop_off:
+    {
+      name: track_loop_off
+      type: instruction
+      syntaxes: []
+    }
+    track_stop:
+    {
+      name: track_stop
+      type: instruction
+      syntaxes: []
+    }
+    med_load:
+    {
+      name: med_load
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "2"
+            "0"
+          ]
+          parameterNames:
+          [
+            _module$
+            _bank
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    med_play:
+    {
+      name: med_play
+      type: instruction
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+            "0"
+          ]
+          parameterNames:
+          [
+            _bank
+            _song
+          ]
+          parameterSeparators:
+          [
+            ","
+          ]
+        }
+      ]
+    }
+    med_stop:
+    {
+      name: med_stop
+      type: instruction
+      syntaxes: []
+    }
+    med_midi_on:
+    {
+      name: med_midi_on
+      type: instruction
+      syntaxes: []
+    }
+  }
+  functions:
+  {
+    vumeter:
+    {
+      name: vumeter
+      type: function
+      returnType: "0"
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+    sam_swapped:
+    {
+      name: sam_swapped
+      type: function
+      returnType: "0"
+      syntaxes:
+      [
+        {
+          parameterTypes:
+          [
+            "0"
+          ]
+          parameterNames:
+          [
+            _voice
+          ]
+          parameterSeparators: []
+        }
+      ]
+    }
+  }
+  imageList: ""
+  imagesPalette: ""
+  soundList: ""
+  soundTypes: ""
+  extraSounds:
+  {
+    bell: true
+    boom: true
+    shoot: true
+  }
+  fileSystemTree:
+    '''
+    	"music":
+    	{
+    		size:1048576,
+    	},
+    '''
+  fonts:
+  {
+    amigaList: ""
+    googleList: ""
+    google: ""
+    amiga: ""
+    families: ""
+    faces: ""
+  }
+  windowFont:
+  {
+    name: IBM Plex Mono
+    type: google
+    height: 13.375
+  }
+}

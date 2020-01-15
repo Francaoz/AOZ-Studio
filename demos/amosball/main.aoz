@@ -1,0 +1,370 @@
+#nobank:"images"
+
+Boob Load "amigaball.js", 1
+Boob Load "aoz.js",2
+Boob Load "better.js",3
+
+'--- Just kidding Francois ;-)
+'--- //Marvin & René
+'
+' IMPORTANT POLITICALLY CORRECT NOTE ;)
+' ------------------------------------------------------------------
+'
+' The "BOOB" Instruction is just a joke, and was not intended to
+' offense anyone. Just an adolescent joke. The name "Boob" was chosen
+' before the real "Bob" instruction was implemented, and just
+' because it sounded similar and was funny.
+'
+' It will not, of course, be included in the final version of AMOS-2
+'
+' It represent a good demonstration of the possibility to create
+' your very own set of instructions and functions, using the
+' language itself.
+'
+' ------------------------------------------------------------------
+' [ WARNING 05/09/2019-08:43
+' Due to changes in the rendering system since the demo was written
+' the Bobs and Boobs ;) - legal, only that, legal :( - are no longuer
+' centered in the screen.
+' No correction to be done from me ever.]d aoz
+'
+' Lens paramenter
+DIST0=512 : ZOM=256
+
+' Radius and resolution of ball
+R=64
+
+'On Error Goto _EXIT
+Degree
+NP=256
+Dim X3D(NP),Y3D(NP),Z3D(NP)
+SJ#=2*R : SJ#=SJ#/16
+SI#=360 : SI#=SI#/16
+K=0
+For J#=-R To R Step SJ#
+   For I#=1 To 360-SI# Step SI#
+      Inc K
+      X3D(K)=Sqr(R*R-(J#*J#))*Cos(I#)
+      Y3D(K)=Sqr(R*R-(J#*J#))*Sin(I#)
+      Z3D(K)=J#
+   Next I#
+Next J#
+_EXIT:
+NP=K-1
+
+Curs Off : paper 0 : double buffer
+
+RAD = 50
+ANG = 0
+
+do
+
+   Clw
+
+   ' Increment rotation angles
+   TETA = TETA + 1 : if TETA > 359 then TETA = 0
+   PHI = PHI + 2 : If PHI > 359 then PHI = 0
+
+   ' Precalculation of COSs and SINs
+   ' ( *256 to stay in integer mode (faster!))
+   CPHI=Cos(PHI)*256
+   SPHI=Sin(PHI)*256
+   CTETA=Cos(TETA)*256
+   STETA=Sin(TETA)*256
+
+   ' Modify zoom
+   DIST=DIST0+SPHI
+
+   Boob Off
+
+   Boob 1,160 + cos (ANG) * RAD,100,3
+   Boob Zoom 1, 0.35, 0.35
+   Boob Set Hotspot 1, "center", "middle"
+
+   For I=2 To NP
+
+      ' Calculation of rotated 3D coords for each displayable
+      ' point of the ball (Z>=0)
+      ' ( /256 to bring back COS and SIN beetween 0->1)
+      ' rotation (X-Z with PHI) & rotation (X-Y with TETA)
+      Z=(Z3D(I)*CPHI-Y3D(I)*SPHI)/256
+      Y=(Z3D(I)*SPHI+Y3D(I)*CPHI)/256
+      X=(X3D(I)*CTETA-Y*STETA)/256
+      Y=(X3D(I)*STETA+Y*CTETA)/256
+
+      ' Calculation of screen coords of A,B,C,D and draw lines
+      X=(X*ZOM)/(DIST+Z)
+      X = X + 160
+      Y=(Y*ZOM)/(DIST+Z)
+      Y = Y + 160 + sin(ANG)*RAD
+
+      ' Display point
+      Boob I,X-50,Y,1
+      Boob Zoom I,0.025,0.025
+	  J=I+NP
+      Boob J,X+50,Y,1
+      Boob Zoom J,0.025,0.025
+	  #debug
+   Next I
+
+   ANG = ANG + 4
+
+   Boob 0,160 + sin (ANG) * RAD,50,2
+   Boob Zoom 0, 0.4, 0.4
+   Boob Set Hotspot 0, "center", "middle"
+
+   Boob Draw 3
+   Screen Swap
+   Wait Vbl
+
+Loop
+end
+
+
+
+
+//
+// Now come new instructions specially created to
+// display bobs in AMOS 2 until the real Bob and Sprites instructions
+// are implemented: boobs!
+// With 'Instruction' and 'Function' keywords, new in AMOS 2,
+// you can program your own instruction set in Basic! (I used Javascript
+// here, but it can be in AMOS).
+// The language is now expandable, in a much better and more open
+// system than extensions.
+// Who wants to do AMOS 3D instruction set? (no kidding! In Basic it will
+// be fast and simple to program...)
+//
+// "Boob" set of instructions, like Bobs but more sexy!
+//
+Instruction "Boob Load", imageName$, number
+	WAITING = 0
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobImages )
+			this.aoz.boobImages = [];
+
+		var self = this;
+		var path = 'resources/images/' + this.vars.imageName$;
+		this.aoz.utilities.loadUnlockedImage( path, 'image/png', {}, function( response, image, name )
+		{
+			if ( response )
+			{
+				self.aoz.boobImages[ self.vars.number ] = image;
+				self.vars.WAITING = 1;
+			}
+		} );
+	}
+	While( WAITING = 0 )
+		Wait 1
+	Wend
+End Instruction
+
+Instruction "Boob Off"
+	// Goto Javascript
+	{
+		this.aoz.boobs = []
+	}
+End Instruction
+
+Instruction "Boob", number, x, y, image
+
+	If number < 0 Then Error 23
+	If image < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			this.aoz.boobs = [];
+		if ( !this.aoz.boobImages )
+			throw 'illegal_function_call';
+		var image = this.aoz.boobImages[ this.vars.image ];
+		if ( !image )
+			throw 'illegal_function_call';
+		var canvas = document.createElement( 'canvas' );
+		canvas.width = image.width;
+		canvas.height = image.height;
+		this.aoz.boobs[ this.vars.number ] =
+		{
+			image: this.vars.image,
+			x: this.vars.x + 48,
+			y: this.vars.y,
+			z: 0,
+			hotSpotX: 0,
+			hotSpotY: 0,
+			zoomX: 1,
+			zoomY: 1,
+			canvas: canvas,
+			context: canvas.getContext( '2d' )
+		}
+	}
+End Instruction
+
+Instruction "Boob Z", number, z
+
+	If number < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			throw 'illegal_function_call';
+		var boob = this.aoz.boobs[ this.vars.number ];
+		if ( !boob )
+			throw 'illegal_function_call';
+		boob.z = this.vars.z;
+	}
+End Instruction
+
+Instruction "Boob Sort"
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			throw 'illegal_function_call';
+		this.aoz.boobs = this.aoz.boobs.sort( function( first, second )
+		{
+			return first.z < second.z;
+		} );
+	}
+End Instruction
+
+Instruction "Boob Zoom", number, zoomX, zoomY
+
+	If number < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			throw 'illegal_function_call';
+		var boob = this.aoz.boobs[ this.vars.number ];
+		if ( !boob )
+			throw 'illegal_function_call';
+		boob.zoomX = typeof this.vars.zoomX == 'undefined' ? boob.zoomX : this.vars.zoomX;
+		boob.zoomY = typeof this.vars.zoomY == 'undefined' ? boob.zoomY : this.vars.zoomY;
+	}
+End Instruction
+
+Instruction "Boob Set Hotspot", number, xPosition$, yPosition$
+
+	If number < 0 Then Error 23
+
+	// Goto Javascript
+	{
+		if ( !this.aoz.boobs )
+			throw 'illegal_function_call';
+		var boob = this.aoz.boobs[ this.vars.number ];
+		if ( !boob )
+			throw 'illegal_function_call';
+		var image = this.aoz.boobImages[ boob.image ];
+		if ( !image )
+			throw 'illegal_function_call';
+		switch ( this.vars.xPosition$ )
+		{
+			case 'left':
+				boob.hotSpotX = 0;
+				break;
+			case 'center':
+				boob.hotSpotX = image.width / 2;
+				break;
+			case 'left':
+				boob.hotSpotX = image.width;
+				break;
+		}
+		switch ( this.vars.yPosition$ )
+		{
+			case 'top':
+				boob.hotSpotY = 0;
+				break;
+			case 'middle':
+				boob.hotSpotY = image.height / 2;
+				break;
+			case 'bottom':
+				boob.hotSpotY = image.height;
+				break;
+		}
+	}
+End Instruction
+
+Instruction "Boob Draw", scale
+	// Goto Javascript
+	{
+		if ( this.aoz.boobs )
+		{
+			for ( var b = 0; b < this.aoz.boobs.length; b++ )
+			{
+				var boob = this.aoz.boobs[ b ];
+				if ( boob )
+				{
+					var image = this.aoz.boobImages[ boob.image ];
+					if ( image )
+						this.aoz.currentScreen.context.drawImage( image, 0, 0, image.width, image.height, ( boob.x - boob.hotSpotX * boob.zoomX ) * this.vars.scale, ( boob.y - boob.hotSpotY * boob.zoomY ) * this.vars.scale, ( image.width * boob.zoomX ) * this.vars.scale, ( image.height * boob.zoomY ) * this.vars.scale );
+				}
+			}
+			this.aoz.currentScreen.setModified();
+		}
+	}
+End Instruction
+
+Instruction "Boob Save"
+	// Goto Javascript
+	{
+		if ( this.aoz.boobs && this.aoz.boobImages )
+		{
+			for ( var b = 0; b < this.aoz.boobs.length; b++ )
+			{
+				var boob = this.aoz.boobs[ b ];
+				var image = this.aoz.boobImages[ boob.image ];
+				if ( boob && image)
+				{
+					boob.canvas.width = image.width * boob.zoomX;
+					boob.canvas.height = image.height * boob.zoomY;
+					boob.context.drawImage( this.aoz.currentScreen.canvas, boob.x - boob.hotSpotX * boob.zoomX, boob.y - boob.hotSpotY * boob.zoomY, image.width * boob.zoomX, image.height * boob.zoomY, 0, 0, boob.canvas.width, boob.canvas.height );
+				}
+			}
+		}
+	}
+End Instruction
+
+Instruction "Boob Clear"
+	// Goto Javascript
+	{
+		if ( this.aoz.boobs && this.aoz.boobImages )
+		{
+			for ( var b = 0; b < this.aoz.boobs.length; b++ )
+			{
+				var boob = this.aoz.boobs[ b ];
+				var image = this.aoz.boobImages[ boob.image ];
+				if ( boob && image )
+				{
+					this.aoz.currentScreen.context.drawImage( boob.canvas, 0, 0, boob.canvas.width, boob.canvas.height, boob.x - boob.hotSpotX * boob.zoomX, boob.y - boob.hotSpotY * boob.zoomY, image.width * boob.zoomX, image.height * boob.zoomY );
+				}
+			}
+		}
+	}
+End Instruction
+
+//
+// Some simple sound instructions, but the music
+// will only play if the application is located on a real
+// web server... (stupid DOM protection of browsers)
+//
+Instruction "Sound Load", name$
+	// Goto Javascript
+	{
+		this.aoz.audio = new Audio( 'resources/' + this.vars.name$ );
+	}
+End Instruction
+Instruction "Sound Play"
+	// Goto Javascript
+	{
+		if ( this.aoz.audio )
+			this.aoz.audio.play();
+	}
+End Instruction
+Instruction "Sound Position", position
+	// Goto Javascript
+	{
+		if ( this.aoz.audio )
+			this.aoz.audioCurrentTime = this.vars.position;
+	}
+End Instruction

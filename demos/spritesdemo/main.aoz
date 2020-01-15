@@ -1,0 +1,120 @@
+'
+' AMOS Sprites demo
+' By Francois Lionet
+'
+' Please note that this demo does not work in version 07-04082019
+'
+' Need more work on bobx and sprites on rotated  screens....
+'
+Degree
+
+' Presentation screen
+Paper 0
+Clw
+Curs Off
+Cls 4
+Hot Spot 2, $11
+Bob 1, 160, 30, 2
+Locate 0, 10
+Centre "AMOS 2 Sprites demo"
+Locate 0, 14
+Centre "  <Space> : displays information" : CDown
+Centre "      <+> : adds one sprite     " : CDown
+Centre "      <-> : removes one sprite  " : CDown
+Centre "<4> / <7> : changes X skew      " : CDown
+Centre "<5> / <8> : changes Y skew      "
+Locate 0, 22 : Centre "Press <space> to start"
+scaleAngle = 0
+screenAngle = 0
+screenScale# =1
+screenSkewX# = 0
+screenSkewY# = 0
+Screen Hot Spot $11
+//Screen Display 0, X Hard( 160 ), Y Hard( 100 ),,
+Ink 5
+
+Do
+	Inc scaleAngle
+	scale# = 1 + Sin( scaleAngle ) * 0.3
+	Bob Scale 1, scale#, scale#
+	Wait Vbl
+	k$ = inkey$
+	If k$ = " " Then Exit
+	If k$ = "-" Then Dec screenAngle
+	If k$ = "+" Then Inc screenAngle
+	If k$ = "4" Then screenScale# = screenScale# - 0.1
+	If k$ = "7" Then screenScale# = screenScale# + 0.1
+	If k$ = "5" Then screenSkewX# = screenSkewX# - 0.1
+	If k$ = "8" Then screenSkewX# = screenSkewX# + 0.1
+	If k$ = "6" Then screenSkewY# = screenSkewY# - 0.1
+	If k$ = "9" Then screenSkewY# = screenSkewY# + 0.1
+	//Screen Rotate screenAngle
+	//Screen Scale screenScale#, screenScale#
+	//Screen Skew screenSkewX#, screenSkewY#
+Loop
+
+' Variable initialization
+Dim x( 1000 ), y( 1000 )
+numberOfSprites = 25
+minZoom# = 0.05
+display = 0
+angle = 0
+xSkew# = 0
+ySkew# = 0
+Hot Spot 1, $11
+Bob 1,, 100,
+
+' Main loop
+Do
+	Cls 0
+
+	For s = 1 To numberOfSprites
+		Sprite s, X Mouse, Y Mouse, 1
+		zm# = minZoom# + ( s / numberOfSprites ) * ( 1 - minZoom# )
+		//Sprite Scale s, zm#, zm#
+		x( s ) = X Mouse
+		y( s ) = Y Mouse
+	Next
+
+	Do
+		If display <> 0
+			Home
+			Fix 0
+			Print "Number of sprites: ";numberOfSprites;"     "
+			Fix 2
+			Print "X Skew: ";xSkew#;"     "
+			Print "Y Skew: ";ySkew#;"     "
+		End If
+
+		Inc scaleAngle
+		scale# = 1 + Sin( scaleAngle ) * 0.3
+		Bob Scale 1, scale#, scale#
+
+		angle = angle + 1
+		For s = numberOfSprites To 2 Step -1
+			x( s ) = x( s - 1 )
+			y( s ) = y( s - 1 )
+		Next
+		x( 1 ) = X Mouse
+		y( 1 ) = Y Mouse
+
+		For s = 1 To numberOfSprites
+			Sprite s, x( s ), y( s ), 1
+			//Sprite Rotate s, angle + s
+			//Sprite Skew s, xSkew#, ySkew#
+		Next
+
+		k$ = inkey$
+		If k$ = " " : display = 1 - display : Clw : End If
+		If k$ = "+" : Inc numberOfSprites : Exit : End If
+		If k$ = "-" : Dec numberOfSprites : Exit : End If
+		If k$ = "4" Then xSkew# = xSkew# - 0.1
+		If k$ = "7" Then xSkew# = xSkew# + 0.1
+		If k$ = "5" Then ySkew# = ySkew# - 0.1
+		If k$ = "8" Then ySkew# = ySkew# + 0.1
+
+		Wait Vbl
+	Loop
+
+	Sprite Off
+Loop

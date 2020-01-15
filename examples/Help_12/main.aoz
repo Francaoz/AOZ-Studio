@@ -1,0 +1,110 @@
+'**********************************  
+'*    AMOS Professional HELP 12   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *             While...Wend (line 10) 
+'*                                *             Direct       (line 23) 
+'*         Ronnie Simpson         *             Exit If      (line 33) 
+'**********************************             On...Proc    (line 45) 
+'
+'------------------------------------------- 
+'While...Wend
+'------------------------------------------- 
+'Repeat a section of code (with the test at the start of the loop) 
+'
+'eg.            While R<99 
+'               R=Rnd(100) 
+'               Print R; 
+'               Wend 
+'
+'The above will loop while R has a value of less than 99 
+'Each WHILE must have its own WEND 
+'
+'------------------------------------------- 
+'Direct
+'------------------------------------------- 
+'Stop program execution and return to direct mode
+'
+'eg.         If Mouse Key Then Direct
+'
+'This instruction is usefull whilst de-bugging a program as you can examine
+'the values of variables etc. from the direct mode.
+'
+'------------------------------------------- 
+'Exit If 
+'------------------------------------------- 
+'Exit from a loop if an expression is true 
+'
+'eg.    (1) Exit If A=1      (2) Exit If Mouse Key       (3) Exit If A=1,2 
+'
+'In example (3) above the extended form is used and the number following 
+'the comma instructs the program to exit from that number of loops.
+'The Exit instruction will work equally well with any combination of 
+'types of loop.   ie. For...Next , Repeat...Until , While...Wend , Do...Loop         
+'
+'------------------------------------------- 
+'On...Proc 
+'------------------------------------------- 
+'Jump to one of several procedures depending on the value of a variable
+'
+'eg.          On N Proc NORTH,SOUTH EAST WEST
+'
+'Procedures used with this instruction can not include parameters
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+BEGIN:
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Pen 6 : Paper 0
+Global COUNT
+'
+Rem *** Print the instructions 
+Locate 0,2 : Print "I AM THINKING OF A NUMBER BETWEEN 0 and 100"
+Pen 2 : Locate 0,4 : Print "TRY TO GUESS IT    (Remember to press return after each try)"
+Print 
+'
+Rem *** Set up the variables 
+R=Rnd(98)+1 : T=100 : COUNT=0
+'
+Rem *** Start main loop
+While T<>R
+   Pen 4 : Inc COUNT
+   '
+   Rem *** Get user input and test  
+   Input "GUESS"+Str$(COUNT)+"- ";T
+   P=3
+   If T>R Then P=1
+   If T<R Then P=2
+   '
+   Rem *** Jump to the correct procedure
+   Pen 10
+   On P Proc LOWER,HIGHER,CORRECT
+   '
+   Rem *** end of main loop 
+Wend 
+'
+Rem *** Check for repeat or quit 
+Pen 14 : Print "LEFT MOUSE KEY FOR ANOTHER GO           RIGHT MOUSE KEY TO QUIT"
+Do 
+   M=Mouse Key
+   Exit If M>0
+Loop 
+If M=1 Then Goto BEGIN
+Direct 
+'
+'
+Procedure LOWER
+   Print "TOO HIGH TRY A LOWER NUMBER"
+End Proc
+'
+Procedure HIGHER
+   Print "TOO LOW TRY A HIGHER NUMBER"
+End Proc
+'
+Procedure CORRECT
+   Print 
+   Print "WELL DONE YOU GOT IT IN"+Str$(COUNT)+" TRIES"
+   Print 
+End Proc

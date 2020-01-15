@@ -1,0 +1,150 @@
+'**********************************  
+'*    AMOS Professional HELP 3    *               SUBJECTS COVERED   
+'*                                *
+'*     (c) Europress Software     *              Goto   (line 10)
+'*                                *              Gosub  (line 26)
+'*         Ronnie Simpson         *              Return (line 38)
+'**********************************              Pop    (line 53)
+'
+'------------------------------------------- 
+'Goto
+'------------------------------------------- 
+'Jump to another part of a program 
+'
+'       Goto 10                (jump to a line number) 
+'       Goto BEGIN             (jump to label) 
+'       Goto "NUMBER"+Str$(6)  (jump to a computed expression) 
+'
+'Notes.
+'      AMOS Professional allowes the option of starting a line with a  
+'      number and these can be used as a goto 'label'. 
+'      Labels can be any legal name immediately followed by a colon. 
+'      Computed goto's can be any AMOS expression integer or string eg.
+'      Goto 6*4+2     Goto "LABEL"     Goto"LABEL_"+"5"
+'
+'------------------------------------------- 
+'Gosub 
+'------------------------------------------- 
+'Jump to a subroutine 
+'
+'      Gosub 6           (Jump to a line number) 
+'      Gosub LABEL       (jump to label) 
+'      Gosub "TEST"+"5"  (jump to a computed expression) 
+'
+'Subroutines must be terminated by a Return instruction or an error
+'will be generated.
+'See notes of Goto section for permitted label names.
+'------------------------------------------- 
+'Return
+'------------------------------------------- 
+'Return to the main program from a subroutine
+'
+'eg.   For n=1 to 100
+'      Gosub Label 
+'      Next N
+'      Edit
+'      LABEL:
+'      Print N 
+'      Return
+'
+'Multiple Returns are allowed in the same subroutines if required. 
+'
+'------------------------------------------- 
+'Pop 
+'------------------------------------------- 
+'Remove the return information from the Gosub stack
+'
+'This instruction allowes you to exit a subroutine and jump to any 
+'part of the program.
+'
+'eg.        For N=1 To 100 
+'           Gosub LABEL
+'           Next N 
+'           XIT: 
+'           Print "program stopped"
+'           Direct 
+'           LABEL: 
+'           Print N  
+'           If N=20 Then Pop : Goto XIT
+'           Return 
+'
+'In the above example as soon as N reaches the value of 20 the 
+'subroutine is aborted and the program is stopped. 
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Pen 6 : Paper 0
+'
+Locate 18,2 : Print "PLEASE CLICK IN A BOX TO MAKE YOUR CHOICE"
+Pen 7
+Rem *** reserve some memory for the screen zones 
+Reserve Zone 4
+Locate 27,7 : Print Border$(Zone$("SEE AN EXAMPLE OF GOTO ",1),2)
+Locate 27,11 : Print Border$(Zone$("SEE AN EXAMPLE OF GOSUB",2),2)
+Locate 27,15 : Print Border$(Zone$(" SEE AN EXAMPLE OF POP ",3),2)
+Locate 27,19 : Print Border$(Zone$("          QUIT         ",4),2)
+'
+Rem *** Start the main loop  
+BEGIN:
+Pen 8
+Locate 24,23 : Print "STATUS- "+"I'M HERE AND WAITING"
+Rem *** wait for user to click in a box  
+Repeat 
+M=Mouse Zone
+Until M>0 and Mouse Key
+'
+Rem *** Act on users input 
+If M=4 Then Edit 
+If M=1 Then Goto LABEL1
+If M=2 Then Gosub LABEL2
+If M=3 Then N=1 : Do : Gosub LABEL5 : Loop 
+Goto BEGIN
+'
+LABEL1:
+Pen 8
+Locate 24,23 : Print "STATUS- "+"I'M NOT HERE        "
+For N=0 To 24
+Pen 9 : Locate 0,N : Print "I'M HERE"; : Wait 5
+Pen 0 : Locate 0,N : Print "        ";
+Next 
+Goto BEGIN
+'
+LABEL2:
+Pen 8
+For N=3 To 7
+Locate 24,23 : Print "STATUS- "+"I'M DRAWING A CIRCLE"
+Ink N : Circle 120,N*20+10,9 : Wait 40
+Gosub LABEL3
+Next 
+Gosub LABEL4
+Return 
+LABEL3:
+Pen 8
+Locate 24,23 : Print "STATUS- "+"I'M DRAWING A SQUARE"
+Ink N : Box 480,N*20 To 516,N*20+18 : Wait 40
+Return 
+LABEL4:
+Pen 8
+Locate 24,23 : Print "STATUS- "+"I'M RUBBING THEM OUT"
+Ink 0 : For Y=60 To 160
+Draw 102,Y To 138,Y : Draw 480,Y To 516,Y : Wait 1
+Next 
+Return 
+'
+LABEL5:
+Pen 8
+Locate 24,23 : Print "STATUS- "+"I'M COUNTING TO 500 "
+Pen 9 : Locate N,22 : Print Str$(N) : Wait 5
+Inc N
+If N=48 Then Pop : Goto LABEL6
+Return 
+'
+LABEL6:
+Pen 8
+Locate 24,23 : Print "STATUS- "+"I'M BORED COUNTING  " : Wait 80
+Locate 24,23 : Print "STATUS- "+"SO I'LL STOP AT 47  " : Wait 80
+Pen 0 : Locate N-1,22 : Print "   "
+Goto BEGIN

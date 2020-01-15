@@ -1,0 +1,201 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ Application Manifest
+ *
+ */
+{
+	// Version of the manifest
+	version: "7"
+
+	// Informations about the application
+	infos:
+	{
+		applicationName: "Name of your application."
+		author: "By You"
+		version: "Version 0.0"
+		date: "Created on the ..."
+		copyright: "(c) Your Corporation Unlimited"
+		start: "main.aoz"
+	},
+
+	// Compilation mode
+	// ----------------
+	compilation:
+	{
+		speed: "fast"					// safe / fair / graphics / fast
+		syntax: "amosPro"				// amos1.3 / amosPro / aoz. Default = amosPro
+		emulation: "1200"				// 500 / 600 / 1200 / 3000 / 4000 / PC. Default = 1200
+		usePalette: true				// true / false. Default = true
+		useShortColors: true			// true / false. Default = true
+		showCopperBlack: false			// true / false. Default = true -> will show the 'empty lines' above each screen and the black areas on the left/right of them
+		unlimitedScreens: true			// true / false. Default = false -> max number of screens
+		unlimitedWindows: true			// true / false. Default = false -> max number of text windows
+		maskHardwareCoordinates: false	// true / false. Default = true -> will round screen display X coordinates and width to multiple of 16
+		endian: "big"					// order of bytes in files: "big"-> as on Amiga, "little"-> as on PC
+	},
+
+	// The display setup
+	display:
+	{
+		tvStandard: "pal"				// 'pal' or 'ntsc' : drives the vertical size of the display
+		width: 1024						// Width of the canvas in the browser (ignored in full-page / full-screen)
+		height: 768						// Height of the canvas in the browser (ignored in full-page / full-screen)
+		background: "color"				// "color" or "transparent" (if transparent, you can pile AOZ applications one on another in the browser)
+		backgroundColor: "#000000"		// In full-page / full-screen will be the color of the 'black-bars' (if keepProportions = true)
+		bodyBackgroundColor: "#000000"	// If NOT full-page / full-screen, this color will be the color of the 'body' part of the page. If not defined, it will be display.background
+		bodyBackgroundImage: "./runtime/resources/star_night.jpeg"		// Path to an image to use as background to the web-page if NOT in full-page / full screen. Overwrites the previous property.
+		scaleX: 2						// Scaling of canvas in the browser. Does not affect coordinates within the AOZ program
+		scaleY: 2						// Scaling of canvas in the browser. Does not affect coordinates within the AOZ program
+		screenScale: 4					// Internal scaling of screens. Improves readability, does not affect AOZ program
+										// Usually, to get the best results, screenScale should be equal to scaleX and scaleY
+										// 0-> the AOZ screen will be resized to the size of the canvas on screen 
+										// (only in full-page/full-screen mode + PC mode, and only if the screen 'hardware' coordinates X and Y are both 0)
+										// 1-> the internal AOZ screen will be the same size as the size specified in Screen Open
+										// 2-> the internal AOZ screen will be the size specified in Screen Open * 2 etc.
+		fps: true						// Display FPS indicator on screen
+		fpsFont: "12px Verdana"			// Font to use for FPS indicator
+		fpsColor: "#FFFF00"				// Color of the FPS indicator
+		fpsX: 10						// X position of the FPS indicator
+		fpsY: 16						// Y position of the FPS indicator
+		fullPage: false					// The display area will fit the browser page
+		fullScreen: false				// Allows passage to full-screen by a user interaction if the application is ran in the browser (security measure), or goes direct in full-screen for wrapped executables.
+		keepProportions: true			// For full-screen/full-page only, will maintain the width and height ratio calculated from the display.width / display.height value in this section. If not set, the display will match the size of the browser window and the application will be distorted.
+		fullScreenIcon: true			// Displays a 'switch to full-screen' 'quit full-screen' icon if the application is in full-page / full-screen mode AND both "fullScreen" and "fullPage" are true
+										// Image is resized to a size calculated from the current width of the browser window divided by the "display.width" property 
+		fullScreenIconX: -34			// Horizontal position of the icon, positive means on the left, negative values are subtracted from the width of the browser window
+		fullScreenIconY: 2				// Vertical position of the icon, positive means on the top, negative values are subtracted from the height of the browser window
+		fullScreenIconImage: "./runtime/resources/full_screen.png"		// The path to the image to use for full-screen, can be semi-transparent, here 32x32
+		smallScreenIconImage: "./runtime/resources/small_screen.png"	// The path to the image to use for quit full-screen, can be semi-transparent, here 32x32
+	},
+
+	// Sprites and bobs
+	sprites:
+	{
+		collisionBoxed: false			// true: Only use box collision detection, fast but imprecise
+		collisionPrecision: 1			// Pixel-precision of the collisions. 1 = pixel per pixel, 0.5 = 2 by 2, 0.25 = 4 by 4 etc. 0.25 is good and 16 times faster...
+										// Set it higher if your game contains small sprites... (for total compatibility with Amiga, leave it to 1, images are small)
+		collisionAlphaThreshold: 1		// Level of alpha for which a pixel is considered 'not transparent' and will generate a collision ( 0 being transparent, and 255 being opaque)
+	}
+
+	// Sounds
+	sounds:
+	{
+		mode: "amiga"
+		volume: 1.0						// The default volume
+		preload: true					// Automatically begin downloading the audio file
+		numberOfSoundsToPreload: 4		// Four voices in Amiga mode
+		soundPoolSize: 4				// Four voices in Amiga mode
+	}
+
+	// Gamepad
+	gamepad:
+	{
+		mapping: 	
+		{
+			"up": 38					// Javascript key to press going up
+			"down": 40					// Javascript key to press going down
+			"left": 37					// Javascript key to press going left
+			"right": 37					// Javascript key to press going right
+			"fire": 32					// Javascript key to press fire
+		}
+	}
+
+	// Fonts
+	fonts:
+	{	
+		listFonts: "amiga"				// "PC" or "Amiga", =Font$ will return extended information for PC, and 40 characters strings for Amiga
+		
+		// Available Amiga fonts can be found in the "aoz/fonts/amiga" folder.
+		// Simply insert the name of the font in lowercase as found in the fonts/amiga 
+		// folder and the compiler will do the rest!
+		amiga: 
+		[
+			"times"
+		]
+
+		// Available Google Fonts can be found in the "aoz/fonts/google" folder
+		// Simply insert the name of the font in lowercase as found in the fonts/google folder
+		// and here too the compiler will do the rest. Google Fonts are included in the application
+		// itself, will load fast and will also work offline...
+		google:
+		[
+		]
+	},
+
+	// File-system
+	fileSystem:
+	{
+		caseSensitive: false			// Should be false for perfect Amiga emulation
+	}
+
+	// Default settings
+	default:
+	{
+		// Definition of the default screen, here, the basic AMOS orange/brown screen
+		screen:
+		{
+			x: 120						// X Position, in 'hardware' (Amiga sense of term) coordinates. Change if 'emulation ' is 'PC'!
+			y: 42						// Y Position, in 'hardware' (Amiga sense of term) coordinates. Change if 'emulation ' is 'PC'!
+			width: 320					// Width, in AMOS pixels
+			height: 256					// Height, in AMOS pixels
+			numberOfColors: 32			// Number of colors
+			pixelMode: "lowres"			// Resolution. 'lowres', 'hires' or 'lowres+laced' or 'hires+laced'
+			palette:					// Default palette, in Javascript colors
+			[
+				"#000000", "#AA4400", "#FFFFFF", "#123456", "#FF0000", "#00FF00", "#0000FF", "#666666"
+				"#555555", "#333333", "#773333", "#337733", "#777733", "#333377", "#773377", "#337777"
+				"#000000", "#EECC88", "#CC6600", "#EEAA00", "#2277FF", "#4499DD", "#55AAEE", "#AADDFF"
+				"#BBDDFF", "#CCEEFF", "#FFFFFF", "#440088", "#AA00EE", "#EE00EE", "#EE0088", "#EEEEEE"
+			],
+
+			// The text window in the back of the screen, where you can Print
+			window:
+			{
+				x: 0
+				y: 0
+				fontWidth: 8
+				fontHeight: 8
+				border: 0
+				paper: 1							// As in AMOS. Different in PC mode! Warning!
+				pen: 2								// As in AMOS. Different in PC mode! Warning!
+				background: "opaque"
+				font:
+				{
+					name: "topaz"					// The real one, as in AMOS!
+					type: "amiga"					// an Amiga font
+					height: 8						// and 8 pixels height
+				},
+				cursorImage: "./runtime/resources/cursor_amiga.png"	// The path to the image to use as cursor from the aoz folder. Can also be an absolute path.
+				cursorColors: 										// New in manifest V6: list the colors AND alpha of the cursor (it is remapped)
+				[													// You can have a semi-transparent cursor much more modern														
+					{ r: 68, g:68, b:0, a: 128 }					// and less intrusive...
+					{ r: 136, g:136, b:0, a: 128 }					// Put as many colors as you like! Colors are updated every FPS. At end of list, pointer resets to zero.
+					{ r: 187, g:187, b:0, a: 128 }					// A white boring cursor is very possible, any shape, the shape being defined in 
+					{ r: 221, g:221, b:0, a: 128 }					// the 'aoz/runtime/resources/cursor.png' file, the picture being resized to the size indicated 
+					{ r: 238, g:238, b:0, a: 128 }					// above in fontWidth and fontHeight. Keep it small, only two colors, transparent and $FFFFFF! ;)
+					{ r: 255, g:255, b:34, a: 128 }
+					{ r: 255, g:255, b:136, a: 128 }
+					{ r: 255, g:255, b:204, a: 128 }
+					{ r: 255, g:255, b:255, a: 128 }
+					{ r: 170, g:170, b:255, a: 128 }
+					{ r: 136, g:136, b:204, a: 128 }
+					{ r: 102, g:102, b:170, a: 128 }
+					{ r: 34, g:34, b:102, a: 128 }
+					{ r: 0, g:0, b:68, a: 128 }
+					{ r: 0, g:0, b:17, a: 128 }
+					{ r: 0, g:0, b:0, a: 128 }
+				]
+			}
+		}
+	}
+}

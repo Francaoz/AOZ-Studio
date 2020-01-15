@@ -1,0 +1,464 @@
+//
+// AOZ
+// Infinite Balls Demo
+// By Francois Lionet
+//
+// Made in 4 hours on the 17/07/2019
+//
+//
+// Note: control panel flash bug in version 07-04082019
+//
+number_of_colours = 1024
+screenWidth = Screen Width
+screenHeight = Screen Height
+Screen Open 0, screenWidth, screenHeight, number_of_colours, Lowres
+Curs Off
+For c = 2 To number_of_colours
+    Colour c, 0
+Next
+Palette $000000, $ffffff
+Degree
+Hot Spot 1, $11
+Hot Spot 2, $11
+// Arrays
+maximum_circles = 512
+Dim rays#( maximum_circles ), angles#( maximum_circles ), speeds#( maximum_circles )
+Dim x_centers( maximum_circles ), y_centers( maximum_circles )
+Dim color_circles( maximum_circles ), color_dots( maximum_circles )
+Dim scale_dots#( maximum_circles )
+Dim current_palette( 512 )
+
+// Display
+x_center = screenWidth / 2
+y_center = screenHeight / 2
+minimum_ray = 32
+maximum_ray = screenWidth / 2
+delta_ray# = 1
+delta_scales# = delta_ray# / 1000
+do_rotations = 1
+z_projection# = 0.15
+
+// Colors
+start_red = 0
+end_red = 0
+start_blue = 0
+end_blue = 255
+start_green = 0
+end_green = 0
+color_animation_speed = 50
+color_animation_count = 0
+global_color_fade# = 1.00
+
+palette_animation_speed = 100
+palette_animation_count = 0
+palette_fade_speed = 4
+palette_fade_count = 0
+palette_fade_length = 50
+palette_is_fading = 0
+
+// Angles
+number_of_angles = 1
+initial_speed# = 0.00
+delta_speed# = 0.10
+general_speed# = 0.01
+
+// Display panel
+width_panel = 260
+height_panel = 146
+x_panel = screenWidth - width_panel
+y_panel = screenHeight - height_panel
+Screen Open 1, width_panel, height_panel, 2, Lowres
+Set Transparent 0
+Screen Display 1, x_panel, y_panel, width_panel, height_panel
+Palette $000000, $ffff00
+Screen To Front 1
+Screen Hide 1
+panel_displayed = 0
+font_height = 16
+font_name$ = "expletus sans"
+Set Font font_name$, font_height
+
+// Advertisement screen
+Screen Open 2, screenWidth, screenHeight, 32, Lowres
+Screen 0
+Screen 2
+Curs Off
+Palette $000000, $FFFFFF
+y_title = 120
+Screen Display 2, 0, y_title, screenWidth, screenHeight
+Set Transparent 0
+Cls 0
+Ink 1
+y = 270
+Set Font font_name$, 40
+Center_Text[ y, "Infinite Balls", 60 ]
+Cls 0
+Paste Bob screenWidth / 2, 100, 2, 0.40, 0.40
+Set Font font_name$, 40
+Center_Text[ y, "Infinite Balls", 60 ]
+Add y, 40
+Center_Text[ y, "An AOZ Demo by Francois Lionet", 30 ]
+Add y, 150
+Center_Text[ y, "Press <SPACE> to start...", 15 ]
+Add y, 20
+Center_Text[ y, "During demo, press <SPACE> to have fun!", 15 ]
+Add y, 60
+Center_Text[ y, "AOZ : Rediscover the Joy of Programming!", 30 ]
+Add y, 30
+Center_Text[ y, "https://aoz.studio - Support the project on www.patreon.com/francoislionet", 20 ]
+
+// Initial display
+Screen 0
+number_of_circles = 0           // To avoid warning
+Gosub Calculate_Coordinates
+Gosub Make_Palette
+palette_fade_count = palette_fade_length
+palette_is_fading = 2
+Repeat
+    If do_redraw != 0
+
+        Gosub Draw_Circles
+        do_redraw = 0
+
+    End If
+    Gosub Animate_Colors
+    Wait Vbl
+Until Inkey$ != ""
+
+// Screen disappear
+For y = y_title To -screenHeight Step -64
+    Screen Display 2, 0, y, 1024, 768
+    Wait Vbl
+Next
+Screen Close 2
+Screen 0
+
+// Main loop
+Set Font font_name$, 14
+do_recalculate = 0
+Do
+
+    If do_recalculate != 0
+
+        Bob Off
+        Gosub Calculate_Coordinates
+        do_recalculate = 0
+        do_redraw = 1
+
+    End If
+
+    If do_redraw != 0
+
+        Gosub Draw_Circles
+        do_redraw = 0
+
+    End If
+
+    Gosub Animate_Palette
+    Gosub Animate_Colors
+    Gosub Animate_Balls
+    Wait Vbl
+
+    Gosub Display_Panel
+    Gosub Control_Demo
+
+Loop
+
+//
+// Play with demo
+//
+Control_Demo:
+    mult# = 1.0
+    if Key State( 35 ) Then mult# = 100.0
+
+    k$ = Inkey$
+    If k$ = " " Then panel_displayed = 1 - panel_displayed
+    If k$ = "r" Then do_rotations = 1 - do_rotations
+    If k$ = "+"
+        Inc number_of_angles
+        do_recalculate = 1
+    End If
+    If k$ = "-" And number_of_angles > 1
+        Dec number_of_angles
+        do_recalculate = 1
+    End If
+    If k$ = "7" Then general_speed# = general_speed# + 0.001 * mult#
+    If k$ = "4" Then general_speed# = general_speed# - 0.001 * mult#
+    If k$ = "8"
+        delta_speed# = delta_speed# + 0.001 * mult#
+        Gosub Update_Speeds
+    End If
+    If k$ = "5"
+        delta_speed# = delta_speed# - 0.001 * mult#
+        Gosub Update_Speeds
+    End If
+    If k$ = "9"
+        Add z_projection#, 0.005 * mult#
+        do_recalculate = 1
+    End If
+    If k$ = "6" And z_projection# > 0.01
+        Add z_projection#, -0.005 * mult#
+        do_recalculate = 1
+    End If
+    If k$ = "p" And palette_is_fading = 0
+
+        palette_animation_count = 100000
+        palette_fade_count = palette_fade_length
+        palette_is_fading = 1
+
+    End If
+    Return
+
+//
+// Display panel
+//
+Display_Panel:
+    If panel_displayed != 0
+
+        Screen Show 1
+        Screen 1
+        Cls 0
+        Curs Off
+
+        x = 0
+        x_right = Screen Width - 40
+        y = Text Base + 8
+        delta_y = 16
+        Ink 1
+        Fix 0
+        Text x, y, "number of angles: " + Str$( number_of_angles )
+        Text x_right, y, " + / -"
+        Add y, delta_y
+        Text x, y, "number of circles: " + Str$( number_of_circles )
+        Add y, delta_y
+        Fix 3
+        Text x, y, "general speed: " + Str$( general_speed# )
+        Text x_right, y, " 7 / 4"
+        Add y, delta_y
+        Text x, y, "delta speeds: " + Str$( delta_speed# )
+        Text x_right, y, " 8 / 5"
+        Add y, delta_y
+        Text x, y, "z projection: " + Str$( z_projection# )
+        Text x_right, y, " 9 / 6"
+        Add y, delta_y
+        Fix 0
+        Text x, y, "total number of bobs: " + Str$( number_of_circles * number_of_angles )
+        Add y, delta_y
+        a$ = "bob rotation: "
+        If do_rotations Then a$ = a$ + "ON" Else a$ = a$ + "OFF"
+        Text x, y, a$
+        Text x_right, y, " R"
+        Add y, delta_y
+        Text x, y, "change palette: " + Str$( palette_fade_count )
+        Text x_right, y, " P"
+        Add y, delta_y
+
+        Screen 0
+
+    Else
+
+        Screen Hide 1
+
+    End If
+    Return
+
+//
+// Make the palette
+//
+Make_Palette:
+
+    number = number_of_circles
+    delta_red# = ( end_red - start_red ) / number
+    delta_blue# = ( end_blue - start_blue ) / number
+    delta_green# = ( end_green - start_green ) / number
+
+    red# = start_red
+    blue# = start_blue
+    green# = start_green
+    For c = 0 To number / 2
+
+        current_palette( c ) = ( Int( red# * global_color_fade# ) << 16 ) + ( Int( blue# * global_color_fade#  ) << 8 ) + Int( green# * global_color_fade# )
+
+        red# = red# + delta_red#
+        blue# = blue# + delta_blue#
+        green# = green# + delta_green#
+
+    Next
+    For c = number / 2 To number
+
+        current_palette( c ) = ( Int( red# * global_color_fade# ) << 16 ) + ( Int( blue# * global_color_fade#  ) << 8 ) + Int( green# * global_color_fade# )
+
+        red# = red# - delta_red#
+        blue# = blue# - delta_blue#
+        green# = green# - delta_green#
+
+    Next
+    Return
+
+//
+// Animate the colors
+//
+Animate_Colors:
+    If palette_fade_count > 0
+        Dec palette_fade_count
+        If palette_fade_count > 0
+            For c = 0 To number_of_circles - 1
+
+                couleur = Colour( c + 2 )
+                couleur_palette = current_palette( c )
+
+                red = ( couleur >> 16 ) & 255
+                red_goal = ( couleur_palette >> 16 ) & 255
+                Add red, Sgn( red_goal - red ) * palette_fade_speed
+                red = Min( Max( red, 0 ), 255 )
+
+                blue = ( couleur >> 8 ) & 255
+                blue_goal = ( couleur_palette >> 8 ) & 255
+                Add blue, Sgn( blue_goal - blue ) * palette_fade_speed
+                blue = Min( Max( blue, 0 ), 255 )
+
+                green = ( couleur >> 8 ) & 255
+                green_goal = couleur_palette & 255
+                Add green, Sgn( green_goal - green ) * palette_fade_speed
+                green = Min( Max( green, 0 ), 255 )
+
+                couleur = ( Int( red ) << 16 ) + ( Int( blue ) << 8 ) + Int( green )
+                Colour c + 2, couleur
+
+            Next
+        End If
+    End If
+
+    color_animation_count = color_animation_count + color_animation_speed
+    If color_animation_count >= 100
+
+        color_animation_count = color_animation_count - 100
+
+        color_temp = color_circles( number_of_circles )
+        For c = number_of_circles To 1 Step -1
+            color_circles( c ) = color_circles( c - 1 )
+        Next
+        color_circles( 1 ) = color_temp
+        do_redraw = 1
+    End If
+    Return
+
+//
+// Make the balls turn
+//
+Animate_Balls:
+    For c = 1 To number_of_circles
+
+        For a = 0 To number_of_angles - 1
+
+            angle_base# = a * delta_angles#
+
+            x_dot = x_centers( c ) + rays#( c ) * Cos( angles#( c ) + angle_base# )
+            y_dot = y_centers( c ) - rays#( c ) * Sin( angles#( c ) + angle_base# )
+
+            bob_number = a * number_of_circles + c
+            Bob bob_number, x_dot, y_dot, 1
+            Bob Scale bob_number, scale_dots#( c ), scale_dots#( c )
+            If do_rotations Then Bob Rotate bob_number, - ( angles#( c ) + angle_base# )
+
+        Next
+
+        angles#( c ) = angles#( c ) + general_speed# + speeds#( c )
+
+    Next
+    Return
+
+
+//
+// Animated the palette
+//
+Animate_Palette:
+    palette_animation_count = palette_animation_count + palette_animation_speed
+    If palette_animation_count >= 100000
+
+        palette_animation_count = palette_animation_count - 100000
+        For c = 0 To number_of_circles
+            current_palette( c ) = 0
+        Next
+        palette_fade_count = palette_fade_length
+        palette_is_fading = 1
+
+    End If
+    If palette_is_fading = 1 And palette_fade_count = 0
+
+        palette_is_fading = 2
+        palette_fade_count = palette_fade_length
+        start_red = 0
+        end_red = Rnd( 255 )
+        start_blue = 0
+        end_blue = Rnd( 255 )
+        start_green = 0
+        end_green = Rnd( 255 )
+        Gosub Make_Palette
+
+    End If
+    If palette_is_fading = 2 And palette_fade_count = 0
+
+        palette_is_fading = 0
+
+    End If
+    Return
+
+//
+// Draw all the circles
+//
+Draw_Circles:
+    Cls 0
+    For c = 1 To number_of_circles
+
+        Ink color_circles( c + 1 )
+        Circle x_centers( c ), y_centers( c ), rays#( c )
+
+    Next
+    Return
+
+//
+// Calculates all coordinates...
+//
+Calculate_Coordinates:
+    ray# = 0
+    scale_dot# = 0.1
+    delta_angles# = 360.0 / number_of_angles
+    For c = 1 To maximum_circles
+
+        ray# = ray# + c * delta_ray# * z_projection#
+        rays#( c ) = ray#
+
+        x_centers( c ) = x_center
+        y_centers( c ) = y_center
+        angles#( c ) = 0.0
+        speeds#( c ) = -( initial_speed# + delta_speed# * c )
+        color_circles( c ) = 1 + c
+        scale_dot# = scale_dot# + c * delta_scales# * z_projection#
+        scale_dots#( c ) = scale_dot#
+
+        Exit If ray# > maximum_ray
+
+    Next
+    number_of_circles = c
+    Return
+
+//
+// Update speeds in real time
+//
+Update_Speeds:
+    For c = 1 To number_of_circles
+
+        speeds#( c ) = -( initial_speed# + delta_speed# * c )
+
+    Next
+    Return
+
+Procedure Center_Text[ y, t$, height ]
+
+    Shared font_name$
+
+    Set Font font_name$, height
+    Text Screen Width / 2, y, t$, "#center"
+
+End Proc

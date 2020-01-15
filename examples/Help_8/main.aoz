@@ -1,0 +1,180 @@
+'********************************* 
+'*    AMOS Professional HELP 8   *                SUBJECTS COVERED 
+'*                               * 
+'*     (c) Europress Software    *               Set Line    (line 13) 
+'*                               *               Paint       (line 27) 
+'*         Ronnie Simpson        *               Bar         (line 44) 
+'*********************************               Polygon     (line 58) 
+'                                                Set Pattern (line 73) 
+'                                                Set Paint   (line 97) 
+'
+'
+'------------------------------------------- 
+'Set Line
+'------------------------------------------- 
+'Set the style of a straight line  (Box,Draw and polyline) 
+'
+'A 16 bit binary number mask is used to set the style of line
+'
+'eg.    Set Line %1111111111111111   (solid line - no gaps)  
+'       Set Line %1111000011110000   (evenly spaced dashes)
+'       Set Line %1000100010001000   (a dotted line) 
+'
+'This command only affects straight lines, circle and ellipse would still
+'produce solid outlines. 
+'
+'------------------------------------------- 
+'Paint 
+'------------------------------------------- 
+'Fill any enclosed area of the Amiga's screen
+'
+'               +----->screen X coordinate   
+'               |   +----->screen Y coordinate 
+'               |   |  +----->painting stop mode can be 0 or 1 
+'               |   |  | 
+'        Paint 100,100,1 
+'
+'A mode value of 1 will stop the fill at any colour that is different from 
+'the existing ink colour.
+'A mode value of 0 will only stop filling at the existing border colour. 
+'Ensure that the area to be filled is completely enclosed or the fill will 
+'spill out to the rest of the screen.
+'
+'------------------------------------------- 
+'Bar 
+'------------------------------------------- 
+'Draw a 'filled' rectangle using the current ink colour  
+'
+'eg      Ink 1 
+'        Bar 10,20 to 30,40
+'
+'This command is very similar to the box command but produces a solid
+'colour rectangle. 
+'
+'Can also be used with set paint and set pattern to produce outlined 
+'and patterned filled boxes. 
+'
+'------------------------------------------- 
+'Polygon 
+'------------------------------------------- 
+'Draw a 'filled' polygon 
+'
+'eg    Ink 1 
+'      Polygon 100,10 to 10,100 to 100,100   (will draw a filled triangle)   
+'
+'      Circle 160,100,20               
+'      Polygon To 190,150 To 130,150   (draw from current graphics position) 
+'
+'
+'Can also be used with set paint and set pattern to produce outlined 
+'and patterned filled polygons.
+'
+'------------------------------------------- 
+'Set Pattern 
+'------------------------------------------- 
+'Select a fill pattern 
+'
+'There are 3 possible types of settings for this command 
+'
+' Type-1 (solid fill - value=0 - default setting)  
+'  eg.   Set Pattern 0    (fill with solid block using current ink colour)   
+'
+' Type-2 (Use built in fill styles - value>0 ) 
+'  eg.   Set Pattern 12   (Use a positive number between 4 and 34) 
+'
+' Type-3 (Use an image from the sprite bank - Value<0 )  
+'  eg    Set Pattern -5   (Use the negative value of your sprite image number) 
+'
+'The built in patterns used in 'Type-2' can found in the Mouse.Abk file    
+'on your boot disc.
+'When using sprite images with Set Pattern the following must be noted:- 
+' 1) The image from the sprite bank will be clipped to 16 pixels wide
+' 2) The height will be rounded to the nearest power of 2  ie. 1,2,4,8,16,32 
+' 3) Two colour images are drawn with the current ink colours    
+' 4) To retain the origonal image colours of multi-coloured sprites use the  
+'    Get Sprite Palette and set ink value to Ink 31,0  
+'------------------------------------------- 
+'Set Paint 
+'------------------------------------------- 
+'turn on or off outline mode for Bar and Polygon 
+'
+'eg.     Set Paint 0  (default setting - no outline) 
+'        set paint 1  (turn outline mode on) 
+'
+'The colour the outline will be drawn in is set by the third parameter of the
+'ink instruction ie. Ink 1,2,3 (1-foreground   2-background   3-border)
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires
+Curs Off : Flash Off : Cls 0 : Pen 6 : Paper 0 : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+'
+Locate 0,24 : Print "PRESS AND HOLD ANY MOUSE KEY TO QUIT";
+'
+Rem *** Start main loop
+Do 
+   Set Pattern 0
+   '
+   Rem *** Draw ten different types of lines then clear the screen  
+   Ink 4,0
+   For N=1 To 10
+      T=Rnd(65535)
+      Locate 0,0 : Print "Set Line "+Bin$(T)
+      Set Line T : Draw 10,15*N To 630,15*N
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Set Line $FFFF
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Paint some shapes
+   Ink 15,0
+   Circle 180,100,80 : Box 140,30 To 500,170 : Polyline 400,20 To 630,180 To 170,180 To 400,20
+   Locate 0,0 : Print "Painting the shapes"
+   For X=1 To 6
+      Ink X
+      Paint X*90,160
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Draw ten outlined filled rectangles
+   Set Paint 1 : Ink ,,15
+   For N=1 To 10
+      X1=Rnd(319) : Y1=Rnd(80)+10 : X2=Rnd(319)+319 : Y2=Rnd(80)+90
+      Locate 0,0 : Print "Bar"+Str$(X1)+","+Str$(Y1)+" To"+Str$(X2)+","+Str$(Y2)+"    "
+      Ink Rnd(14)+1 : Bar X1,Y1 To X2,Y2
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Draw ten filled triangles using polygon
+   Locate 0,0 : Print "DRAWING FILLED TRIANGLES USING POLYGON"
+   For N=1 To 10
+      X1=Rnd(440)+100 : Y1=Rnd(80)+60
+      Gr Locate X1,Y1
+      Ink Rnd(14) : Polygon To X1-80,Y1+40 To X1+80,Y1+40
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   Cls 0,0,0 To 640,191
+   '
+   Rem *** Draw ten patterned filled rectangles 
+   For N=1 To 10
+      Set Pattern N*2
+      X1=Rnd(319) : Y1=Rnd(80)+10 : X2=Rnd(319)+319 : Y2=Rnd(80)+90
+      Locate 0,0 : Print "Bar"+Str$(X1)+","+Str$(Y1)+" To"+Str$(X2)+","+Str$(Y2)+"       "+"PATTERN NUMBER "+Str$(N*2)+"    "
+      Ink Rnd(14)+1 : Bar X1,Y1 To X2,Y2
+      If Mouse Key Then Exit 2
+      Wait 40
+   Next 
+   '
+   Cls 0,0,0 To 640,191
+   '
+Loop 
+Edit 

@@ -1,0 +1,45 @@
+//
+// AOZ 3D Demo
+// By Baptiste Bideaux
+//
+#need_server
+
+CW=0
+CH=0
+{
+    // Note: functions to get the window size are on the TODO list...
+    this.vars.CW = window.innerWidth;
+    this.vars.CH = window.innerHeight;
+}
+
+Pen1 : Paper 0 : Print "Darius by Kraken. Under Licence CC Attribution.";
+locate 1,2: Print "https://sketchfab.com";
+
+Rem Load a 3D scene
+Load3D Scene "scene_darius", "darius/scene.gltf"
+
+// Create a ambient light
+// Create3D DIrectionalLight "light", $FFFFFF
+// AddTo Scene3D "scene_darius", "light"
+
+// Create a directionallight
+Create3D DIrectionalLight "light1", $FFFFFF, 4
+AddTo Scene3D "scene_darius", "light1"
+
+// Create a Camera
+Create3D PerspectiveCamera "camera1", 75, CW, CH, 0.1, 1000
+MoveXYZ "camera1", 0,20,50
+
+SetName 3DModel 0, "scene_darius", "darius"
+
+// Display scene...
+x#=0.0
+y#=0.0
+z#=0.0
+Do
+    RotateZ "darius", z#
+    z# = z# + 1
+    Render3D "scene_darius", "camera1"
+    Wait Vbl
+Loop
+

@@ -1,0 +1,76 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Websocket extension
+ * By Francois Lionet
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+
+//
+// Initialization
+//
+url$ = "ws://localhost:8080"
+tags$ = ""
+Global url$, tags$
+
+// Connect
+Instruction "WSConnect", connect_url$, connect_tags$
+
+    url$ = connect_url$
+    tags$ = connect_tags$
+
+    // Javascript
+    {
+        this.socket = new WebSocket( this.vars.connect_url$ );
+
+        // Message handlers
+        this.socket.onopen = function(e)
+        {
+            socket.send( "My name is Francois" );
+        };
+
+        this.socket.onmessage = function(event)
+        {
+            alert( `[message] Data received from server: ${event.data}` );
+        };
+
+        this.socket.onclose = function( event )
+        {
+            if (event.wasClean)
+            {
+                alert( `[close] Connection closed cleanly, code=${event.code} reason=${event.reason}` );
+            }
+            else
+            {
+                alert('[close] Connection died');
+            }
+        };
+
+        this.socket.onerror = function( event )
+        {
+            event.preventDefault();
+        };
+    }
+End Instruction
+
+Function "WSUrl$"
+
+End Function( url$ )

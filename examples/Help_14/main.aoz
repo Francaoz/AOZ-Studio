@@ -1,0 +1,131 @@
+'**********************************  
+'*    AMOS Professional HELP 14   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Every...Gosub (line 10) 
+'*                                *            Every...Proc  (line 23) 
+'*         Ronnie Simpson         *            Every On/Off  (line 36) 
+'**********************************            Break On/Off  (line 61) 
+'
+'------------------------------------------- 
+'Every...Gosub 
+'------------------------------------------- 
+'Call a subroutine at regular time intervals 
+'
+'              +---->Time interval between calls in 50ths. of a second 
+'              |         +---->subroutine line number or label   
+'              |         | 
+'       Every 100 Gosub Test 
+'
+'The time taken to complete your subroutine must always be less than 
+'the interval between calls. 
+'See Every On / Off for more information.  
+'------------------------------------------- 
+'Every...Proc
+'------------------------------------------- 
+'Call a procedure at regular time intervals  
+'
+'              +---->Time interval between calls in 50ths. of a second 
+'              |        +---->Procedure name 
+'              |        |  
+'       Every 100 Proc Test  
+'
+'The time taken to complete your procedure must always be less than  
+'the interval between calls. 
+'See Every On / Off for more information.  
+'------------------------------------------- 
+'Every On
+'Every Off 
+'------------------------------------------- 
+'Switch on or off automatic calls
+'
+'    Every On   (enable or restart automatic calls)  
+'    Every Off  (disable automatic calls)  
+'
+'Each time a procedure or subroutine is entered the automatic call system
+'is disabled, if required use an Every On command just before the End Proc 
+'or Return instructions to keep the auto-call system running.
+'
+'eg.      Global S                  (make variable S global) 
+'         Every 250 Proc SECONDS    (call procedure SECONDS every 5 seconds) 
+'         Every On                  (initiate automatic calls) 
+'         '  
+'         Wait Key                  (this would be the rest of your program) 
+'         '
+'         Procedure SCORES          (the start of the procedure) 
+'         Add S,5                   (add 5 to the variable S)  
+'         Locate 0,0 : Print S      (print value of S on screen) 
+'         Every On                  (restart automatic calls)
+'         End Proc                  (end of procedure) 
+'
+'------------------------------------------- 
+'Break On
+'Break Off 
+'------------------------------------------- 
+'Switch on or off program interupt keys ( Ctrl + C ) 
+'
+'        Break On   (enable user break)  
+'        Break Off  (disable user break)   
+'
+'As a default the users can normally stop program execution by pressing  
+'the Ctrl + C keys but this can be disabled with use of Break Off. 
+'WARNING:- Do not use this instruction until the program has been fully
+'tested and a backup made as a complete machine reset would be required
+'to exit if your program got stuck in a loop.
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** Tidy up screen and set a new palette 
+Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Home : Paper 0
+'
+Rem *** set up a couple of variables 
+FLAG=1 : A$="I'M JUST PASSING THE TIME...."
+Global FLAG
+'
+Rem *** print some information on the screen 
+Pen 8 : Locate 0,1 : Centre "EXAMPLE OF AUTOMATIC CALL USING EVERY"
+Pen 14 : Locate 0,3 : Centre "PLUS"
+Pen 10 : Locate 0,5 : Centre "AN EXAMPLE OF BREAK ON AND BREAK OFF"
+Pen 2 : Locate 0,10 : Centre "BREAK KEYS ENABLED "
+Locate 0,12 : Centre "  YOU CAN STOP PROGRAM USING Ctrl + C  "
+'
+Rem *** set up automatic call procedure with an interval of 5 seconds  
+Every 250 Proc CHANGE
+'
+Rem *** now turn auto call on
+Every On 
+'
+Rem *** start a never ending loop  
+Repeat 
+   For X=1 To Len(A$)
+      Add C,1,1 To 15 : Pen C
+      Locate 4+X,21 : Print Mid$(A$,X,1)
+      Wait Vbl 
+   Next X
+   Wait VBL
+Until THE_COWS_COME_HOME
+'
+'
+Rem *** the procedure to be called 
+Procedure CHANGE
+   Add FLAG,1,1 To 2
+   If FLAG=1
+      Pen 2
+      Locate 0,10 : Centre "BREAK KEYS ENABLED "
+      Locate 0,12 : Centre "  YOU CAN STOP PROGRAM USING Ctrl + C  "
+      '
+      Rem *** turn break keys on 
+      Break On 
+   Else 
+      '
+      Rem *** turn break keys off
+      Break Off 
+      Pen 1
+      Locate 0,10 : Centre "BREAK KEYS DISABLED"
+      Locate 0,12 : Centre "YOU CAN NOT STOP PROGRAM USING Ctrl + C"
+   End If 
+   '
+   Rem *** re-enable the automatic call 
+   Every On 
+End Proc
