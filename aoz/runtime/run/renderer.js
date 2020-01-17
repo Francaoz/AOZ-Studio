@@ -263,55 +263,75 @@ Renderer.prototype.render = function( force )
 		{
 			// Rainbows
 			var rainbowsToRemove;
-			if ( this.aoz.rainbows && this.aoz.rainbows.mode == 'fast' )
+			var rainbowsToDraw;
+			if ( this.aoz.rainbows )
 			{
 				var numberOfRainbows = 0;
 				var rainbows = [];
 				for ( var rainbow = this.aoz.rainbows.context.getFirstElement( this.aoz.currentContextName ); rainbow != null; rainbow = this.aoz.rainbows.context.getNextElement( this.aoz.currentContextName ) )
 					rainbows[ numberOfRainbows++ ] = rainbow;
-				
-				if ( numberOfRainbows > 0 )
+
+				if ( this.aoz.rainbows.mode == 'slow' )
+				{ 
+					if ( numberOfRainbows )
+						rainbowsToDraw = rainbows;
+				}	
+				else if ( this.aoz.rainbows.mode == 'fast' )
 				{
-					// Insert rainbow screen at the correct Z position in screens
-					var screen;
-					var screens = [];
-					var countScreens = 0;
-					for ( screen = this.aoz.screensContext.getFirstElement( this.aoz.currentContextName ); screen != null; screen = this.aoz.screensContext.getNextElement() )
+					if ( numberOfRainbows > 0 )
 					{
-						for ( var r = 0; r < numberOfRainbows; r++ )
+						// Insert rainbow screen at the correct Z position in screens
+						var screen;
+						var screens = [];
+						var countScreens = 0;
+						for ( screen = this.aoz.screensContext.getFirstElement( this.aoz.currentContextName ); screen != null; screen = this.aoz.screensContext.getNextElement() )
 						{
-							if ( countScreens == rainbow.zPosition )
-							{ 
-								if ( !screens[ countScreens ] )
-								{
-									screens[ countScreens ] = screen;
-									break;
+							for ( var r = 0; r < numberOfRainbows; r++ )
+							{
+								var rainbow = rainbows[ r ];
+								if ( countScreens == rainbow.zPosition && rainbow.screen )
+								{ 
+									if ( !screens[ r ] )
+									{
+										screens[ r ] = screen;
+										countScreens++;
+										break;
+									}
 								}
 							}
 						}
-						countScreens++;
-					}
-					rainbowsToRemove = [];
-					for ( var r = 0; r < rainbows.length; r++ )
-					{
-						rainbowsToRemove.push( rainbows[ r ] );
-						rainbows[ r ].screen.show( true );
-						if ( screens[ r ] )
+						if ( countScreens )
 						{
-							this.aoz.screenContext.addElement( this.aoz.currentContextName, rainbows[ r ] );
-							this.aoz.screenContext.moveBefore( this.aoz.currentContextName, rainbows[ r ], screen );
-							screens[ r ] = null;
+							rainbowsToRemove = [];
+							for ( var r = 0; r < rainbows.length; r++ )
+							{
+								if ( rainbows[ r ].screen )
+								{
+									rainbowsToRemove.push( rainbows[ r ] );
+									rainbows[ r ].screen.show( true );
+									if ( screens[ r ] )
+									{
+										this.aoz.screensContext.addElement( this.aoz.currentContextName, rainbows[ r ].screen );
+										this.aoz.screensContext.moveBefore( this.aoz.currentContextName, rainbows[ r ].screen, screens[ r ] );
+										screens[ r ] = null;
+									}
+								}
+							}
+							for ( var r = 0; r < rainbows.length; r++ )
+							{
+								if ( rainbows[ r ].screen )
+								{
+									if ( screens[ r ] )
+									{
+										this.aoz.screensContext.addElement( this.aoz.currentContextName, rainbows[ r ] );
+									}
+								}
+							}
 						}
-					}
-					for ( var r = 0; r < rainbows.length; r++ )
-					{
-						if ( screens[ r ] )
-						{
-							this.aoz.screenContext.addElement( this.aoz.currentContextName, rainbows[ r ] );
-						}
-					}
+					}			
 				}
 			}
+
 			this.aoz.screensContext.parseAll( undefined, function( screen )
 			{
 				if ( !screen.hidden )
@@ -414,7 +434,15 @@ Renderer.prototype.render = function( force )
 			{
 				for ( var r = 0; r < rainbowsToRemove.length; r++ )
 				{
-					this.aoz.screenContext.deleteElement( this.aoz.currentContextName, rainbowsToRemove[ r ] );
+					this.aoz.screensContext.deleteElement( this.aoz.currentContextName, rainbowsToRemove[ r ] );
+				}
+			}
+			else if ( rainbowsToDraw )
+			{
+				for ( var r = 0; r < rainbowsToDraw.length; r++ )
+				{					
+					var rainbow = rainbowsToDraw[ r ];
+					rainbow.render( this.context, { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height } );
 				}
 			}
 		};

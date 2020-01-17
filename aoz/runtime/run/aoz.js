@@ -615,7 +615,7 @@ function AOZ( canvasId, manifest )
 			}
 			else
 			{
-				self.currentContextName = self.section.contextName;
+				//self.currentContextName = self.section.contextName;
 				self.position = pop.position;
 				self.parent = pop.parent;
 				self.onError = pop.onError;
@@ -637,7 +637,7 @@ AOZ.prototype.run = function( section, position, parent, root )
 		onError: this.onError
 	} );
 	this.section = section;
-	this.currentContextName = section.contextName;
+	//this.currentContextName = section.contextName;
 	if ( typeof root != 'undefined' )
 		this.root = root;
 	this.position = position;
@@ -1927,7 +1927,7 @@ AOZ.prototype.setMouse = function()
 	function onMouseDown( event )
 	{
 		self.mouseButtons |= AOZ.buttonToMouse[ event.button ];
-		//self.clickMouse = self.mouseButtons;
+		self.clickMouse = self.mouseButtons;
 	}
 	function onMouseUp( event )
 	{
@@ -1935,7 +1935,7 @@ AOZ.prototype.setMouse = function()
 	}
 	function onClick( event )
 	{
-		self.clickMouse |= AOZ.buttonToMouse[ event.button ];
+		//self.clickMouse |= AOZ.buttonToMouse[ event.button ];
 	}
 	function onDblClick( event )
 	{
@@ -2136,7 +2136,6 @@ AArray.prototype.dim = function( dimensions )
 		this.aoz.error = 10;
 		return;
 	}
-
 	var self = this;
 	this.dimensions = dimensions;
 	this.array = createArray( 0 );

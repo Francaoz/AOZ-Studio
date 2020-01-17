@@ -1648,23 +1648,45 @@ AOZContext.prototype.moveBefore = function( contextName, source, destination )
 {
 	if ( this.options.sorted )
 	{
+		var result = [];
 		if ( contextName )
 		{			
-			this.listSortedInContext[ contextName ].splice( source.indexSortedInContext, 1 );
-			if ( source.indexSortedInContext < destination.indexSortedInContext )
-				this.listSortedInContext[ contextName ].splice( destination.indexSortedInContext, 0, source );
-			else
-				this.listSortedInContext[ contextName ].splice( destination.indexSortedInContext + 1, 0, source );
 			for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
-				this.listSortedInContext[ contextName ][ i ].indexSortedInContext = i;
+			{
+				var element = this.listSortedInContext[ contextName ][ i ];
+				if ( element == destination )
+				{
+					source.indexSortedInContext = result.length;
+					result.push( source );
+					destination.indexSortedInContext = result.length;
+					result.push( destination );
+				}
+				else if ( element != source )
+				{
+					element.indexSortedInContext = result.length;
+					result.push( source );
+				}
+			}
+			this.listSortedInContext[ contextName ] = result;
+			result = [];
 		}
-		this.listSorted.splice( source.indexSorted, 1 );
-		if ( source.indexSorted < destination.indexSorted )
-			this.listSorted.splice( destination.indexSorted, 0 , source );
-		else
-			this.listSorted.splice( destination.indexSorted + 1, 0, source );
 		for ( var i = 0; i < this.listSorted.length; i++ )
-			this.listSorted[ i ].indexSorted = i;
+		{
+			var element = this.listSorted[ i ];
+			if ( element == destination )
+			{
+				source.indexSorted = result.length;
+				result.push( source );
+				destination.indexSorted = result.length;
+				result.push( destination );
+			}
+			else if ( element != source )
+			{
+				element.indexSorted = result.length;
+				result.push( source );
+			}
+		}
+		this.listSorted = result;
 	}
 };
 

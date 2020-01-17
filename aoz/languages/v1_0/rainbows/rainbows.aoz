@@ -39,70 +39,92 @@
     this.mode = 'fast';
 
     // Rainbow class
-    this.Rainbow = function( aoz, name, height, ink, red$, green$, blue$ )
+    function Rainbow( aoz, name, ink, height, red$, green$, blue$ )
     {
-        this.aoz = root.aoz;
+        this.aoz = aoz;
         this.name = name;
-        this.options = options;
         this.rainbows = this.aoz.rainbows;
 
         this.position = null;
         this.dimension = null;
         this.ink = ink;
         this.offset = 0;
+        this.displayHeight = 0;
         this.zPosition = 0;
         this.calculate( red$, green$, blue$, height );
     }
-    this.Rainbow.prototype.setDisplay = function( offset, y, height )
+    Rainbow.prototype.setDisplay = function( offset, y, height )
     {
         this.offset = typeof offset == 'undefined' ? this.offset : offset;
-        if ( this.dimensions.height < 0 || this.offset < 0 )
+        this.displayHeight = typeof offset == 'undefined' ? this.displayHeight : height;
+        if ( height < 0 || this.offset < 0 )
             throw 'illegal_function_call'
+        this.y = y;
         if ( this.rainbows.mode == 'fast' )
         {
             var screenDefinition = this.aoz.manifest.default.screen;
             screenDefinition.width = 32;
-            screenDefinition.height = dimensions.height;
+            screenDefinition.height = height;
             screenDefinition.numberOfColors = 4;
             screenDefinition.pixelMode = 'lowres';
             screenDefinition.palette = [ '#000000', '#000000', '#000000', '#000000' ];
             this.screen = new Screen( this.aoz, this.aoz.renderer, this.aoz.currentContextName, screenDefinition );
-            this.screen.setCursor( false );
+            this.screen.currentTextWindow.cursorOff( false );
             this.screen.setInk( 1 );
-            this.screen.setScale( )
-            this.screen.setDisplay( { y: y, height: height } );
+            this.screen.setScale( { x: 100, y: 1 } );
+            this.screen.setDisplay( { x: 0, y: y, height: this.displayHeight } );
             this.screen.show( false );
             this.redraw();
         }
+        this.aoz.renderer.setModified();
     };
-    this.Rainbow.prototype.render = function( )
+    Rainbow.prototype.render = function( context, rectangle )
     {
         if ( this.rainbows.mode == 'slow' )
         {
-            var position = this.offset;
-            for ( var y = 0; y < this.displayHeight; y++ )
+            // Get the palette of the last screen
+            var screen = this.aoz.screensContext.getLastElement( this.aoz.currentContextName );
+            var colour = screen.palette[ this.ink % screen.numberOfColors ];
+            if ( colour )
             {
-                var r = redBuffer[ position ];
-                var g = greenBuffer[ position ];
-                var b = blueBuffer[ position ];
+                var colours = this.aoz.utilities.getRGBAStringColors( colour );
 
-                var data = this.imageData.data;
-                for ( x = 0; x < this.lineWidth; x++ )
+                // Get bytes from image
+                var imageData = context.getImageData( rectangle.x, rectangle.y, rectangle.width, rectangle.height );
+                var data = imageData.data;
+
+                // Remap!
+                var position = this.offset;
+                var width = rectangle.width;
+                var height = rectangle.height;
+                var rIndex = colours.r;
+                var gIndex = colours.g;
+                var bIndex = colours.b;
+                var length = this.redBuffer.length; 
+                for ( var y = 0; y < this.height; y++ )
                 {
-                    var address = ( y * this.linewidth * + x ) * 4;
-                    if ( data[ address ] == this.rIndex && data[ address + 1 ] == this.gIndex && data[ address + 2 ] == this.bIndex )
+                    var r = this.redBuffer[ position ];
+                    var g = this.greenBuffer[ position ];
+                    var b = this.blueBuffer[ position ];
+
+                    for ( x = 0; x < width; x++ )
                     {
-                        data[ address + 0 ] = r;
-                        data1[ address + 1 ] = g;
-                        data[ address + 2 ] = b;
+                        var address = ( y * width + x ) * 4;
+                        if ( data[ address ] == rIndex && data[ address + 1 ] == gIndex && data[ address + 2 ] == bIndex )
+                        {
+                            data[ address + 0 ] = r;
+                            data[ address + 1 ] = g;
+                            data[ address + 2 ] = b;
+                        }
                     }
+                    if ( ++position >= length )
+                        position = 0;
                 }
-                if ( ++position > this.lineBuffers.length )
-                    break;
+                context.putImageData( imageData, rectangle.x, rectangle.y );
             }
         }
     };
-    this.Rainbow.prototype.redraw = function()
+    Rainbow.prototype.redraw = function()
     {
         if ( this.rainbows.mode == 'fast' )
         {            
@@ -118,8 +140,8 @@
                     var g = this.greenBuffer[ position ];
                     var b = this.blueBuffer[ position ];
 
-                    this.screen.setColor( 1, this.aoz.utilities.getRGBAString( r, g, b ) );
-                    this.screen.drawLine( { x: 0, y: y }, { x: this.screen.width, y: y } );
+                    this.screen.setColour( 1, this.aoz.utilities.getRGBA( r, g, b, 255 ) );
+                    this.screen.draw( { x: 0, y: y, width: this.screen.dimension.width, height: 0 } );
 
                     if ( ++position >= bufferLength )
                         position = 0;
@@ -128,8 +150,9 @@
             }
         }
     };
-    this.Rainbow.prototype.calculate = function( red$, green$, blue$, height )
+    Rainbow.prototype.calculate = function( red$, green$, blue$, height )
     {
+        var self = this;
         if ( height < 0 )
             throw 'illegal_function_call';
 
@@ -140,44 +163,52 @@
 
         // Calculates the values...
         this.redBuffer = calculate( red );
-        this.greeBuffer = calculate( green );
+        this.greenBuffer = calculate( green );
         this.blueBuffer = calculate( blue );   
 
         var self = this;
         function interpret( string$ )
         {
             var definition = [];
-            var destination = 0;
-            var info = new self.Information( string$ );
-            do
+            if ( string$ != '' )
             {
+                var destination = 0;
+                var info = new Information( self.aoz, string$ );
                 var c = info.getNextChar();
-                if ( info.eol || c != '(' )
-                    throw 'syntax_error_in_amal_string';
-
-                var lines = info.getNumber();
-                c = info.getNextChar();
-                if ( info.eol || c != ',' )
-                    throw 'syntax_error_in_amal_string';
-                
-                var delta = info.getNumber();
-                c = info.getNextChar();
-                if ( info.eol || c != ',' )
-                    throw 'syntax_error_in_amal_string';
-
-                var count = info.getNumber();
-                c = info.getNextChar();
-                if ( info.eol || c != ',' )
-                    throw 'syntax_error_in_amal_string';
-
-                definition[ destination ] = 
+                do
                 {
-                    lines: lines,
-                    delta: delta,
-                    count: count
-                };
-                destination++;
-            } while( !info.eol );            
+                    if ( info.eol || c != '(' )
+                        throw 'syntax_error_in_amal_string';
+
+                    var lines = info.getNumber();
+                    c = info.getNextChar();
+                    if ( info.eol || c != ',' )
+                        throw 'syntax_error_in_amal_string';
+                    
+                    var delta = info.getNumber();
+                    c = info.getNextChar();
+                    if ( info.eol || c != ',' )
+                        throw 'syntax_error_in_amal_string';
+
+                    var count = info.getNumber();
+                    c = info.getNextChar();
+                    if ( c != ')' )
+                        throw 'syntax_error_in_amal_string';
+
+                    definition[ destination ] = 
+                    {
+                        lines: lines,
+                        delta: delta,
+                        count: count
+                    };
+                    destination++;
+                    c = info.getNextChar();
+                } while( !info.eol );            
+            }
+            else
+            {
+                definition.push( { lines: 1000, delta: 0, count: 1000 } );
+            }
             return definition;
         };
         function calculate( definition, color )
@@ -189,21 +220,17 @@
             color = typeof color == 'undefined' ? 0 : color;
             do
             {
-                for ( count = 0; count < definition[ position ].count ); count++ )
+                for ( count = 0; count < definition[ position ].count && line < height; count++ )
                 {
-                    for ( l = 0; l < definition[ position ].lines; l++ )
+                    for ( l = 0; l < definition[ position ].lines && line < height; l++ )
                     {
                         lineBuffer[ line++ ] = color;                
                     }
-                    color += definition[ position++ ].delta;
-                    color[ c ] &= 255;
-                    position++;
-                    if ( line > height )
-                        break;
+                    color += definition[ position ].delta;
+                    color &= 255;
                 }
-                if 
-                    break;
-                if ( position > definition.length )
+                position++;
+                if ( position >= definition.length )
                     position = 0;
             } while( line < height );
             return lineBuffer;
@@ -211,13 +238,14 @@
     };
 
     // Information object
-    this.Information = function( line )
+    function Information( aoz, line )
     {
+        this.aoz = aoz;
         this.position = 0;
         this.line = line;
         this.eol = false;
-    }
-    this.Information.prototype.extractNumber = function()
+    };
+    Information.prototype.getNumber = function()
     {
         this.skipSpaces();
         if ( this.eol )
@@ -242,7 +270,7 @@
             while( this.position < this.line.length )
             {
                 c = this.line.charAt( this.position );
-                if ( !( ( c >= '0' && c <= '9' ) )
+                if ( !( c >= '0' && c <= '9' ) )
                     break;
                 this.text += c;
                 this.position++;
@@ -253,7 +281,7 @@
             return value;
         }
     };
-    this.Information.prototype.skipSpaces = function()
+    Information.prototype.skipSpaces = function()
     {
         this.eol = false;
         while( this.position < this.line.length && ( this.line.charCodeAt( this.position ) == 32 || this.line.charCodeAt( this.position ) == 9 ) )
@@ -261,8 +289,9 @@
         if ( this.position >= this.line.length )
             this.eol = true;
     };
-    this.Information.prototype.getNextChar = function()
+    Information.prototype.getNextChar = function()
     {
+        this.skipSpaces();
         var c = this.line[ this.position++ ];
         if ( this.position.length > this.line.length )
             this.eol = true;
@@ -273,13 +302,13 @@
     this.setRainbow = function( index, ink, height, red$, green$, blue$ )
     {
         #errors
-        var rainbow = new this.Rainbow( this.aoz, 'rainbow_' + number, ink, height, red$, green$, blue$ );
+        var rainbow = new Rainbow( this.aoz, 'rainbow_' + index, ink, height, red$, green$, blue$ );
         this.context.setElement( this.aoz.currentContextName, rainbow, index, true );
     };
     this.deleteRainbow = function( index )
     {
         #errors
-        var rainbow = new this.Rainbow( this.aoz, 'rainbow_' + number, ink, height, red$, green$, blue$ );
+        var rainbow = new Rainbow( this.aoz, 'rainbow_' + number, ink, height, red$, green$, blue$ );
         this.context.deleteElement( this.aoz.currentContextName, index, 'rainbow_not_found' );
     };
     this.getRainbow = function( index )
@@ -289,17 +318,17 @@
     };
 }
 
-Instruction "set rainbow", _number, _index, _height, _red$, _green$, _blue$, _alpha$
+Instruction "set rainbow", _index, _ink, _height, _red$, _green$, _blue$, _alpha$
 {
     #errors
-    this.aoz.rainbows.setRainbow( %_number, %_index, %_height, %_red$, %_green$, %_blue$, %_alpha$ );
+    this.aoz.rainbows.setRainbow( %_index, %_ink, %_height, %_red$, %_green$, %_blue$, %_alpha$ );
 }
 End Instruction
 
 Instruction "rainbow", _number, _offset, _vertical_position, _height
 {
     #errors
-    this.aoz.rainbows.getElement( this.aoz.currentContextName, %_number, 'rainbow_not_defined' ).setDisplay( %_offset, %_vertical_position, %_height );
+    this.aoz.rainbows.context.getElement( this.aoz.currentContextName, %_number, 'rainbow_not_defined' ).setDisplay( %_offset, %_vertical_position, %_height );
 }
 End Instruction
 
