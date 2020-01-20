@@ -1,3 +1,4 @@
+
 cls
 curs off : cls 0
 screen open 1,340,64,64,lowres

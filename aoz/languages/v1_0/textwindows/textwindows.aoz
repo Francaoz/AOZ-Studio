@@ -65,7 +65,7 @@ End Instruction
 Instruction "wind size", _width, _height
 {
 	#errors
-	this.aoz.currentScreen.currentTextWindow.windSize({x:%_width,y:%_height});
+	this.aoz.currentScreen.currentTextWindow.windSize({width:%_width,height:%_height});
 }
 End Instruction
 

@@ -1949,6 +1949,10 @@ AOZ.prototype.setMouse = function()
 		 	event.stopPropagation();
 	}
 };
+AOZ.prototype.xor = function( a, b )
+{
+	return ( a && !b ) || ( !a && b );
+};
 AOZ.prototype.screenIn = function( number, x, y )
 {
 	if ( typeof number != 'undefined' )
@@ -2048,6 +2052,22 @@ AOZ.prototype.hZone = function( number, x, y )
 AOZ.prototype.mouseZone = function()
 {
 	return this.hZone( undefined, this.xMouse, this.yMouse );
+};
+AOZ.prototype.setXMouse = function( x )
+{
+	this.xMouse = x;
+};
+AOZ.prototype.setYMouse = function( y )
+{
+	this.yMouse = y;
+};
+AOZ.prototype.getXMouse = function( x )
+{
+	return this.xMouse;
+};
+AOZ.prototype.getYMouse = function( y )
+{
+	return this.yMouse;
 };
 
 // Data/read

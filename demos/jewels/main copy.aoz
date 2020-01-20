@@ -1,0 +1,1187 @@
+'Set Buffer 300
+'Erase All 
+
+screen open 2,320,256,64,lowres : curs off
+
+print "prutt"
+
+wait key
+
+
+OFFSETX=64
+OFFSETY=32
+DROPDELAY=8
+SIZEX=9
+SIZEY=9
+LEVEL=1
+POANG=0
+EMODE$="testgame"
+CURRENTMODE$="haha"
+Dim PLIST$(40)
+Dim PROGRESS(1000)
+
+Global GOFE,GX,GY,GC,GT
+Global OFFSETX,OFFSETY
+
+
+'Load Iff "df0:jewels2.iff",2
+AGH=1
+For T=0 To 2
+   For C=0 To 5
+      'Get Bob C+1+T*6,T*16+1,C*16+1 To T*16+16,C*16+16
+      Inc AGH
+   Next C
+Next T
+
+For T=0 To 4
+   'Get Bob AGH+T,T*16+1,11*16+1 To T*16+16,11*16+16
+Next T
+
+Print AGH+5
+Wait Key 
+
+Rem Get Sprite 25,0,12*16 To 16,13*16
+
+''Get Bob 24,0,6*16 To 16,7*16
+'Get Bob 25,0,7*16 To 16,8*16
+'et Bob 26,3*16+1,1 To 4*16,16
+'Palette 2,$0
+
+'Get Bob 27,1,13*16+1 To 16,13*16+16
+
+Screen Hide 2
+
+Screen Open 1,320,256,32,Lowres
+
+Rem Get Palette 2
+
+'Load Iff "df0:kandyback.iff",1
+
+'Get Palette 2
+
+Flash Off 
+
+Locate 10,10
+
+
+Dim KANDY(20,20,3)
+Dim ED(20,20,3)
+Dim SAD(20,20,3)
+Dim MOV(20,20)
+Dim TST(20)
+Dim TST2(20)
+Dim MOVX(50),MOVY(50),MOVS(50)
+
+MARKUPX=-1
+MARKUPY=-1
+MOVEPOSS=False
+
+Global KANDY(),SIZEX,SIZEY
+Global EMODE$,LEVEL
+
+
+
+Gosub _LOADPLAYERS
+
+Gosub CHOOSEPLAYER
+
+Gosub MAINMENU
+
+
+
+Gosub _LOADLEVEL
+Rem Gosub RELOAD 
+Rem Gosub CREATEGRID 
+RALL=True
+Gosub RITAGRID
+Rem Gosub FIRSTGRID
+RFLAG=True : TRYMOVE=True
+
+' Switch OFF multitask 
+'Amos Lock 
+'Break Off 
+'Dreg(0)=Execall(-132) 
+
+Repeat 
+   XM=X Screen(X Mouse)-OFFSETX
+   YM=Y Screen(Y Mouse)-OFFSETY
+   A$=Inkey$
+   If TRYMOVE=False : Gosub TESTMOVE : End If 
+   If EMODE$="testgame"
+      Gosub _CHECKKANDY
+   End If 
+   If CURRENTMODE$<>EMODE$
+      Ink 2,0
+      Text 240,20,Left$(EMODE$+Space$(20),20)
+      CURRENTMODE$=EMODE$
+   End If 
+   If RFLAG=True and EMODE$="testgame"
+      Rem RFLAG=False
+      While RFLAG=True
+         Gosub MOVEKANDY
+         Rem TRYMOVE=True 
+         Rem Gosub SGRID
+         Rem MARKUPX=-1 
+         Gosub GOTAMOVE
+      Wend 
+      MOVED=True : TRYMOVE=False : MOVEPOSS=False
+   End If 
+   If Upper$(A$)="1" : EMODE$="editboard" : RALL=True : Gosub RITAGRID : End If 
+   If Upper$(A$)="2" : EMODE$="placegems" : RALL=True : Gosub RITAGRID : End If 
+   If Upper$(A$)="P" : EMODE$="testgame" : RALL=True : Gosub RITAGRID : End If 
+   If Upper$(A$)="R" : Gosub RELOAD : End If 
+   If Upper$(A$)="M" : Gosub MAKERANDOMGRID : RALL=True : Gosub RITAGRID : End If 
+   If Upper$(A$)="." or CHLVL=True : CHLVL=False
+      LEVEL=LEVEL+1 : Gosub _LOADLEVEL : RALL=True
+      Gosub RITAGRID : RFLAG=True : TRYMOVE=True
+   End If 
+   If Upper$(A$)="," : LEVEL=LEVEL-1 : Gosub _LOADLEVEL : RALL=True : Gosub RITAGRID : Gosub FIRSTGRID : End If 
+   If Upper$(A$)="T" : MOVEPOSS=False : End If 
+   If Upper$(A$)="V"
+      MARKX=XM/16 : MARKY=YM/16
+      If ED(MARKX,MARKY,1)>-1
+         ED(MARKX,MARKY,1)=-1
+      Else 
+         ED(MARKX,MARKY,1)=0
+      End If 
+      KANDY(MARKX,MARKY,1)=ED(MARKX,MARKY,1)
+      KANDY(MARKX,MARKY,0)=0
+      MOV(MARKX,MARKY)=1
+      Gosub RITAGRID
+   End If 
+   If Upper$(A$)="L"
+      Gosub _LOADLEVEL
+   End If 
+   If Upper$(A$)="S" : Gosub _SAVELEVEL : End If 
+   
+   If Mouse Key=1 and EMODE$="editboard"
+      MARKX=XM/16 : MARKY=YM/16
+      ED(MARKX,MARKY,1)=ED(MARKX,MARKY,1)+1
+      KANDY(MARKX,MARKY,1)=ED(MARKX,MARKY,1)
+      MOV(MARKX,MARKY)=1
+      Gosub RITAGRID
+      While Mouse Key=1 : Wend 
+   End If 
+   
+   If Mouse Key=2 and EMODE$="editboard"
+      MARKX=XM/16 : MARKY=YM/16
+      If ED(MARKX,MARKY,1)>-1
+         ED(MARKX,MARKY,1)=ED(MARKX,MARKY,1)-1
+         KANDY(MARKX,MARKY,1)=ED(MARKX,MARKY,1)
+         MOV(MARKX,MARKY)=1
+         Gosub RITAGRID
+      End If 
+      While Mouse Key=2 : Wend 
+   End If 
+   
+   If Mouse Key=1 and EMODE$="placegems"
+      MARKX=XM/16 : MARKY=YM/16
+      ED(MARKX,MARKY,0)=ED(MARKX,MARKY,0)+1
+      KANDY(MARKX,MARKY,0)=ED(MARKX,MARKY,0)
+      MOV(MARKX,MARKY)=1
+      Gosub RITAGRID
+      While Mouse Key=1 : Wend 
+   End If 
+   
+   If Mouse Key=2 and EMODE$="placegems"
+      MARKX=XM/16 : MARKY=YM/16
+      If ED(MARKX,MARKY,1)>-1
+         ED(MARKX,MARKY,0)=ED(MARKX,MARKY,0)-1
+         KANDY(MARKX,MARKY,0)=ED(MARKX,MARKY,0)
+         MOV(MARKX,MARKY)=1
+         Gosub RITAGRID
+      End If 
+      While Mouse Key=2 : Wend 
+   End If 
+   
+   If Mouse Key=1 and EMODE$="testgame"
+      MARKX=XM/16 : MARKY=YM/16
+      If MARKX>-1 and MARKX<SIZEX and MARKY>-1 and MARKY<SIZEY and KANDY(MARKX,MARKY,1)>-1
+         If MARKUPX=-1
+            MARKUPX=MARKX : MARKUPY=MARKY : MARKV=KANDY(MARKX,MARKY,0)
+            MOV(MARKX,MARKY)=1
+            Gosub RITAGRID
+            While Mouse Key=1 : Wend 
+         Else 
+            If MARKX<MARKUPX+2 and MARKX>MARKUPX-2 and MARKY<MARKUPY+2 and MARKY>MARKUPY-2
+               SV=KANDY(MARKUPX,MARKUPY,0)
+               If MARKX=MARKUPX and MARKY=MARKUPY
+                  MARKUPX=-1
+                  MOV(MARKX,MARKY)=1
+                  Gosub RITAGRID
+                  While Mouse Key=1
+                  Wend 
+                  Goto LP
+               End If 
+               TRYMOVE=True
+               MOV(MARKX,MARKY)=1
+               MOV(MARKUPX,MARKUPY)=1
+               Gosub SGRID
+               If MARKX=MARKUPX
+                  If MARKY<MARKUPY
+                     KANDY(MARKUPX,MARKUPY,0)=KANDY(MARKUPX,MARKUPY-1,0)
+                     KANDY(MARKUPX,MARKUPY-1,0)=SV
+                     MOV(MARKUPX,MARKUPY-1)=1
+                     SVX=MARKUPX : SVY=MARKUPY-1
+                     Gosub ANMOVE
+                     If KANDY(MARKX,MARKY,0)>20 or KANDY(MARKUPX,MARKUPY,0)>20
+                        Gosub BONUS1
+                        RFLAG=True
+                        Gosub DELKANDY
+                     End If 
+                  Else 
+                     If MARKUPY<SIZEY-1
+                        KANDY(MARKUPX,MARKUPY,0)=KANDY(MARKUPX,MARKUPY+1,0)
+                        KANDY(MARKUPX,MARKUPY+1,0)=SV
+                        SVX=MARKUPX : SVY=MARKUPY+1
+                        Gosub ANMOVE
+                        If KANDY(MARKX,MARKY,0)>20 or KANDY(MARKUPX,MARKUPY,0)>20
+                           Gosub BONUS1
+                           RFLAG=True
+                           Gosub DELKANDY
+                        End If 
+                     End If 
+                  End If 
+                  MARKUPX=-1
+                  Gosub RITAGRID
+                  While Mouse Key=1 : Wend 
+                  Goto LP
+               End If 
+               If MARKY=MARKUPY
+                  If MARKX<MARKUPX
+                     KANDY(MARKUPX,MARKUPY,0)=KANDY(MARKUPX-1,MARKUPY,0)
+                     KANDY(MARKUPX-1,MARKUPY,0)=SV
+                     SVX=MARKUPX-1 : SVY=MARKUPY
+                     Gosub ANMOVE
+                     If KANDY(MARKX,MARKY,0)>20 or KANDY(MARKUPX,MARKUPY,0)>20
+                        Gosub BONUS1
+                        RFLAG=True
+                        Gosub DELKANDY
+                     End If 
+                  Else 
+                     If MARKUPX<SIZEX-1
+                        KANDY(MARKUPX,MARKUPY,0)=KANDY(MARKUPX+1,MARKUPY,0)
+                        KANDY(MARKUPX+1,MARKUPY,0)=SV
+                        SVX=MARKUPX+1 : SVY=MARKUPY
+                        Gosub ANMOVE
+                        If KANDY(MARKX,MARKY,0)>20 or KANDY(MARKUPX,MARKUPY,0)>20
+                           Gosub BONUS1
+                           RFLAG=True
+                           Gosub DELKANDY
+                        End If 
+                     End If 
+                  End If 
+                  MARKUPX=-1
+                  Gosub RITAGRID
+                  While Mouse Key=1 : Wend 
+                  Goto LP
+               End If 
+            Else 
+               MOV(MARKUPX,MARKUPY)=1
+               MARKUPX=-1
+               Gosub RITAGRID
+               While Mouse Key=1
+               Wend 
+               Goto LP
+            End If 
+         End If 
+      End If 
+   End If 
+   LP:
+Until Upper$(A$)="Q"
+Erase All 
+Edit 
+
+
+
+MAINMENU:
+
+Return 
+
+CHOOSEPLAYER:
+Screen Open 4,320,256,4,Lowres
+RETRY2:
+Cls 0
+Locate 0,0
+Print "100 to add a new player"
+For T=0 To NUMPLAYERS
+   Text 20,40+T*10,Str$(T)+"-"+PLIST$(T)
+Next T
+Locate 2,2
+Input "player nr: ";PN
+CURRENTPLAYER=PN
+If PN=100
+   Input "new player: ";TEMP$
+   For T=0 To NUMPLAYERS
+      If Upper$(TEMP$)=Upper$(PLIST$(T))
+         Print "player already exists - press any key"
+         Wait Key 
+         Goto RETRY2
+      Else 
+         NUMPLAYERS=NUMPLAYERS+1
+         PLIST$(NUMPLAYERS)=TEMP$
+         CURRENTPLAYER=NUMPLAYERS
+         Gosub _SAVEPLAYERS
+      End If 
+   Next T
+End If 
+If PN=101
+   Input "player nr:";PN
+   Input "new name: ";PLIST$(PN)
+   Gosub _SAVEPLAYERS
+   Goto RETRY2
+End If 
+Screen Close 4
+Gosub _LOADPROGRESS
+Return 
+
+_SAVEPROGRESS:
+Open Out 1,"players/"+PLIST$(CURRENTPLAYER)
+For T=0 To 1000
+   Print #1,PROGRESS(T)
+Next T
+Close 1
+Return 
+
+_LOADPROGRESS:
+If Exist("players/"+PLIST$(CURRENTPLAYER))
+   Open In 1,"players/"+PLIST$(CURRENTPLAYER)
+   For T=0 To 1000
+      Input #1,PROGRESS(T)
+   Next T
+   Close 1
+End If 
+For T=1 To 1000
+   If PROGRESS(T)=0
+      LEVEL=T
+      Exit 
+   End If 
+Next T
+Return 
+
+
+_SAVEPLAYERS:
+Open Out 1,"players.dat"
+For T=0 To NUMPLAYERS
+   Print #1,PLIST$(T)
+Next T
+Close 1
+Return 
+
+_LOADPLAYERS:
+If Exist("players.dat")
+   Open In 1,"players.dat"
+   T=0
+   While Not Eof(1)
+      Input #1,PLIST$(T)
+      T=T+1
+   Wend 
+   NUMPLAYERS=T-1
+   Close 1
+End If 
+Return 
+
+TESTMOVE:
+If MOVEPOSS=False
+   COUNT=0 : COUNT2=0
+   For X=0 To SIZEX-1
+      For Y=0 To SIZEY-1
+         If KANDY(X,Y,0)=21
+            MOVEPOSS=True
+            Return 
+         End If 
+      Next Y
+   Next X
+   For X=0 To SIZEX-1
+      For Y=0 To SIZEY-1
+         If KANDY(X,Y,1)>-1
+            D=KANDY(X,Y,0) : C=0 : F1=False
+            If D>0
+               If D>10 : D=D-10 : End If 
+               For Y2=Y-1 To Y+1 Step 1
+                  For X2=X-1 To X+1 Step 1
+                     If X2>-1 and Y2>-1 and X2<SIZEX and Y2<SIZEY
+                        TST(C)=KANDY(X2,Y2,0)
+                        TST2(C)=KANDY(X2,Y2,1)
+                     Else 
+                        TST(C)=-2
+                        TST2(C)=-2
+                     End If 
+                     C=C+1
+                  Next X2
+               Next Y2
+               If Y+2<SIZEY
+                  TST(9)=KANDY(X,Y+2,0)
+               Else 
+                  TST(9)=-2
+               End If 
+               If X+2<SIZEX
+                  TST(10)=KANDY(X+2,Y,0)
+               Else 
+                  TST(10)=-2
+               End If 
+               If Y-2>-1
+                  TST(11)=KANDY(X,Y-2,0)
+               Else 
+                  TST(11)=-2
+               End If 
+               If X-2>-1
+                  TST(12)=KANDY(X-2,Y,0)
+               Else 
+                  TST(12)=-2
+               End If 
+               
+               If TST(1)=D and TST2(7)>-1 : If(TST(8)=D or TST(6)=D) : F1=True : TR0=1 : Goto DAN3 : End If : End If 
+               If TST(5)=D and TST2(3)>-1 : If(TST(6)=D or TST(0)=D) : F1=True : TR0=2 : Goto DAN3 : End If : End If 
+               If TST(7)=D and TST2(1)>-1 : If(TST(0)=D or TST(2)=D) : F1=True : TR0=3 : Goto DAN3 : End If : End If 
+               If TST(3)=D and TST2(5)>-1 : If(TST(2)=D or TST(8)=D) : F1=True : TR0=4 : Goto DAN3 : End If : End If 
+               If TST(2)=D and TST(8)=D and TST2(5)>-1 : F1=True : TR0=5 : Goto DAN3 : End If 
+               If TST(8)=D and TST(6)=D and TST2(7)>-1 : F1=True : TR0=6 : Goto DAN3 : End If 
+               If TST(6)=D and TST(0)=D and TST2(3)>-1 : F1=True : TR0=7 : Goto DAN3 : End If 
+               If TST(0)=D and TST(2)=D and TST2(1)>-1 : F1=True : TR0=8 : Goto DAN3 : End If 
+               
+               If TST(1)=D and TST(9)=D and TST2(7)>-1 : F1=True : TR0=9 : Goto DAN3 : End If 
+               If TST(3)=D and TST(10)=D and TST2(5)>-1 : F1=True : TR0=10 : Goto DAN3 : End If 
+               If TST(5)=D and TST(12)=D and TST2(3)>-1 : F1=True : TR0=11 : Goto DAN3 : End If 
+               If TST(7)=D and TST(11)=D and TST2(1)>-1 : F1=True : TR0=12 : Goto DAN3 : End If 
+               
+               DAN3:
+               If F1=True
+                  MOVEPOSS=True
+                  Text 0,190,Str$(X)+","+Str$(Y)+"  "
+                  Exit 2
+               End If 
+            End If 
+         End If 
+      Next Y
+   Next X
+   If MOVEPOSS=False
+      Ink 2,0
+      Text 80,60," NO MORE MOVE "
+      Wait 100
+      Rem Wait Key 
+      Gosub CREATEGRID
+      Gosub NEWGRID
+      
+      Rem KANDY(Rnd(SIZEX),Rnd(SIZEY),0)=21
+   End If 
+End If 
+Return 
+
+NEWGRID:
+
+EMODE$="editboard"
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,1)>-1
+         Rem PKANDY[KANDY(X,Y,0),X+(OFFSETX/16),Y+(OFFSETY/16),0] 
+         GX=X+(OFFSETX/16) : GY=Y+(OFFSETY/16) : GC=KANDY(X,Y,0) : GOFE=0 : Gosub PKANDY
+      End If 
+      Wait 1
+   Next X
+Next Y
+
+EMODE$="testgame"
+For Y=SIZEY-1 To 0 Step -1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,1)>-1
+         Rem PKANDY[KANDY(X,Y,0),X+(OFFSETX/16),Y+(OFFSETY/16),0] 
+         X2=X : Y2=Y
+         GX=X+(OFFSETX/16) : GY=Y+(OFFSETY/16) : GC=KANDY(X,Y,0) : GOFE=0 : Gosub PKANDY
+      End If 
+      Wait 1
+   Next X
+Next Y
+
+Return 
+
+ANMOVE:
+
+C=KANDY(MARKUPX,MARKUPY,0)
+C2=KANDY(MARKX,MARKY,0)
+
+If C>10 : C=C+1 : End If 
+If C2>10 : C2=C2+1 : End If 
+
+
+
+MX1=0 : MY1=0 : MX2=0 : MY2=0
+If MARKUPX<MARKX : MX1=-2 : MX2=2
+Else 
+   If MARKX<MARKUPX
+      MX1=2 : MX2=-2
+   End If 
+End If 
+If MARKUPY<MARKY : MY1=-2 : MY2=2
+Else 
+   If MARKY<MARKUPY
+      MY1=2 : MY2=-2
+   End If 
+End If 
+
+B2=9
+B=KANDY(MARKUPX,MARKUPY,1)
+
+Screen 2
+
+Get Bob 28,B*16,B2*16 To B*16+16,B2*16+16
+
+B=KANDY(MARKX,MARKY,1)
+
+Get Bob 29,B*16,B2*16 To B*16+16,B2*16+16
+
+Screen 1
+
+For AN=0 To 7
+
+   'Screen Copy 2,B*16,B2*16,B*16+16,B2*16+16 To 1,MARKUPX*16+OFFSETX,MARKUPY*16+OFFSETY
+
+   Paste Bob MARKUPX*16+OFFSETX,MARKUPY*16+OFFSETY,28
+
+  ' Screen Copy 2,B*16,B2*16,B*16+16,B2*16+16 To 1,MARKX*16+OFFSETX,MARKY*16+OFFSETY 
+
+   Paste Bob MARKX*16+OFFSETX,MARKY*16+OFFSETY,29
+   
+   Paste Bob MARKX*16+OFFSETX-(MX2*AN)+1,MARKY*16+OFFSETY-(MY2*AN)+1,C
+   
+   Paste Bob MARKUPX*16+OFFSETX-(MX1*AN)+1,MARKUPY*16+OFFSETY-(MY1*AN)+1,C2
+   
+   Screen Swap 
+   Wait Vbl 
+   Wait 1
+   
+Next AN
+
+Return 
+
+BONUS1:
+If KANDY(MARKUPX,MARKUPY,0)>20
+   DKAND=KANDY(MARKX,MARKY,0)
+   KANDY(MARKUPX,MARKUPY,0)=-1
+   KANDY(MARKUPX,MARKUPY,3)=4
+   MOV(MARKUPX,MARKUPY)=1
+   MOV(MARKX,MARKY)=1
+   If KANDY(MARKUPX,MARKUPY,1)>0 : KANDY(MARKUPX,MARKUPY,1)=KANDY(MARKUPX,MARKUPY,1)-1 : End If 
+Else 
+   DKAND=KANDY(MARKUPX,MARKUPY,0)
+   KANDY(MARKX,MARKY,0)=-1
+   KANDY(MARKX,MARKY,3)=4
+   MOV(MARKUPX,MARKUPY)=1
+   MOV(MARKX,MARKY)=1
+   If KANDY(MARKX,MARKY,1)>0 : KANDY(MARKX,MARKY,1)=KANDY(MARKX,MARKY,1)-1 : End If 
+End If 
+
+Return 
+
+DELKANDY:
+For X=0 To SIZEX-1
+   For Y=0 To SIZEY-1
+      If KANDY(X,Y,0)=DKAND
+         Rem Print "kaaa" 
+         Rem Wait Key 
+         KANDY(X,Y,0)=-1
+         KANDY(X,Y,3)=4
+         MOV(X,Y)=1
+         If KANDY(X,Y,1)>0 : KANDY(X,Y,1)=KANDY(X,Y,1)-1 : End If 
+      End If 
+   Next Y
+Next X
+Return 
+
+SGRID:
+For X=0 To SIZEX-1
+   For Y=0 To SIZEY-1
+      For T=0 To 2
+         SAD(X,Y,T)=KANDY(X,Y,T)
+      Next 
+   Next Y
+Next X
+Return 
+
+CANCELGRID:
+For X=0 To SIZEX-1
+   For Y=0 To SIZEY-1
+      For T=0 To 2
+         KANDY(X,Y,T)=SAD(X,Y,T)
+      Next T
+   Next Y
+Next X
+Return 
+
+
+MOVEKANDY:
+Rem Goto URKA
+MOVN=0
+For X=SIZEX-1 To 0 Step -1
+   For Y=SIZEY-1 To 0 Step -1
+      If KANDY(X,Y,0)=-1
+         KR=0
+         MOVX(MOVN)=X : MOVY(MOVN)=Y-1
+         For T=Y-1 To 0 Step -1
+            KR=KR+1
+         Next T
+         MOVS(MOVN)=KR
+         MOVN=MOVN+1
+         Exit 
+      End If 
+   Next Y
+Next X
+
+If MOVN>0
+   For A=2 To 16 Step 4
+      K=A
+      For C=0 To MOVN-1
+         X=MOVX(C)
+         If MOVY(C)>-1
+            STX=-1
+            For T=MOVY(C) To 0 Step -1
+               If KANDY(X,T,1)>-1
+                  Rem  PKANDY[KANDY(X,T,0),X+(OFFSETX/16),T+(OFFSETY/16),K]
+                  X2=X : Y2=T
+                  GX=X+(OFFSETX/16) : GY=T+(OFFSETY/16) : GC=KANDY(X,T,0) : GOFE=K : Gosub PKANDY
+               Else 
+                  STX=X : STY=T
+               End If 
+            Next T
+            If STX>-1
+               Rem PKANDY[KANDY(STX,STY,0),STX+(OFFSETX/16),STY+(OFFSETY/16),0] 
+               X2=STX : Y2=STY
+               GX=STX+(OFFSETX/16) : GY=STY+(OFFSETY/16) : GC=KANDY(STX,STY,0) : GOFE=0 : Gosub PKANDY
+            End If 
+         End If 
+      Next C
+      Screen Swap : Wait Vbl 
+      Wait 1
+   Next A
+End If 
+
+
+URKA:
+For X=SIZEX-1 To 0 Step -1
+   For Y=SIZEY-1 To 0 Step -1
+      D=KANDY(X,Y,0) : MX=X : MY=Y
+      If D=-1
+         For T=Y-1 To 0 Step -1
+            MY=T
+            LP2:
+            If T>0
+               If KANDY(X,T,1)=-1 : T=T-1 : Goto LP2 : End If 
+            End If 
+            If T>0
+               KANDY(X,MY+1,0)=KANDY(X,T,0)
+               MOV(X,MY+1)=1
+            Else 
+               If T<0
+                  KANDY(X,MY+1,0)=Rnd(5)+1
+               Else 
+                  KANDY(X,MY+1,0)=KANDY(X,T,0)
+                  KANDY(X,MY,0)=Rnd(5)+1
+                  MOV(X,MY)=1
+               End If 
+               MOV(X,MY+1)=1
+            End If 
+         Next T
+         Exit 
+      Else 
+      End If 
+      
+      If D=-2
+         For X2=X-1 To X+1
+            For Y2=Y-1 To Y+1
+               If X2>-1 and Y2>-1 and X2<SIZEX and Y2<SIZEY
+                  If KANDY(X2,Y2,0)>10 and KANDY(X2,Y2,1)>-1
+                     KANDY(X2,Y2,0)=-2
+                     KANDY(X2,Y2,3)=4 : POANG=POANG+10
+                     MOV(X2,Y2)=1
+                     If KANDY(X2,Y2,1)>0 : KANDY(X2,Y2,1)=KANDY(X2,Y2,1)-1 : End If 
+                  Else 
+                     If KANDY(X2,Y2,1)>-1
+                        KANDY(X2,Y2,0)=-1
+                        KANDY(X2,Y2,3)=4 : POANG=POANG+10
+                        MOV(X2,Y2)=1
+                        If KANDY(X2,Y2,1)>0 : KANDY(X2,Y2,1)=KANDY(X2,Y2,1)-1 : End If 
+                     End If 
+                  End If 
+               End If 
+            Next Y2
+         Next X2
+         MOVED=True
+         Exit 2
+      End If 
+   Next Y
+Next X
+Gosub CHECKREMOVE
+Gosub RITAGRID
+Rem Wait DROPDELAY 
+Return 
+
+_CHECKKANDY:
+If TRYMOVE=True or MOVED=True
+   CMARK=False : CMARKUP=False : CBOMBX=-1 : CBOMBX2=-1
+   For Y=SIZEY-1 To 0 Step -1
+      For X=SIZEX-1 To 0 Step -1
+         D=KANDY(X,Y,0) : COUNT=0 : CT=D
+         If D>0
+            For T=X To 0 Step -1
+               D2=KANDY(T,Y,0)
+               If D<>D2 and D+10<>D2 and D<>D2+10
+                  Exit 
+               End If 
+               COUNT=COUNT+1
+            Next T
+            If COUNT>2
+               For T=X To X-COUNT+1 Step -1
+                  If T=SVX and COUNT>3
+                     If KANDY(T,Y,0)<10 and KANDY(T,Y,0)>-1
+                        Rem KANDY(T,Y,0)=KANDY(T,Y,0)+10   
+                        CBOMBX=T : CBOMBY=Y
+                        If COUNT<5 : CBOMB=KANDY(T,Y,0)+10 : End If 
+                        If COUNT>4 : CBOMB=21 : End If 
+                        KANDY(T,Y,0)=-1 : MOV(T,Y)=1
+                     End If 
+                  Else 
+                     If KANDY(T,Y,0)>10
+                        MOV(T,Y)=1
+                        KANDY(T,Y,0)=-1
+                        KANDY(T,Y,3)=4 : POANG=POANG+10
+                        If KANDY(T,Y,1)>0 : KANDY(T,Y,1)=KANDY(T,Y,1)-1 : End If 
+                        Rem KANDY(T,Y,0)=-2
+                        For X2=T-1 To T+1
+                           For Y2=Y-1 To Y+1
+                              If X2>-1 and Y2>-1 and X2<SIZEX and Y2<SIZEY
+                                 If KANDY(X2,Y2,0)>10 and KANDY(X2,Y2,1)>-1
+                                    KANDY(X2,Y2,0)=-2
+                                    KANDY(X2,Y2,3)=4 : POANG=POANG+10
+                                    MOV(X2,Y2)=1
+                                    If KANDY(X2,Y2,1)>0 : KANDY(X2,Y2,1)=KANDY(X2,Y2,1)-1 : End If 
+                                 Else 
+                                    If KANDY(X2,Y2,0)>-1 and KANDY(X2,Y2,1)>-1
+                                       KANDY(X2,Y2,0)=-1
+                                       KANDY(X2,Y2,3)=4 : POANG=POANG+10
+                                       MOV(X2,Y2)=1
+                                       If KANDY(X2,Y2,1)>0 : KANDY(X2,Y2,1)=KANDY(X2,Y2,1)-1 : End If 
+                                    End If 
+                                 End If 
+                              End If 
+                           Next Y2
+                        Next X2
+                        
+                     Else 
+                        If(T<>MARKUPX or Y<>MARKY) and(T<>MARKUPX or Y<>MARKUPY)
+                           KANDY(T,Y,0)=-1
+                           KANDY(T,Y,3)=4 : POANG=POANG+10
+                           MOV(T,Y)=1
+                           If KANDY(T,Y,1)>0 : KANDY(T,Y,1)=KANDY(T,Y,1)-1 : End If 
+                        Else 
+                           If T=MARKX and Y=MARKY
+                              CMARK=True
+                           End If 
+                           If T=MARKUPX and Y=MARKUPY
+                              CMARKUP=True
+                           End If 
+                        End If 
+                     End If 
+                  End If 
+                  RFLAG=True
+               Next T
+            End If 
+            COUNT2=0
+            For T=Y To 0 Step -1
+               D2=KANDY(X,T,0)
+               If CT<>D2 and CT+10<>D2 and CT<>D2+10
+                  Exit 
+               End If 
+               COUNT2=COUNT2+1
+            Next T
+            If COUNT2>2
+               For T=Y To Y-COUNT2+1 Step -1
+                  If T=SVY and COUNT2>3
+                     If KANDY(X,T,0)<10 and KANDY(X,T,0)>-1
+                        Rem KANDY(X,T,0)=KANDY(X,T,0)+10 
+                        CBOMBX2=X : CBOMBY2=T
+                        If COUNT2<5 : CBOMB2=KANDY(X,T,0)+10 : End If 
+                        If COUNT2>4 : CBOMB2=21 : End If 
+                        KANDY(X,T,0)=-1
+                        MOV(X,T)=1
+                     End If 
+                  Else 
+                     If KANDY(X,T,0)>10
+                        KANDY(X,T,0)=-1
+                        KANDY(X,T,3)=4 : POANG=POANG+10
+                        If KANDY(X,T,1)>0 : KANDY(X,T,1)=KANDY(X,T,1)-1 : End If 
+                        Rem KANDY(X,T,0)=-2
+                        For X2=X-1 To X+1
+                           For Y2=T-1 To T+1
+                              If X2>-1 and Y2>-1 and X2<SIZEX and Y2<SIZEY
+                                 If KANDY(X2,Y2,0)>10 and KANDY(X2,Y2,1)>-1
+                                    KANDY(X2,Y2,0)=-2
+                                    KANDY(X2,Y2,3)=4 : POANG=POANG+10
+                                    MOV(X2,Y2)=1
+                                    If KANDY(X2,Y2,1)>0 : KANDY(X2,Y2,1)=KANDY(X2,Y2,1)-1 : End If 
+                                 Else 
+                                    If KANDY(X2,Y2,0)>-1 and KANDY(X2,Y2,1)>-1
+                                       KANDY(X2,Y2,0)=-1
+                                       KANDY(X2,Y2,3)=4 : POANG=POANG+10
+                                       MOV(X2,Y2)=1
+                                       If KANDY(X2,Y2,1)>0 : KANDY(X2,Y2,1)=KANDY(X2,Y2,1)-1 : End If 
+                                    End If 
+                                 End If 
+                              End If 
+                           Next Y2
+                        Next X2
+                     Else 
+                        If(X<>MARKX or T<>MARKY) and(X<>MARKUPX or T<>MARKUPY)
+                           KANDY(X,T,0)=-1
+                           KANDY(X,T,3)=4 : POANG=POANG+10
+                           MOV(X,T)=1
+                           If KANDY(X,T,1)>0 : KANDY(X,T,1)=KANDY(X,T,1)-1 : End If 
+                        Else 
+                           If X=MARKX and T=MARKY
+                              CMARK=True
+                           End If 
+                           If X=MARKUPX and T=MARKUPY
+                              CMARKUP=True
+                           End If 
+                        End If 
+                     End If 
+                  End If 
+                  RFLAG=True
+               Next T
+            End If 
+            If COUNT+COUNT2>BIGCOUNT
+               BIGCOUNT=COUNT+COUNT2
+            End If 
+         End If 
+      Next X
+   Next Y
+   If CMARKUP=True
+      MOV(MARKUPX,MARKUPY)=1
+      KANDY(MARKUPX,MARKUPY,0)=-1
+      KANDY(MARKUPX,MARKUPY,3)=4
+      If KANDY(MARKUPX,MARKUPY,1)>0 : KANDY(MARKUPX,MARKUPY,1)=KANDY(MARKUPX,MARKUPY,1)-1 : End If 
+   End If 
+   If CMARK=True
+      MOV(MARKX,MARKY)=1
+      KANDY(MARKX,MARKY,0)=-1
+      KANDY(MARKX,MARKY,3)=4
+      If KANDY(MARKX,MARKY,1)>0 : KANDY(MARKX,MARKY,1)=KANDY(MARKX,MARKY,1)-1 : End If 
+   End If 
+   If RFLAG=False and MOVED=False
+      CANCELMOVE=True
+   End If 
+   TRYMOVE=False
+   If CBOMBX>-1
+      KANDY(CBOMBX,CBOMBY,0)=CBOMB
+      MOV(CBOMBX,CBOMBY)=1
+   End If 
+   If CBOMBX2>-1
+      KANDY(CBOMBX2,CBOMBY2,0)=CBOMB2
+      MOV(CBOMBX2,CBOMBY2)=1
+   End If 
+   If RFLAG=True
+      Gosub CHECKREMOVE
+      Gosub RITAGRID
+      Rem Wait DROPDELAY 
+      Gosub WEDONE
+   End If 
+   If CANCELMOVE=True
+      Gosub CANCELGRID
+      RALL=True
+      Gosub RITAGRID
+      RALL=False
+      Wait DROPDELAY
+      CANCELMOVE=False
+   End If 
+   MOVED=False
+End If 
+
+Return 
+
+WEDONE:
+WEDO=True
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,1)>0
+         WEDO=False
+         Exit 2
+      End If 
+   Next X
+Next Y
+
+If WEDO=True
+   PROGRESS(LEVEL)=POANG
+   Gosub _SAVEPROGRESS
+   CHLVL=True
+End If 
+
+Return 
+
+CHECKREMOVE:
+AGAIN:
+AN=False
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,3)>0 : AN=True
+         Exit 2
+      End If 
+   Next X
+Next Y
+If AN=True
+   B2=9
+   For Y=0 To SIZEY-1
+      For X=0 To SIZEX-1
+         If KANDY(X,Y,3)>0
+            MOV(X,Y)=1
+            ANI=5-KANDY(X,Y,3)
+            KANDY(X,Y,3)=KANDY(X,Y,3)-1
+            B=KANDY(X,Y,1) : X2=X*16+OFFSETX : Y2=Y*16+OFFSETY
+            Screen Copy 2,B*16,B2*16,B*16+16,B2*16+16 To 1,X2,Y2
+            Paste Bob X*16+OFFSETX,Y*16+OFFSETY,ANI+19
+            
+            Paste Bob X*16+OFFSETX+4,Y*16+OFFSETY-ANI+4,27
+         End If 
+      Next X
+   Next Y
+   Wait 5
+   Goto AGAIN
+End If 
+Return 
+
+CANWEMOVE:
+
+Return 
+
+GOTAMOVE:
+RFLAG=False
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,0)=-1
+         RFLAG=True
+      End If 
+   Next X
+Next Y
+Return 
+
+RITAGRID:
+SETX=OFFSETX/16
+SETY=OFFSETY/16
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If MOV(X,Y)>0 or RALL=True
+         If MOV(X,Y)>0 : MOV(X,Y)=MOV(X,Y)-1 : End If 
+         Rem If KANDY(X,Y,0)>0 or KANDY(X,Y,0)<0
+         Rem PKANDY[KANDY(X,Y,0),X+(OFFSETX/16),Y+(OFFSETY/16),0] 
+         X2=X : Y2=Y
+         GX=X+SETX : GY=Y+SETY : GC=KANDY(X,Y,0) : GOFE=0 : Gosub PKANDY
+         Rem End If 
+         If X=MARKUPX and Y=MARKUPY
+            Ink 2
+            Rem Box X*16+1+OFFSETX,Y*16+1+OFFSETY To X*16+15+OFFSETX,Y*16+15+OFFSETY 
+            Paste Bob X*16+OFFSETX,Y*16+OFFSETY,25
+         End If 
+      End If 
+   Next X
+Next Y
+RALL=False
+Ink 10,0
+Text 10,10,Str$(BIGCOUNT)+"   "
+Text 10,16,Str$(MARKV)+"   "
+Text 120,10,"level: "+Str$(LEVEL)+"  "
+Text 120,16,"score: "+Str$(POANG)+"  "
+Text 120,24,"hiscore: "+Str$(PROGRESS(LEVEL))+"  "
+Screen Swap : Wait Vbl 
+Return 
+
+FIRSTGRID:
+BEF=0
+ABOVE=0
+For T=0 To 2
+   Rem  KANDY(Rnd(SIZEX),Rnd(SIZEY-3)+2,1)=-1 
+Next T
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,1)>-1
+         If Y>0 : ABOVE=KANDY(X,Y-1,0) : End If 
+         Repeat 
+            NEW=Rnd(5)+1
+         Until NEW<>BEF and NEW<>ABOVE
+         KANDY(X,Y,0)=NEW
+         ED(X,Y,0)=NEW
+         Rem KANDY(X,Y,1)=1 
+         BEF=KANDY(X,Y,0)
+         Rem PKANDY[KANDY(X,Y,0),X+(OFFSETX/16),Y+(OFFSETY/16),0] 
+      Else 
+         ED(X,Y,0)=0
+         KANDY(X,Y,0)=0
+      End If 
+      Rem Wait 1 
+   Next X
+Next Y
+SETX=OFFSETX/16
+SETY=OFFSETY/16
+For Y=SIZEY-1 To 0 Step -1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,1)>-1
+         Rem PKANDY[KANDY(X,Y,0),X+(OFFSETX/16),Y+(OFFSETY/16),0] 
+         GX=X+SETX : GY=Y+SETY : GC=KANDY(X,Y,0) : GOFE=0 : Gosub PKANDY
+      End If 
+      Rem Wait 1 
+   Next X
+Next Y
+
+For T=0 To 5
+   Rem KANDY(Rnd(SIZEX),Rnd(SIZEY),0)=21
+Next T
+Return 
+
+CREATEGRID:
+BEF=0
+ABOVE=0
+For T=0 To 2
+   Rem  KANDY(Rnd(SIZEX),Rnd(SIZEY-3)+2,1)=-1 
+Next T
+For Y=0 To SIZEY-1
+   For X=0 To SIZEX-1
+      If KANDY(X,Y,1)>-1
+         If Y>0 : ABOVE=KANDY(X,Y-1,0) : End If 
+         Repeat 
+            NEW=Rnd(5)+1
+         Until NEW<>BEF and NEW<>ABOVE
+         KANDY(X,Y,0)=NEW
+         ED(X,Y,0)=NEW
+         Rem KANDY(X,Y,1)=1 
+         BEF=KANDY(X,Y,0)
+         Rem PKANDY[KANDY(X,Y,0),X+(OFFSETX/16),Y+(OFFSETY/16)] 
+      Else 
+         ED(X,Y,0)=0
+         KANDY(X,Y,0)=0
+      End If 
+   Next X
+Next Y
+For T=0 To 5
+   Rem KANDY(Rnd(SIZEX),Rnd(SIZEY),0)=21
+Next T
+Return 
+
+MAKERANDOMGRID:
+For X=0 To((SIZEX-1)/2)
+   For Y=0 To SIZEY-1
+      ED(X,Y,0)=0
+      ED(X,Y,1)=Rnd(2)
+      ED((SIZEX-1)-X,Y,0)=0
+      ED((SIZEX-1)-X,Y,1)=ED(X,Y,1)
+   Next Y
+Next X
+Gosub RELOAD
+Return 
+
+RELOAD:
+For X=0 To SIZEX-1
+   For Y=0 To SIZEY-1
+      For T=0 To 3
+         If T>0
+            KANDY(X,Y,T)=ED(X,Y,T)
+         Else 
+            If ED(X,Y,1)>-1
+               KANDY(X,Y,T)=-1
+            Else 
+               KANDY(X,Y,T)=0
+            End If 
+         End If 
+      Next T
+   Next Y
+Next X
+Rem Gosub CREATEGRID 
+Return 
+
+_LOADLEVEL:
+POANG=0
+If Exist("levels/level "+Str$(LEVEL)+".lvl")
+   Open In 1,"levels/level "+Str$(LEVEL)+".lvl"
+   For X=0 To SIZEX-1
+      For Y=0 To SIZEY-1
+         ED(X,Y,0)=-1
+         
+         Input #1,ED(X,Y,1)
+         Input #1,ED(X,Y,2)
+         Input #1,ED(X,Y,3)
+      Next Y
+   Next X
+   Close 1
+   Gosub RELOAD
+Else 
+   For X=0 To SIZEX-1
+      For Y=0 To SIZEY-1
+         ED(X,Y,1)=0
+         ED(X,Y,2)=0
+         ED(X,Y,3)=0
+      Next Y
+   Next X
+   Gosub RELOAD
+End If 
+Return 
+
+_SAVELEVEL:
+
+Open Out 1,"levels/level "+Str$(LEVEL)+".lvl"
+For X=0 To SIZEX-1
+   For Y=0 To SIZEY-1
+      Print #1,ED(X,Y,1)
+      Print #1,ED(X,Y,2)
+      Print #1,ED(X,Y,3)
+   Next Y
+Next X
+Close 1
+
+Return 
+
+Rem Procedure PKANDY[C,X,Y,OFE]
+
+PKANDY:
+Rem X2=GX-(OFFSETX/16) 
+Rem Y2=GY-(OFFSETY/16) 
+B2=9 : SP=0 : B=0
+Rem If X2<0 or Y2<0 or X2>30 or Y2>20 : Return : End If  
+If KANDY(X2,Y2,1)>0 : B=KANDY(X2,Y2,1) : End If 
+If KANDY(X2,Y2,1)=-1 : B=4 : End If 
+If GC>0
+   B2=9 : SP=0
+   If GC>10 and GC<20 : SP=1 : GC=GC-10 : End If 
+   If GC>20 and GC<30 : SP=2 : GC=GC-20 : End If 
+   If GC>30 and GC<40 : B=2 : GC=GC-30 : End If 
+   If GC>40 and GC<50 : B=3 : GC=GC-40 : End If 
+   Rem Ink GC 
+   GC=GC-1
+   Rem Bar gX*16+2,gY*16+2 To gX*16+14,gY*16+14 
+   
+   
+   
+   Screen Copy 2,B*16,B2*16,B*16+16,B2*16+16 To 1,GX*16,GY*16
+   
+   
+   Rem Screen Copy 2,T*16+1,C*16+1,T*16+16,C*16+16 To 1,gX*16+1,gY*16+1 
+   Rem Screen 2 
+   Rem Get Bob 1,T*16+1,C*16+1 To T*16+16,C*16+16 
+   Rem Screen 1 
+   If EMODE$="testgame" or EMODE$="placegems"
+      Rem Paste Bob gX*16+2,gY*16+2,C+7  
+      Rem Paste Bob gX*16,gY*16,C+7  
+      
+      If SP=0
+         Paste Bob GX*16+1,GY*16+1+GOFE,GC+1
+      End If 
+      If SP=1
+         Paste Bob GX*16+1,GY*16+1+GOFE,GC+13
+      End If 
+      If SP=2
+         Paste Bob GX*16+1,GY*16+1+GOFE,26
+      End If 
+   End If 
+Else 
+   Rem B=0
+   B2=9
+   Screen Copy 2,B*16,B2*16,B*16+16,B2*16+16 To 1,GX*16,GY*16
+End If 
+Return 
+
+

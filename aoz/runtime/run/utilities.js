@@ -1381,12 +1381,12 @@ AOZContext.prototype.deleteElement = function( contextName, index, errorString )
 		for ( var e in this.list )
 		{
 			if ( this.list[ e ] == index )
-				found = e;
+				found = this.list[ e ];
 		}
 		if ( found )
 		{
-			contextIndexName = contextName + ':' + found.contextName;
-			contextIndex = contextName + ':' + found.contextIndex;
+			contextIndex = contextName + ':' + found.index;
+			contextIndexName = contextName + ':' + this.list[ contextIndex ].name;
 		}
 		else
 		{

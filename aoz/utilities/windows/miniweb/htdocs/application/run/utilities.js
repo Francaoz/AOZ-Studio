@@ -1,13 +1,20 @@
-/*@****************************************************************************
-*
-*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
-*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
-*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
-*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
-*
-****************************************************************************@*/
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
 /** @file
  *
  * AOZ Runtime
@@ -548,6 +555,13 @@ Utilities.prototype.skipSpaces = function( line )
 	while ( ( line.charAt( position ) == ' ' || line.charAt( position ) == '\t' ) && position < line.length )
 		position++;
 	return line.substring( position );
+};
+Utilities.prototype.flattenObject = function( objet )
+{
+	var result = [];
+	for ( var i in objet )
+		result.push( objet[ i ] );
+	return result;
 };
 
 
@@ -1348,6 +1362,12 @@ AOZContext.prototype.setElement = function( contextName, element, index, replace
 	}
 	return index;
 };
+AOZContext.prototype.addElement = function( contextName, element, errorString = 'internal_error' )
+{
+	var index = this.numberOfElementsInContext[ contextName ];
+	this.setElement( contextName, element, this.numberOfElementsInContext[ contextName ], false, errorString );
+	return index;
+};
 AOZContext.prototype.deleteElement = function( contextName, index, errorString )
 {
 	if ( typeof index == 'number' && index < 0 )
@@ -1357,8 +1377,22 @@ AOZContext.prototype.deleteElement = function( contextName, index, errorString )
 
 	if ( this.aoz.utilities.isObject( index ) )
 	{
-		contextIndexName = contextName + ':' + index.name;
-		contextIndex = contextName + ':' + index.index;
+		var found;
+		for ( var e in this.list )
+		{
+			if ( this.list[ e ] == index )
+				found = this.list[ e ];
+		}
+		if ( found )
+		{
+			contextIndex = contextName + ':' + found.index;
+			contextIndexName = contextName + ':' + this.list[ contextIndex ].name;
+		}
+		else
+		{
+			if ( errorString ) throw errorString;
+			return;	
+		}
 	}
 	else if ( typeof index == 'string' )
 	{
@@ -1383,6 +1417,10 @@ AOZContext.prototype.deleteElement = function( contextName, index, errorString )
 	{
 		this.listSorted.splice( element.indexSorted, 1 );
 		this.listSortedInContext[ contextName ].splice( element.indexSortedInContext, 1 );
+		for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
+			this.listSortedInContext[ contextName ][ i ].indexSortedInContext = i;
+		for ( var i = 0; i < this.listSorted.length; i++ )
+			this.listSorted[ i ].indexSorted = i;	
 	}
 	this.numberOfElements--;
 	this.numberOfElementsInContext[ contextName ]--;
@@ -1610,23 +1648,45 @@ AOZContext.prototype.moveBefore = function( contextName, source, destination )
 {
 	if ( this.options.sorted )
 	{
+		var result = [];
 		if ( contextName )
 		{			
-			this.listSortedInContext[ contextName ].splice( source.indexSortedInContext, 1 );
-			if ( source.indexSortedInContext < destination.indexSortedInContext )
-				this.listSortedInContext[ contextName ].splice( destination.indexSortedInContext, 0, source );
-			else
-				this.listSortedInContext[ contextName ].splice( destination.indexSortedInContext + 1, 0, source );
 			for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
-				this.listSortedInContext[ contextName ][ i ].indexSortedInContext = i;
+			{
+				var element = this.listSortedInContext[ contextName ][ i ];
+				if ( element == destination )
+				{
+					source.indexSortedInContext = result.length;
+					result.push( source );
+					destination.indexSortedInContext = result.length;
+					result.push( destination );
+				}
+				else if ( element != source )
+				{
+					element.indexSortedInContext = result.length;
+					result.push( source );
+				}
+			}
+			this.listSortedInContext[ contextName ] = result;
+			result = [];
 		}
-		this.listSorted.splice( source.indexSorted, 1 );
-		if ( source.indexSorted < destination.indexSorted )
-			this.listSorted.splice( destination.indexSorted, 0 , source );
-		else
-			this.listSorted.splice( destination.indexSorted + 1, 0, source );
 		for ( var i = 0; i < this.listSorted.length; i++ )
-			this.listSorted[ i ].indexSorted = i;
+		{
+			var element = this.listSorted[ i ];
+			if ( element == destination )
+			{
+				source.indexSorted = result.length;
+				result.push( source );
+				destination.indexSorted = result.length;
+				result.push( destination );
+			}
+			else if ( element != source )
+			{
+				element.indexSorted = result.length;
+				result.push( source );
+			}
+		}
+		this.listSorted = result;
 	}
 };
 

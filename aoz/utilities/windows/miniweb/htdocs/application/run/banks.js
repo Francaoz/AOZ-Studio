@@ -1,13 +1,20 @@
-/*@****************************************************************************
-*
-*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
-*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
-*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
-*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
-*
-****************************************************************************@*/
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
 /** @file
  *
  * AOZ Runtume
@@ -25,7 +32,6 @@ function Banks( aoz )
 	this.manifest = aoz.manifest;
 	this.banks = [];
 	this.quickBanks = [];
-	this.extraSounds = {};
 	this.numberOfSoundsToPreload = typeof this.aoz.manifest.sounds.numberOfSoundsToPreload == 'undefined' ? 4 : this.aoz.manifest.sounds.numberOfSoundsToPreload; 
 	this.soundPoolSize = this.aoz.manifest.sounds.soundPoolSize;
 
@@ -43,6 +49,7 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 		throw 'illegal_function_call';
 	if ( !this.manifest.unlimitedBanks && number > 16 )
 		throw 'illegal_function_call';
+	length = typeof length == 'undefined' ? 0 : length;
 	if ( length < 0 )
 		throw 'illegal_function_call';
 	if ( !type || type == '' )
@@ -55,26 +62,26 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 	switch ( type )
 	{
 		case 'images':
-			this.banks[ number ][ contextName ] = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domaine: type } );
+			this.banks[ number ][ contextName ] = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domaine: type, type: type } );
 			break;
 		case 'icons':
-			this.banks[ number ][ contextName ] = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domain: type } );
+			this.banks[ number ][ contextName ] = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domain: type, type: type } );
 			break;
 		case 'musics':
-			this.banks[ number ][ contextName ] = new SampleBank( this.aoz, [], [], { domain: type } );
+			this.banks[ number ][ contextName ] = new SampleBank( this.aoz, [], [], { domain: type, type: type } );
 			break;
 		case 'samples':
-			this.banks[ number ][ contextName ] = new SampleBank( this.aoz, [], [], { domain: type } );
+			this.banks[ number ][ contextName ] = new SampleBank( this.aoz, [], [], { domain: type, type: type } );
 			break;	
 		case 'picpac':
 		case 'amal':
-			this.banks[ number ][ contextName ] = new DataBank( this.aoz, 0, [], { domain: type } );
+			this.banks[ number ][ contextName ] = new DataBank( this.aoz, undefined, 0, { domain: type, type: type } );
 			break;
+		case 'work':
 		case 'tracker':
 		case 'data':
-		case 'work':
 		default:
-			this.banks[ number ][ contextName ] = new DataBank( this.aoz, length, [], { domain: type } );
+			this.banks[ number ][ contextName ] = new DataBank( this.aoz, undefined, length, { domain: type, type: type } );
 			break;
 	}
 	this.quickBanks[ contextName ] = [];
@@ -111,27 +118,30 @@ Banks.prototype.getBank = function( bankIndex, contextName, bankType )
 	if ( !this.manifest.unlimitedBanks && bankIndex > 16 )
 		throw 'illegal_function_call';
 
-	var bank = this.banks[ bankIndex ];
-	if ( !bank )
+	if ( !this.banks[ bankIndex ] )
 		throw 'bank_not_reserved';
-	bank = bank[ contextName ];
+	var bank = this.banks[ bankIndex ][ contextName ];
 	if ( !bank )
 		throw 'bank_not_reserved';
 	if ( bankType && !bank.isType( bankType ))
 		throw 'bank_type_mismatch';
 	return bank;
 };
-Banks.prototype.erase = function( number, contextName )
+Banks.prototype.erase = function( bankIndex, contextName )
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 
-	if ( number < 1 )
+	if ( bankIndex < 1 )
 		throw 'illegal_function_call';
-	if ( !this.manifest.unlimitedBanks && number > 16 )
+	if ( !this.manifest.unlimitedBanks && bankIndex > 16 )
 		throw 'illegal_function_call';
 
-	var bank = this.getBank( number, contextName );
-	bank.deleteElement( contextName, number );			
+	this.getBank( bankIndex, contextName ).erase();
+	if ( !this.banks[ bankIndex ] )
+		throw 'bank_not_reserved';
+	if ( !this.banks[ bankIndex ][ contextName ] )
+		throw 'bank_not_reserved';
+	this.banks[ bankIndex ] = this.utilities.cleanObject( this.banks[ bankIndex ], contextName );
 };
 Banks.prototype.getBankElement = function( bankIndex, elementNumber, contextName )
 {
@@ -144,7 +154,7 @@ Banks.prototype.getStart = function( bankIndex, contextName, elementNumber )
 	elementNumber = typeof elementNumber == 'undefined' ? 1 : elementNumber;
 	var bank = this.getBank( bankIndex, contextName );
 	if ( bank.type == 'tracker' || bank.type == 'data' || bank.type == 'work' )
-		return bank.getElement( elementNumber ).memoryBlock.memoryHash * this.aoz.memoryHashMultiplier;
+		return bank.getElement( elementNumber ).memoryHash * this.aoz.memoryHashMultiplier;
 	throw 'bank_type_mismatch';
 };
 Banks.prototype.getLength = function( bankIndex, contextName )
@@ -160,20 +170,28 @@ Banks.prototype.listBank = function( contextName )
 		if ( this.banks[ b ] )
 		{
 			var bank = this.banks[ b ][ contextName ];
-			switch ( bank.domain )
+			if ( bank )
 			{
-				case 'images':
-				case 'icons':
-				case 'samples':
-				case 'musics':
-				case 'amal':
-					result = ' ' + b + ' - ' + bank.domain + '     ' + ' L: ' + bank.getLength();
-					break;
-				default:
-					result = ' ' + b + ' - ' + bank.domain + '     ' + 'S: ' + this.aoz.hex$( bank.memoryBlock.memoryHash >> 8, 8 ) + ' L: ' + bank.getLength();
-					break;
+/*				
+				switch ( bank.domain )
+				{
+					case 'images':
+					case 'icons':
+					case 'samples':
+					case 'musics':
+					case 'amal':
+						result = ' ' + b + ' - ' + bank.domain + '     ' + ' L: ' + bank.getLength();
+						break;
+					default:
+						result = ' ' + b + ' - ' + bank.domain + '     ' + ' L: ' + bank.getLength();
+						break;
+				}
+*/				
+				this.aoz.currentScreen.currentTextWindow.printUsing( '###', [ b ], false );
+				this.aoz.currentScreen.currentTextWindow.print( ' - ', false );
+				this.aoz.currentScreen.currentTextWindow.printUsing( '~~~~~~~~~~~~~~~~~ L: ', [ bank.domain ], false );
+				this.aoz.currentScreen.currentTextWindow.print( '' + bank.getLength(), true );
 			}
-			this.aoz.currentScreen.currentTextWindow.print( result, true );
 		}
 	}
 };
@@ -530,6 +548,9 @@ ImageBank.prototype.setHotSpot = function( index, position )
 			image.hotSpotY = position.y;
 	}
 };
+ImageBank.prototype.erase = function( index )
+{
+};
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -539,15 +560,9 @@ ImageBank.prototype.setHotSpot = function( index, position )
 //////////////////////////////////////////////////////////////////////////
 Banks.prototype.getSound = function( index, callback, extra, contextName, bankIndex )
 {
-	var sample, bank;
-	if ( typeof index == 'string' && this.extraSounds[ index ] )
-		sample = this.extraSounds[ index ];
-	else
-	{
-		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
-		bank = this.getBank( bankIndex, contextName, 'samples' );
-		sample = bank.getElement( index );
-	}
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	var bank = this.getBank( bankIndex, contextName, 'samples' );
+	var sample = bank.getElement( index );
 
 	// A free sound?
 	var sound;
@@ -579,27 +594,6 @@ Banks.prototype.getSound = function( index, callback, extra, contextName, bankIn
 		return;
 	}
 	callback( false, null, extra );
-};
-Banks.prototype.loadExtraSound = function( filename, type, bankIndex, contextName )
-{
-	var self = this;
-	var path = './resources/samples/' + filename;
-	//contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
-	this.utilities.loadMultipleUnlockedSound( path, this.numberOfSoundsToPreload, {}, function( response, soundsLoaded, name )
-	{
-		if ( response )
-		{
-			var start = name.indexOf( '.' );
-			if ( start >= 0 )
-				name = name.substring( start + 1 );
-			self.extraSounds[ name ] =
-			{
-				name: name,
-				pathname: path,
-				sounds: soundsLoaded
-			};
-		}
-	}, this.utilities.getFilename( filename ) );
 };
 Banks.prototype.insertSample = function( index, name, tags, sample, contextName, bankIndex )
 {
@@ -752,6 +746,9 @@ SampleBank.prototype.deleteRange = function( first, last )
 SampleBank.prototype.setTags = function( index, tags )
 {
 };
+SampleBank.prototype.erase = function( index )
+{
+};
 
 
 
@@ -768,8 +765,8 @@ function DataBank( aoz, loadList, length, options )
 	this.context = new AOZContext( this.aoz, this.domain, {} );
 	if ( loadList )
 		this.loadList( loadList, options.tags );
-	else
-		this.context.setElement( this.domain, new MemoryBlock( this.aoz, length, this.manifest.compilation.endian ), 1, true );
+	else if ( length > 0 )
+		this.context.setElement( this.domain, this.aoz.allocMemoryBlock( length, this.aoz.manifest.compilation.endian ), 1, true );
 };
 DataBank.prototype.isType = function( type )
 {
@@ -795,7 +792,7 @@ DataBank.prototype.loadList = function( loadList, tags )
 		{
 			if ( response )
 			{
-				var block = new MemoryBlock( self.aoz, data, self.aoz.manifest.compilation.endian );
+				var block = nself.aoz.allocMemoryBlock( data, self.aoz.manifest.compilation.endian );
 				block.path = extra.path;
 				block.name = extra.name;
 				self.context.setElement( self.domain, block, extra.index, true );
@@ -825,6 +822,11 @@ DataBank.prototype.setElement = function( index, block, tags )
 {
 	this.context.setElement( this.domain, block, index, true );
 };
+DataBank.prototype.erase = function()
+{
+	for ( var block = this.context.getFirstElement( this.domain ); block !=null; block = this.context.getNextElement( this.domain ) )
+		this.aoz.freeMemoryBlock( block );
+};
 DataBank.prototype.delete = function( index )
 {
 	return this.context.deleteElement( this.domain, index );
@@ -835,9 +837,17 @@ DataBank.prototype.deleteRange = function( first, last )
 };
 DataBank.prototype.getLength = function( index )
 {
-	if ( typeof index == 'undefined' )
-		return this.context.numberOfElements;
-	return this.getElement( index ).length;
+	if ( this.type == 'tracker' )
+	{
+		if ( typeof index == 'undefined' )
+			return this.context.numberOfElements;			
+		else
+			return this.getElement( index ).length;
+	}		
+	var element = this.context.getElement( this.domain, 1 );
+	if ( element.aoz )
+		return element.length;
+	return 0
 };
 DataBank.prototype.setTags = function( index, tags )
 {

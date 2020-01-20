@@ -1,13 +1,20 @@
-/*@****************************************************************************
-*
-*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
-*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
-*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
-*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
-*
-****************************************************************************@*/
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file license.pdf.                                                 *
+*                                                                              *
+*****************************************************************************@*/
 /** @file
  *
  * AOZ Runtime
@@ -254,6 +261,77 @@ Renderer.prototype.render = function( force )
 		// Draw screens
 		if ( this.aoz.screensContext.isAny() )
 		{
+			// Rainbows
+			var rainbowsToRemove;
+			var rainbowsToDraw;
+			if ( this.aoz.rainbows )
+			{
+				var numberOfRainbows = 0;
+				var rainbows = [];
+				for ( var rainbow = this.aoz.rainbows.context.getFirstElement( this.aoz.currentContextName ); rainbow != null; rainbow = this.aoz.rainbows.context.getNextElement( this.aoz.currentContextName ) )
+					rainbows[ numberOfRainbows++ ] = rainbow;
+
+				if ( this.aoz.rainbows.mode == 'slow' )
+				{ 
+					if ( numberOfRainbows )
+						rainbowsToDraw = rainbows;
+				}	
+				else if ( this.aoz.rainbows.mode == 'fast' )
+				{
+					if ( numberOfRainbows > 0 )
+					{
+						// Insert rainbow screen at the correct Z position in screens
+						var screen;
+						var screens = [];
+						var countScreens = 0;
+						for ( screen = this.aoz.screensContext.getFirstElement( this.aoz.currentContextName ); screen != null; screen = this.aoz.screensContext.getNextElement() )
+						{
+							for ( var r = 0; r < numberOfRainbows; r++ )
+							{
+								var rainbow = rainbows[ r ];
+								if ( countScreens == rainbow.zPosition && rainbow.screen )
+								{ 
+									if ( !screens[ r ] )
+									{
+										screens[ r ] = screen;
+										countScreens++;
+										break;
+									}
+								}
+							}
+						}
+						if ( countScreens )
+						{
+							rainbowsToRemove = [];
+							for ( var r = 0; r < rainbows.length; r++ )
+							{
+								if ( rainbows[ r ].screen )
+								{
+									rainbowsToRemove.push( rainbows[ r ] );
+									rainbows[ r ].screen.show( true );
+									if ( screens[ r ] )
+									{
+										this.aoz.screensContext.addElement( this.aoz.currentContextName, rainbows[ r ].screen );
+										this.aoz.screensContext.moveBefore( this.aoz.currentContextName, rainbows[ r ].screen, screens[ r ] );
+										screens[ r ] = null;
+									}
+								}
+							}
+							for ( var r = 0; r < rainbows.length; r++ )
+							{
+								if ( rainbows[ r ].screen )
+								{
+									if ( screens[ r ] )
+									{
+										this.aoz.screensContext.addElement( this.aoz.currentContextName, rainbows[ r ] );
+									}
+								}
+							}
+						}
+					}			
+				}
+			}
+
 			this.aoz.screensContext.parseAll( undefined, function( screen )
 			{
 				if ( !screen.hidden )
@@ -352,6 +430,21 @@ Renderer.prototype.render = function( force )
 					}
 				}
 			} );
+			if ( rainbowsToRemove )
+			{
+				for ( var r = 0; r < rainbowsToRemove.length; r++ )
+				{
+					this.aoz.screensContext.deleteElement( this.aoz.currentContextName, rainbowsToRemove[ r ] );
+				}
+			}
+			else if ( rainbowsToDraw )
+			{
+				for ( var r = 0; r < rainbowsToDraw.length; r++ )
+				{					
+					var rainbow = rainbowsToDraw[ r ];
+					rainbow.render( this.context, { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height } );
+				}
+			}
 		};
 
 		// Sprites!

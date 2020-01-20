@@ -1,13 +1,20 @@
-/*@****************************************************************************
-*
-*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
-*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
-*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
-*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
-*
-****************************************************************************@*/
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
 /** @file
  *
  * AOZ Runtime
@@ -608,7 +615,7 @@ function AOZ( canvasId, manifest )
 			}
 			else
 			{
-				self.currentContextName = self.section.contextName;
+				//self.currentContextName = self.section.contextName;
 				self.position = pop.position;
 				self.parent = pop.parent;
 				self.onError = pop.onError;
@@ -630,7 +637,7 @@ AOZ.prototype.run = function( section, position, parent, root )
 		onError: this.onError
 	} );
 	this.section = section;
-	this.currentContextName = section.contextName;
+	//this.currentContextName = section.contextName;
 	if ( typeof root != 'undefined' )
 		this.root = root;
 	this.position = position;
@@ -1920,7 +1927,7 @@ AOZ.prototype.setMouse = function()
 	function onMouseDown( event )
 	{
 		self.mouseButtons |= AOZ.buttonToMouse[ event.button ];
-		//self.clickMouse = self.mouseButtons;
+		self.clickMouse = self.mouseButtons;
 	}
 	function onMouseUp( event )
 	{
@@ -1928,7 +1935,7 @@ AOZ.prototype.setMouse = function()
 	}
 	function onClick( event )
 	{
-		self.clickMouse |= AOZ.buttonToMouse[ event.button ];
+		//self.clickMouse |= AOZ.buttonToMouse[ event.button ];
 	}
 	function onDblClick( event )
 	{
@@ -1941,6 +1948,10 @@ AOZ.prototype.setMouse = function()
 		if( event.stopPropagation != undefined )
 		 	event.stopPropagation();
 	}
+};
+AOZ.prototype.xor = function( a, b )
+{
+	return ( a && !b ) || ( !a && b );
 };
 AOZ.prototype.screenIn = function( number, x, y )
 {
@@ -2042,6 +2053,22 @@ AOZ.prototype.mouseZone = function()
 {
 	return this.hZone( undefined, this.xMouse, this.yMouse );
 };
+AOZ.prototype.setXMouse = function( x )
+{
+	this.xMouse = x;
+};
+AOZ.prototype.setYMouse = function( y )
+{
+	this.yMouse = y;
+};
+AOZ.prototype.getXMouse = function( x )
+{
+	return this.xMouse;
+};
+AOZ.prototype.getYMouse = function( y )
+{
+	return this.yMouse;
+};
 
 // Data/read
 AOZ.prototype.read = function( type )
@@ -2129,7 +2156,6 @@ AArray.prototype.dim = function( dimensions )
 		this.aoz.error = 10;
 		return;
 	}
-
 	var self = this;
 	this.dimensions = dimensions;
 	this.array = createArray( 0 );

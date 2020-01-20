@@ -12,7 +12,8 @@ for n = 0 to 34
 	ink rnd( 32 )
 	set pattern 0
 	set paint 0
-	polygon rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 )*/
+	polygon rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 ) to rnd( 320 ), rnd( 200 )
+*/
 	ink rnd( 32 )
 	set pattern n
 	set paint 1

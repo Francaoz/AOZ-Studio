@@ -1,13 +1,20 @@
-/*@****************************************************************************
-*
-*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
-*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
-*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
-*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
-*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
-*
-****************************************************************************@*/
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
 /** @file
  *
  * AOZ Runtime
@@ -242,7 +249,8 @@ function Errors( aoz )
 		"procedure_not_closed:Procedure not closed",
 		"non_contiguous_instructions:Non contiguous instruction definition",
 		"non_contiguous_functions:Non contiguous function definition",
-		"javascript_section_not_closed:Javascript section not closed"
+		"javascript_section_not_closed:Javascript section not closed",
+		"compiler_stuck_in_loop:Compiler stuck in loop"
 	];
 };
 Errors.prototype.getErrorFromId = function( id )
