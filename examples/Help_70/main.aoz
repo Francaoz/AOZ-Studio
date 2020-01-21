@@ -1,0 +1,130 @@
+'**********************************
+'*    AMOS Professional HELP 70   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Amos To Back  (line 11)
+'*                                *           Amos To Front (line 20)
+'*         Ronnie Simpson         *           Amos Here     (line 27)
+'**********************************           Amos Lock     (line 37)
+'                                             Amos Unlock   (line 45)
+'                                             System calls  (line 53)
+'------------------------------------------- 
+'Amos To Back
+'------------------------------------------- 
+'hide AMOS Pro. from view
+'
+'This instruction is used without parameters and will hide AMOS Professional 
+'from view and allow multi-tasking from the workbench or Cli, giving the 
+'same effect as pressing Amiga+A.
+'
+'------------------------------------------- 
+'Amos To Front 
+'------------------------------------------- 
+'bring AMOS Pro. to front
+'
+'This instruction reverses the effect of the previous Amos To Back command.
+'
+'------------------------------------------- 
+'Amos Here 
+'------------------------------------------- 
+'report of task on display 
+'
+'This function will return -1 (true) if AMOS Professional is being displayed 
+'otherwise it will be 0 (false). 
+'
+'eg.             If Not Amos Here Then Amos To Front 
+'
+'------------------------------------------- 
+'Amos Lock 
+'------------------------------------------- 
+'lock AMOS Pro. in display position
+'
+'This instruction brings AMOS Professional to the front (if it is hidden) and
+'then disables the Amiga+A hot keys. 
+'
+'------------------------------------------- 
+'Amos Unlock 
+'------------------------------------------- 
+'unlock hot keys 
+'
+'This instruction restores the Amiga+A hot keys reversing the effect of
+'the Amos Lock command.  
+'
+'------------------------------------------- 
+'System library calls
+'------------------------------------------- 
+'Amos Professional allows calls to the Amiga's internal system librarys, 
+'although this is not normally required as all useful routines have already
+'been incorporated. These routines are for experts only and a crash will 
+'almost certainly result if you do not know what you are doing. Further
+'reading will be required before using any of the following functions, the 
+'Amiga Rom kernal manuals are a good place to start. 
+'
+'
+'            =Doscall( function)         (Dos library) 
+'            =Execall( function)         (Exec library)
+'            =Gfxcall( function)         (Graphics library)
+'            =Intcall( function)         (Intuition library) 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Dim X(21),Y(21),DX(21),DY(21)
+Screen Open 1,320,32,4,Lowres : Hide : Paper 0 : Pen 1 : Screen Hide 
+A$="THEOUTERLIMITS"
+'
+Rem *** grab some bobs for the text
+For N=1 To Len(A$) : Locate 0,0 : Print Mid$(A$,N,1) : Wait Vbl 
+Get Bob N,0,0 To 7,7 : Next 
+'
+Rem ***  tidy up the screen and plot some stars
+'
+Screen Open 0,640,200,16,Hires : Flash Off : Curs Off : Cls 0 : Hide 
+For N=1 To 16 : Colour N,0 : Next 
+For N=1 To 300 : Ink Rnd(13)+2 : Plot Rnd(638)+1,Rnd(198)+1 : Next 
+Ink 7 : Box 0,0 To 639,199 : Double Buffer 
+'
+Rem *** position the text bobs 
+'
+For N=8 To 10 : Bob N,N*20,60,N-7 : Y(N)=60 : Next 
+For N=11 To 15 : Bob N,N*20,80,N-7 : Y(N)=80 : Next 
+For N=16 To 21 : Bob N,N*20,100,N-7 : Y(N)=100 : Next 
+For N=8 To 21 : X(N)=N*20 : Read DX(N),DY(N) : Next 
+'
+Rem *** fade in
+'
+Fade 10,$2,$2,$222,$333,$444,$555,$666,$777,$888,$999,$AAA,$BBB,$CCC,$DDD,$EEE,$111
+Wait 150 : Fade 10,,$FF : Wait 150
+'
+Rem *** move the text around 
+'
+Pen 13 : Paper 0 : Locate 0,24 : Centre "We can control the horizontal"
+For R=1 To 3 : For T=1 To 36 : For N=1 To 21
+   Add X(N),DX(N) : Bob N,X(N),Y(N), : Next : Next 
+   For T=1 To 36 : For N=1 To 21
+Add X(N),-DX(N) : Bob N,X(N),Y(N), : Next : Next : Next 
+Locate 0,24 : Centre " We can control the vertical " : Wait 60
+For R=1 To 3 : For T=1 To 30 : For N=1 To 21
+   Add Y(N),DY(N) : Bob N,X(N),Y(N), : Next : Next 
+   For T=1 To 30 : For N=1 To 21
+Add Y(N),-DY(N) : Bob N,X(N),Y(N), : Next : Next : Next 
+'
+Rem *** togle Amos professional to front and back
+'
+Locate 0,24 : Centre "We can control the workbench and CLI" : Wait 100
+For R=20 To 1 Step -1
+   Amos To Back : Wait R : Amos To Front : Wait R
+Next 
+'
+Rem *** random exit of text
+'
+For N=1 To 21 : DX(N)=Rnd(8)-3 : DY(N)=Rnd(6)-3
+   If DY(N)=0 Then DY(N)=2
+Next 
+Flash 1,"(0FF,2)(F00,2)(00f,2)"
+For T=1 To 120 : For N=1 To 21
+      Add X(N),DX(N) : Add Y(N),DY(N) : Bob N,X(N),Y(N),
+Next : Next : Flash Off : Fade 3 : Wait 30
+'
+Edit 
+'
+Data -2,-2,0,0,2,2,-2,-2,-1,-1,0,0,1,1,2,2,-3,-3,-2,-2,-1,-1,1,1,2,2,3,3

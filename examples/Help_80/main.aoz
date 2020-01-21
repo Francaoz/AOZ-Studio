@@ -1,0 +1,123 @@
+'**********************************
+'*    AMOS PROFESSIONAL HELP 80   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Med Load    (line  11)
+'*                                *            Med Play    (line  25)
+'*         Ronnie Simpson         *            Med Stop    (line  40)
+'**********************************            Med Cont    (line  50)
+'                                              Med Midi On (line  60)
+'
+'------------------------------------------- 
+'Med Load
+'------------------------------------------- 
+'Load a Med module 
+'
+'                       +--->name of module to be loaded 
+'                       |   +--->bank number 
+'eg.        Med Load "name",7  
+'
+'Please note that the bank will be allocated in chip memory and will not be
+'saved along with the program. 
+'This instruction will attempt to load the Medplayer.library if this is not
+'available to the system an error will be reported.
+'
+'------------------------------------------- 
+'Med Play
+'------------------------------------------- 
+'play a loaded med module
+'
+'There are 3 possible formats of this instruction:-
+'
+'                 Med Play       (play the last loaded module) 
+'                 Med Play 7     (play the module in bank number 7)
+'
+'Some med modules can contain more than one song, the 3rd. version of the
+'instruction caters for this by allowing the optional song number parameter. 
+'
+'                 Med Play 7,1   (play song number 1 from bank 7)
+'
+'------------------------------------------- 
+'Med Stop
+'------------------------------------------- 
+'pause med song
+'
+'This instruction is used without parameters and will stop the Med song
+'currently being played. The song may be re-started with Med Cont. 
+'
+'eg.              Med Stop 
+'
+'------------------------------------------- 
+'Med Cont
+'------------------------------------------- 
+'re-start a paused med song
+'
+'This instruction is used without parameters and will re-start a Med song
+'from the position where it was stopped. 
+'
+'eg.              Med Cont 
+'
+'------------------------------------------- 
+'Med Midi On 
+'------------------------------------------- 
+'switch on med MIDI
+'
+'This instruction must be issued before the medplayer.library is opened ie-
+'before any modules are loaded.
+'Obviously a MIDI synthetiser must be connected to the computer and the
+'module must contain MIDI data for this instruction to have any effect.  
+'
+'eg.               Med Midi On 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** draw the disco lights
+'
+Screen Open 0,640,200,16,Hires
+Flash Off : Curs Off : Cls 0
+For X=56 To 600 Step 88
+   Ink Rnd(11)+2
+   For Y=32 To 180 Step 44
+      For R=2 To 20 Step 2
+         Box X-R*2,Y-R To X+R*2,Y+R
+         Ink Rnd(11)+2
+         Circle X,Y,R
+      Next 
+   Next 
+Next 
+'
+Rem *** set out the mouse zones
+'
+Reserve Zone 5
+Ink 1 : Box 0,0 To 639,199
+Ink 13 : Box 1,1 To 638,198
+Pen 14 : Paper 15
+Locate 3,22 : Print Border$(Zone$(" MED Pause ",1),2)
+Locate 18,22 : Print Border$(Zone$(" MED Continue ",2),2)
+Locate 36,22 : Print Border$(Zone$(" Quit ",3),2)
+Locate 46,22 : Print Border$(Zone$(" Change - ",4),2)
+Locate 60,22 : Print Border$(Zone$(" Change + ",5),2)
+Set Rainbow 1,0,196,"","","(1,1,15)(2,-1,15)" : Rainbow 1,0,53,196
+Med Midi On 
+Palette 0,$FF,0,0,0,0,0,0,0,0,0,0,0,0,$FF0,0
+'
+Rem *** load and start the Med module
+'
+Med Load "AMOSPro_Examples:Music/Med_Module",7
+Med Play 7 : W=2
+Locate 74,22 : Print Border$(Str$(W)+" ",2)
+'
+Rem *** check the buttons and flash the graphics 
+'
+Do 
+   M=Mouse Zone
+   If Mouse Key and M=1 Then Med Stop : FLAG=True
+   If Mouse Key and M=2 Then Med Cont : FLAG=False
+   If Mouse Key and M=3 Then Med Stop : Edit 
+   If Mouse Key and M=4 and W>1 Then Dec W : Locate 74,22 : Print Border$(Str$(W)+" ",2) : Wait 2
+   If Mouse Key and M=5 and W<9 Then Inc W : Locate 74,22 : Print Border$(Str$(W)+" ",2) : Wait 2
+   If FLAG=False
+      Colour Rnd(11)+2,Rnd(4095)
+      Wait W
+   End If 
+Loop 

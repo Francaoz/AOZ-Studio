@@ -160,7 +160,7 @@ End Instruction
 Instruction "writing", _style1, _style2
 {
 	#errors
-	this.aoz.currentScreen.currentTextWindow.writing(%_style1,%_style2);
+	this.aoz.currentScreen.currentTextWindow.setWriting(%_style1,%_style2);
 }
 End Instruction
 
@@ -251,22 +251,22 @@ End Instruction
 Function "cup$"
 {
 }
-End Function( {"$(COMDY-1COM)$"} )
+End Function( {"$(COMdy-1COM)$"} )
 
 Function "cdown$"
 {
 }
-End Function( {"$(COMDY1COM)$"} )
+End Function( {"$(COMdy1COM)$"} )
 
 Function "cleft$"
 {
 }
-End Function( {"$(COMDX-1COM)$"} )
+End Function( {"$(COMdx-1COM)$"} )
 
 Function "cright$"
 {
 }
-End Function( {"$(COMDX1COM)$"} )
+End Function( {"$(COMdx1COM)$"} )
 
 Instruction "cup"
 {
@@ -310,12 +310,12 @@ End Instruction
 
 Instruction "remember x"
 {
-	this.aoz.currentScreen.currentTextWindow.locate(this.aoz.currentScreen.currentTextWindow.memoryX);
+	this.aoz.currentScreen.currentTextWindow.locate({x:this.aoz.currentScreen.currentTextWindow.memoryX});
 }
 End Instruction
 Instruction "remember y"
 {
-	this.aoz.currentScreen.currentTextWindow.locate(undefined,this.aoz.currentScreen.currentTextWindow.memoryY);
+	this.aoz.currentScreen.currentTextWindow.locate({y:this.aoz.currentScreen.currentTextWindow.memoryY});
 }
 End Instruction
 
@@ -342,7 +342,7 @@ End Instruction
 Instruction "hscroll", _dx
 {
 	#errors
-	this.aoz.currentScreen.currentcurrentTextWindowWindow.hScroll(%_dx);
+	this.aoz.currentScreen.currentTextWindow.hScroll(%_dx);
 }
 End Instruction
 

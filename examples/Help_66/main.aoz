@@ -1,0 +1,181 @@
+'**********************************
+'*    AMOS Professional HELP 66   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Get Block  (line 21)
+'*                                *            Put Block  (line 40)
+'*         Ronnie Simpson         *            Del Block  (line 65)
+'**********************************            Get Cblock (line 76)
+'                                              Put Cblock (line 87)
+'                                              Del Cblock (line 102) 
+'------------------------------------------- 
+'Blocks
+'------------------------------------------- 
+'Blocks are images which can be grabbed into memory and pasted onto any
+'screen, the images stored are treated as temporary data and are not saved 
+'along with your program. (unlike Icons) 
+'One common use of the set of block instructions is to save and replace
+'the areas under your dialogue boxes etc.  
+'Please note that images are clipped to the nearest 8 pixel boundary.  
+'
+'------------------------------------------- 
+'Get Block 
+'------------------------------------------- 
+'grab a rectangular area from the screen 
+'
+'                     +--->block image number
+'                     |   +--->top left screen coordinates of rectangle
+'                     |   |    +--->width of rectangle 
+'                     |  / \   |  +--->height of rectangle 
+'           Get Block 1,10,20,30,40
+'
+'This instruction grabs and stores the rectangular image from the current
+'screen, as a default when it is redrawn it will replace and overwrite any 
+'existing graphics already on screen but an optional mask parameter may  
+'be added which will create a mask resulting in colour 0 becoming transparent. 
+'
+'           Get Block 1,10,20,30,40,1  (mask=1 colour zero transparent)
+'           Get Block 1,10,20,30,40,0  (mask=0 default replace mode) 
+'            
+'------------------------------------------- 
+'Put Block 
+'------------------------------------------- 
+'place copy of block on screen 
+'
+'In its simplest form the Put Block instruction will place a copy of the 
+'image on screen at the same position as it was saved:-  
+'
+'           Put Block 1
+'
+'If a pair of X,Y coordinates are added the block will be positioned at the
+'new position
+'
+'           Put Block 1,20,40
+'
+'It is also possible to sellect the screen planes and blitter mode by
+'adding a further two parameters. (only used for special effects)  
+'
+'                                 +--->screen planes bitmap  
+'                                 |        +--->blitter mode 
+'           Put Block 1,20,40,%101010,%01100000
+'
+'See sections on screen copy and set bob for more details of the special 
+'effects possible. 
+'
+'------------------------------------------- 
+'Del Block 
+'------------------------------------------- 
+'delete a block
+'
+'If this instruction is used without parameters the all blocks will be 
+'deleted otherwise only the given block is erased from memory. 
+'
+'           Del Block 1  (delete only block number 1)
+'           Del Block    (delete all stored blocks)  
+'
+'------------------------------------------- 
+'Get Cblock  
+'------------------------------------------- 
+'grab and compact a rectangular area from the screen 
+'
+'           Get Cblock 1,10,20,30,40 
+'
+'This instruction is similar in syntax etc. to the above Get Block but 
+'blocks grabbed will be compacted (saving on the memory required to  
+'store the block) by a routine optimised for speed.  
+'
+'------------------------------------------- 
+'Put Cblock  
+'------------------------------------------- 
+'place copy of a compacted block on screen 
+'
+'In its simplest form the Put Cblock instruction will place a copy of the  
+'image on screen at the same position as it was saved:-  
+'
+'           Put Cblock 1 
+'
+'If a pair of X,Y coordinates are added the block will be positioned at the
+'new position
+'
+'           Put Cblock 1,20,40 
+'
+'------------------------------------------- 
+'Del Cblock
+'------------------------------------------- 
+'delete a compacted block
+'
+'If this instruction is used without parameters the all compacted blocks 
+'will be deleted otherwise only the given block is erased from memory. 
+'
+'           Del Cblock 1  (delete only compacted block number 1) 
+'           Del Cblock    (delete all stored compacted blocks)   
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem *** Print the instructions etc.
+Dim X(16),Y(16),C(16)
+Flash Off : Curs Off : Palette $4,$BB0,$B0B,$BB : Hide 
+Cls 0 : Pen 14 : Paper 0 : Print "*" : Get Sprite 1,0,0 To 7,7 : Cls 0
+Locate 0,5 : Centre "Try to reassemble the logo back"
+Locate 0,7 : Centre "to its original form."
+Pen 1 : Locate 0,11 : Centre "Just click on any rectangle to"
+Locate 0,13 : Centre "swap its position with the one"
+Locate 0,15 : Centre "marked with a star"
+Pen 3 : Locate 0,19 : Centre "Click any mouse key to start"
+Repeat : Until Mouse Key
+'
+Rem *** load the picture and split into 16 blocks
+'
+Load Iff "AmosPro_Examples:IFF/LOGO.Iff",0
+COUNT=1
+Reserve Zone 16
+For X=0 To 319 Step 80
+   For Y=0 To 199 Step 50
+      X(COUNT)=X : Y(COUNT)=Y : C(COUNT)=COUNT
+      Set Zone COUNT,X,Y To X+80,Y+50
+      Get Block COUNT,X,Y,80,50
+      Inc COUNT
+Next : Next 
+'
+Rem *** mix them up
+'
+For N=1 To 50
+   R1=Rnd(15)+1 : R2=Rnd(15)+1
+   A=C(R1) : B=C(R2)
+   C(R2)=A : C(R1)=B
+Next 
+For N=1 To 16
+   Put Block C(N),X(N),Y(N)
+Next 
+'
+Rem *** start the main loop
+'
+OLD=1 : FLAG=True : Sprite 3,X(1)+160,Y(1)+70,1 : Show 
+Do 
+   M=Mouse Zone
+   If Mouse Key=1 and M>0
+      A=C(M) : B=C(OLD)
+      C(M)=B : C(OLD)=A
+      Put Block C(M),X(M),Y(M) : Put Block C(OLD),X(OLD),Y(OLD)
+      Sprite 3,X(M)+160,Y(M)+70, : OLD=M
+      Gosub CHECK
+   End If 
+   Exit If FLAG=False
+Loop 
+'
+Rem *** the end
+'
+Pen 1 : Paper 0 : Hide : Sprite Off 
+Locate 0,5 : Centre "W E L L   D O N E"
+Wait 200 : Edit 
+'
+Rem *** check for all done 
+'
+CHECK:
+FLAG=False
+For N=1 To 16
+   If C(N)<>N
+      FLAG=True : Exit 
+   End If 
+Next 
+Return 

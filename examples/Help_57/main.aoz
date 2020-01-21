@@ -1,0 +1,111 @@
+'**********************************
+'*    AMOS Professional HELP 57   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *               Peek (line 17) 
+'*                                *               Poke (line 27) 
+'*         Ronnie Simpson         *               Deek (line 38) 
+'**********************************               Doke (line 49) 
+'                                                 Leek (line 61) 
+'                                                 Loke (line 73) 
+'------------------------------------------- 
+'WARNING 
+'------------------------------------------- 
+'Three of the instructions listed below allow the memory contents of the 
+'Amiga to be changed, using without due care will almost certainly result
+'in the system crashing and any unsaved work being lost. 
+'------------------------------------------- 
+'Peek
+'------------------------------------------- 
+'get a byte
+'
+'eg.         P=Peek(Varptr(A)) 
+'
+'This function will read the 8 bits (1 byte) at the address given in 
+'the brackets. 
+'
+'------------------------------------------- 
+'Poke
+'------------------------------------------- 
+'change a byte 
+'
+'               +--->address to be changed 
+'               | +--->value to be loaded
+'          Poke A,V
+'
+'Poke copies a number in the range of 0-255 into the given address.
+'
+'------------------------------------------- 
+'Deek
+'------------------------------------------- 
+'get a word
+'
+'eg.         P=Deek(Varptr(B)) 
+'
+'This function will read the 2 bytes (a word) at the address given in
+'the brackets. 
+'The address must be even or an error will be generated. 
+'
+'------------------------------------------- 
+'Doke
+'------------------------------------------- 
+'change a word 
+'
+'               +--->address to be changed 
+'               | +--->value to be loaded
+'          Doke A,V
+'
+'Doke copies a number in the range of 0-65535 into the 2 bytes starting
+'at the given address. 
+'
+'------------------------------------------- 
+'Leek
+'------------------------------------------- 
+'get a long word 
+'
+'eg.         P=Leek(Varptr(C)) 
+'
+'This function will read the 4 bytes (a long word) at the address given in 
+'the brackets. 
+'Once again the address must be even or an error will be generated.
+'If bit 31 is set then a negative number will be returned. 
+'
+'------------------------------------------- 
+'Loke
+'------------------------------------------- 
+'change a long word  
+'
+'               +--->address to be changed 
+'               | +--->value to be loaded
+'          Loke A,V
+'
+'Loke copies a number in into the 4 bytes starting at the given address. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+'
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,4,Hires : Flash Off : Hide 
+Palette $0,$FF,$F0,$F00
+Curs Off : Cls 0 : Paper 0
+Pen 3 : Locate 0,24 : Centre "Press any mouse key to quit"
+'
+Rem *** set up variables 
+'
+P#=10000 : S=Phybase(0)+2000 : C=0
+Pen 2 : Locate 2,1 : Print "Displaying your Amiga's memory contents"
+Locate 40,1 : Print Str$(P#)+" TO"+Str$(P#+12000)
+'
+Rem *** start the main loop
+'
+Do 
+   L=Leek(P#)
+   Loke S+C,L
+   P#=P#+4
+   Add C,4,0 To 11996
+   If C<3
+      Locate 40,1 : Print Str$(P#)+" TO"+Str$(P#+12000)
+   End If 
+   If Mouse Key Then Edit 
+Loop 

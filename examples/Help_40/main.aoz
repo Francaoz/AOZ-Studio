@@ -1,0 +1,127 @@
+'**********************************  
+'*    AMOS Professional HELP 40   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *          Screen Swap       (line 11) 
+'*                                *          Logbase / Phybase (line 25) 
+'*         Ronnie Simpson         *          Physic / Logic    (line 37) 
+'**********************************          =Screen           (line 52) 
+'                                            Wait Vbl          (line 63) 
+'
+'------------------------------------------- 
+'Screen Swap 
+'------------------------------------------- 
+'swap logical and physical screens 
+'
+'When using the double buffered system these are the two screens which are 
+'automatically set up for you. 
+'Before you can use Screen Swap a call to Bob Update Off and Autoback 0
+'must be made to kill the automatic updating system. 
+'
+'Screen Swap immidiately exchanges the physical and logical screens allowing 
+'any amount of graphics etc. to be completed out of sight on the logical 
+'screen before being flicked into view with Screen Swap. 
+'
+'------------------------------------------- 
+'Logbase 
+'Phybase 
+'------------------------------------------- 
+'return the address of a screen plane
+'
+'eg.     L=Logbase(2)   (return the start address of bit plane 2)
+'        P=Phybase(1)   (return the start address of bit plane 1)
+'
+'This allows users direct access to the current screen memory and the
+'functions will return 0 if the bit plane does not exist.  
+'Bit plane numbers range from 0 to 5 depending on the screen mode. 
+'------------------------------------------- 
+'Logic 
+'Physic
+'------------------------------------------- 
+'return the identification number of a screen
+'
+'eg.     P=Physic(1)   (return ID. number of physical screen 1)
+'        L=Logic(0)    (return ID. number of logical screen 0) 
+'        X=Logic       (return ID. number of current screen) 
+'
+'If the optional screen number is omitted then the number returned will
+'be from the current screen. 
+'
+'eg.           Screen Copy Physic To Logic 
+'
+'------------------------------------------- 
+'=Screen 
+'------------------------------------------- 
+'return current screen number
+'
+'eg. S= Screen 
+'
+'=Screen returns the identification number of the currently active screen to 
+'which graphic and text is being directed, this is not always the screen 
+'that is being viewed. 
+'
+'------------------------------------------- 
+'Wait Vbl  
+'------------------------------------------- 
+'wait for a vertical blank period
+'
+'Every 1/50th. of a second updating of bobs etc. takes place during the  
+'vertical blank this instruction holds program execution until this period.
+'
+'eg.       Put Bob 3 
+'          Wait Vbl  
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** reserve some memory for the array
+'
+Dim X(15)
+'
+'
+Rem *** load some bobs and use the palette 
+'
+Flash Off 
+Load "AMOSPro_Examples:OBJECTS/bobs.abk"
+Get Sprite Palette : Curs Off : Cls 0
+'
+'
+Rem *** set up start positions 
+'
+For N=0 To 4
+   X(N+1)=N*75
+   X(N+6)=N*75
+   X(N+11)=N*75
+Next 
+'
+'
+Rem *** prepare the screen and swith off automatic updating
+'
+Cls 14,10,3 To 309,22 : Pen 2 : Paper 14
+Locate 0,1 : Centre "PRESS ANY MOUSE KEY TO QUIT"
+Double Buffer 
+Bob Update Off 
+Autoback 0
+'
+'
+Rem *** start the main loop
+'
+Do 
+   Cls 15,0,25 To 320,200
+   For N=11 To 15
+      Add X(N),1,-64 To 311
+      Paste Bob X(N),35,2
+   Next 
+   For N=6 To 10
+      Add X(N),-2,-64 To 311
+      Paste Bob X(N),75,3
+   Next 
+   For N=1 To 5
+      Add X(N),4,-64 To 311
+      Paste Bob X(N),115,1
+   Next 
+   Screen Swap : Wait Vbl 
+   Exit If Mouse Key
+Loop 
+'
+'
+Edit 

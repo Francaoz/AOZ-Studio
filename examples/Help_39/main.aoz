@@ -1,0 +1,177 @@
+'**********************************  
+'*    AMOS Professional HELP 39   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *           Screen To Front (line 11)
+'*                                *           Screen          (line 25)
+'*         Ronnie Simpson         *           Screen To Back  (line 35)
+'**********************************           Screen Copy     (line 45)
+'                                             Cls             (line 84)
+'
+'------------------------------------------- 
+'Screen To front 
+'------------------------------------------- 
+'move a screen to front of display 
+'
+'eg.        Screen To Front 2
+'
+'If the optional screen number is omitted then the current screen will be
+'moved to the front. 
+'All graphics etc. will still be output to the current screen this is not
+'necessarily the one that is at the front. 
+'If Autoview Off is active then nothing will appear to happen until View 
+'or Autoview On is used. 
+'
+'------------------------------------------- 
+'Screen
+'------------------------------------------- 
+'set the current screen
+'
+'eg.     Screen 1  (output all future text and graphics to screen number 1)
+'
+'The named screen will be used for all future drawing operations but this is 
+'not necessarily the screen which is being viewed. 
+'
+'------------------------------------------- 
+'Screen To Back
+'------------------------------------------- 
+'move a screen to the back of the display
+'
+'eg.    Screen To Back 1 
+'
+'If the optional screen number is omitted then the current screen will be
+'moved to the back.  
+'
+'------------------------------------------- 
+'Screen Copy 
+'------------------------------------------- 
+'copy all or part of a screen
+'
+'There are two main formats of the Screen Copy instruction:- 
+'
+'   1) Basic format- copy a full screen from a source to a destination.
+'
+'eg.       Screen Copy 1 To 2
+'
+'If the destination screen number is omitted then the contents of the source 
+'screen will be copied to the current screen.
+'
+'   2) Extended format- restrict the source to a rectangular area. 
+'              +--->source screen number 
+'              |   +--->coordinates of top left of rectangle 
+'              |   |     +--->coordinates of bottom right of rectangle 
+'              |   |     |      +--->destination screen number 
+'              |   |     |      |     +--->coordinates of top left position
+'              |  / \   / \     |    / \ 
+'  Screen Copy 1,10,20,30,40 To 2,100,100
+'
+'Any areas which lie outside the screen will be clipped. 
+'An optional blitter mode parameter can also be added in a bitmap format,
+'this controls the way in which your copy will be combined with the existing 
+'graphics. 
+'
+'eg.      Screen Copy 1,10,20,30,40 To 2,100,10,%1100000 
+'
+'All in all there are 256 possible combinations of effects, (the bottom 4
+'bits should always be set to zero) the 5 most common are:-
+'
+'   1) %11000000      replace  (default) 
+'   2) %00110000      invert 
+'   3) %10000000      and
+'   4) %11100000      or 
+'   5) %01100000      xor
+'
+'------------------------------------------- 
+'Cls 
+'------------------------------------------- 
+'clear all or part of a screen 
+'
+'There are 3 possible formats:-
+'
+'1) Cls                   (clears the current screen including windows)
+'2) Cls 2                 (clears screen to the colour index number stated)
+'3) Cls 2,10,20 To 30,40  (clears the rectangle defined to the colour index) 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** load a picture 
+'
+Hide 
+Load Iff "AMOSPro_Examples:IFF/LOGO.iff",1
+Screen Hide 1
+Wait 100
+Screen To Back : Screen Open 0,320,200,32,Lowres
+Get Palette 1 : Flash Off : Curs Off : Cls 0
+'
+'
+Rem *** start the main loop
+'
+Do 
+   Pen 1 : Paper 0 : Locate 0,12 : Centre "PRESS AND HOLD A MOUSE KEY TO QUIT"
+   Wait 100
+   '
+   Rem *** venetian blind effect  
+   For N=0 To 7
+      For Y=0 To 199 Step 8
+         Screen Copy 1,0,Y+N,319,Y+1+N To 0,0,Y+N : Wait Vbl 
+         If Mouse Key Then Edit 
+   Next : Next 
+   Rem *** melt to bottom 
+   For Y=150 To 0 Step -2
+      For N=Y To 200
+         Screen Copy 0,0,Y,319,Y+2 To 0,0,Y+N
+         If Mouse Key Then Edit 
+   Next : Next 
+   Rem *** double wipe
+   For X=0 To 320 Step 4
+      Screen Copy 1,X,0,X+2,200 To 0,X,0
+      If Mouse Key Then Edit 
+   Wait Vbl : Next 
+   For X=318 To 0 Step -4
+      Screen Copy 1,X,0,X+2,200 To 0,X,0
+      If Mouse Key Then Edit 
+   Wait Vbl : Next : Wait 50
+   Rem *** small squares cls
+   For N=0 To 3
+      For X=0 To 320 Step 4
+         Cls 0,X+N,0 To X+N+1,200
+         If Mouse Key Then Edit 
+      Wait Vbl : Next 
+      For Y=0 To 199 Step 4
+         Cls 0,0,Y+N To 320,Y+N+1
+         If Mouse Key Then Edit 
+      Wait Vbl : Next 
+   Next : Wait 50
+   Rem *** small squares fill 
+   For N=1 To 6000
+      X=Rnd(64)*5 : Y=Rnd(40)*5
+      Screen Copy 1,X,Y,X+5,Y+5 To 0,X,Y
+      If Mouse Key Then Edit 
+   Next : Screen Copy 1 To 0 : Wait 50
+   Rem *** diamond cls
+   For Y=100 To 0 Step -1
+      Cls 0,160-Y*2,Y To 160+Y*2,200-Y
+      If Mouse Key Then Edit 
+   Wait Vbl : Next : Wait 50
+   For Y=0 To 100
+      Cls 0,160-Y*2,100-Y To 160+Y*2,100+Y
+      If Mouse Key Then Edit 
+   Wait Vbl : Next : Wait 50
+   Rem *** random pattern 
+   For N=1 To 1500
+      X2=(Rnd(10))*32 : Y2=(Rnd(10))*20
+      X=Rnd(9)*32 : Y=Rnd(9)*20
+      Screen Copy 1,X,Y,X+32,Y+20 To 0,X2,Y2
+      If Mouse Key Then Edit 
+   Next : Screen Copy 1 To 0 : Wait 50
+   Rem melt to side 
+   For X=0 To 320 Step 8
+      For N=X To 0 Step -2
+         Screen Copy 0,X-1,0,X+1,199 To 0,N-2,0
+         If Mouse Key Then Edit 
+   Next : Next 
+   '
+Loop 
+'
+'
+Edit 

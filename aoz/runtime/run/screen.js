@@ -580,7 +580,7 @@ Screen.prototype.setHalfBrightColor = function( p )
 };
 Screen.prototype.getPalette = function( index, mask )
 {
-	var screen = this.renderer.getScreen( index );
+	var screen = this.aoz.getScreen( index );
 	var b = 1;
 	for ( var c = 0; c < screen.palette.length; c++ )
 	{
@@ -1322,7 +1322,7 @@ Screen.prototype.createPattern = function( pattern )
 				var mask = 0x80 >> x;
 				for ( xx = 0; xx < this.scale.x; xx++ )
 				{
-					if ( ( source[ y ] & mask ) != 0 )
+					if ( ( source[ y ] & mask ) == 0 )
 					{
 						var offset = ( y * this.scale.y + yy ) * 32 * this.scale.x + ( x * this.scale.x + xx ) * 4;
 						imageData.data[ offset ] = colorInk.r;
@@ -1586,17 +1586,17 @@ Screen.prototype.getBob = function( index, rectangle, tags, contextName )
 	var zone = this.utilities.getZone( rectangle, this.dimension, this.scale );
 
 	var canvas = document.createElement( 'canvas' );
-	canvas.width = zone.width;
-	canvas.height = zone.height;
+	canvas.width = rectangle.width;
+	canvas.height = rectangle.height;
 	var context = canvas.getContext( '2d' );
 	context.imageSmoothingEnabled= false;
-	this.parent.startDrawing();
+	this.startDrawing();
 	context.drawImage( this.canvas, zone.x, zone.y, zone.width, zone.height, 0, 0, canvas.width, canvas.height );
-	this.parent.endDrawing();
+	this.endDrawing();
 
 	this.utilities.remapBlock( context, [ { r: 0, g: 0, b: 0, a: 255 } ], [ { r: 0, g: 0, b: 0, a: 0 } ], { x: 0, y: 0, width: canvas.width, height: canvas.height } );
 
-	contextName = typeof contextName == 'undefined' ? contextName : contextName;
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	this.banks.insertImage( index, undefined, tags, contextName, undefined, canvas );
 };
 Screen.prototype.putBob = function( index, contextName )

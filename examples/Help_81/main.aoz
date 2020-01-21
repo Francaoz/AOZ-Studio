@@ -1,0 +1,175 @@
+'**********************************
+'*    AMOS PROFESSIONAL HELP 81   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *         Parallel Open   (line   15)
+'*                                *         Parallel Send   (line   26)
+'*         Ronnie Simpson         *         Parallel Out    (line   38)
+'**********************************         Parallel Input$ (line   50)
+'                                           Parallel Abort  (line   64)
+'                                           Parallel Check  (line   72)
+'                                           Parallel Error  (line   81)
+'                                           Parallel Status (line   91)
+'                                           Parallel Base   (line  108)
+'                                           Parallel Close  (line  119)
+'------------------------------------------- 
+'Parallel Open 
+'------------------------------------------- 
+'open port for input or output 
+'
+'This instruction is used without parameters and will attempt to open the
+'parallel port, the parallel device driver will will be requested the first
+'time it is called.
+'Only one channel can be opened at any one time, so if the Printer Device is 
+'already being used by another application then this command may not be used.
+'
+'------------------------------------------- 
+'Parallel Send 
+'------------------------------------------- 
+'send a string to the parallel port
+'
+'eg.               Parallel Send A$  
+'
+'Data will be send as it is, therefore Escape codes may be embedded within 
+'the string for direct interpretation by the printer etc.
+'If a printer is being accessed then each line should be terminated by a 
+'single linefeed. (chr$(10)) 
+'
+'------------------------------------------- 
+'Parallel Out
+'------------------------------------------- 
+'send data from an address 
+'
+'                  Parallel Out address,length 
+'  
+'This instruction will send the number of characters given in the length 
+'parameter starting from the given address.
+'
+'eg.     Parallel Send Start(7),Length(7)        (send contents of bank 7) 
+'
+'------------------------------------------- 
+'Parallel Input$ 
+'------------------------------------------- 
+'read a string 
+'
+'                 P$=Parallel Input$(length[,stop])  
+'
+'This command will halt the program until the number of characters given in
+'the length parameter has been received. 
+'A time out will be generated if the required number of characters has not 
+'been received after a reasonable length of time.
+'The optional stop character will end the transmittion as soon as one is 
+'received. 
+'
+'------------------------------------------- 
+'Parallel Abort
+'------------------------------------------- 
+'stop operation
+'
+'This command is used without parameters and will immediately halt any 
+'Parallel Out or Parallel Send instruction, and characters already sent
+'will be lost.   
+'
+'------------------------------------------- 
+'Parallel Check
+'------------------------------------------- 
+'status of port readiness
+'
+'                P=Parallel Check
+'
+'This function returns the status of the Parellel port readiness, 0 (false)
+'if it is not available or -1 (true) if it is.   
+'
+'------------------------------------------- 
+'Parallel Error
+'------------------------------------------- 
+'report on error status
+'
+'                P=Parallel Error  
+'
+'This function will return 0 (false) if everything is OK. whilst any other 
+'value will indicate an error. 
+'
+'------------------------------------------- 
+'Parallel Status 
+'------------------------------------------- 
+'parallel port status  
+'
+'                P=Parallel Status 
+'
+'This function returns a bit pattern showing the current status of the 
+'parallel port in the following format:- 
+'
+'                Bit           Status  
+'                 0       printer selected 
+'                 1           paper out  
+'                 2         printer busy 
+'                 3       0=read   1=write 
+'
+'------------------------------------------- 
+'Parallel Base 
+'------------------------------------------- 
+'get base address
+'
+'                 B=Parallel Base
+'  
+'This function is for experts only and will return the internal base address 
+'of the memory area used by the printer port.
+'
+'------------------------------------------- 
+'Parallel Close  
+'------------------------------------------- 
+'close port
+'
+'Guess what?    This instruction closes the parallel port  
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up the screen 
+'
+Screen Open 0,640,200,8,Hires : Curs Off : Cls 0 : Paper 0 : Hide 
+Palette $102,$FF7,$7FF,,$F7F
+Curs Off : Cls 0 : Paper 0
+'
+Rem *** open the port
+'
+Parallel Open : Wait Vbl 
+'
+Repeat 
+   Locate 0,19 : Pen 1 : Cline : Centre "Press left mouse key when ready to send text to printer or both to quit"
+   '
+   Rem *** send a report of the Parallel port to the screen 
+   '
+   Do 
+      P=Parallel Check : Locate 24,5
+      If P=True Then Pen 2 : Print "Parellel port ready           " Else Pen 3 : Print "Parallel port not available"
+      P=Parallel Status : Locate 24,9 : 
+      If Btst(0,P)=0 Then Pen 2 : Print "Printer selected     " Else Pen 3 : Print "Printer not selected"
+      Locate 24,11
+      If Btst(1,P) Then Pen 3 : Print "Paper out      " Else Pen 2 : Print "Paper inserted"
+      Locate 24,7
+      If Btst(3,P) Then Pen 2 : Print "Parallel port in write mode" Else Pen 3 : Print "Parallel port in read mode"
+      P=Parallel Error : Locate 24,15 : Pen 4
+      If P=0 Then Print "No errors reported in transmission" Else Print "Error reported in transmition    "
+      M=Mouse Key
+      Exit If M>0
+   Loop 
+   '
+   Rem *** close port if both keys are held 
+   If M>1 Then Parallel Close : Edit 
+   '
+   Rem *** get the text to be sent
+   '
+   Pen 1 : Locate 0,19 : Cline : Print "Please enter text to be sent to printer"
+   Locate 10,21 : Input A$ : Curs Off 
+   '
+   Rem *** send the string to the port  
+   '
+   Parallel Send A$+B$+Chr$(10)
+   For N=19 To 23 : Locate 0,N : Cline : Next 
+
+Until THE_COWS_COME_HOME
+
+
+
+

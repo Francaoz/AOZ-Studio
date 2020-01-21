@@ -1,0 +1,141 @@
+'**********************************
+'*    AMOS Professional HELP 43   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *              Inkey$    (line 10) 
+'*                                *              Scancode  (line 24) 
+'*         Ronnie Simpson         *              Key State (line 38) 
+'**********************************              Key Shift (line 59) 
+'                                                Scanshift (line 85) 
+'------------------------------------------- 
+'Inkey$
+'------------------------------------------- 
+'check for a keypress
+'
+'eg.        K=Inkey$ 
+'
+'The Inkey$ function will return an empty string (or "") when no keys have 
+'been pressed. 
+'Unlike the Input$ function, Inkey$ will not wait for a keypress.  
+'Only keys which return an ASCII value can be detected with this function. 
+'Inkey$ can be used in conjunction with Scancode to find the values of some
+'of the non-ASCII keys like Help or Tab. 
+'
+'------------------------------------------- 
+'Scancode
+'------------------------------------------- 
+'return internal scancode number 
+'
+'Used in conjunction with the above Inkey$ function, Scancode will return the  
+'internal number of any key including those that do not return an ASCII value. 
+'
+'eg.       While K$="" 
+'          K$=Inkey$ 
+'          Wend  
+'          S=Scancode
+'          Print S 
+'
+'------------------------------------------- 
+'Key State 
+'------------------------------------------- 
+'test the state of any key 
+'
+'eg.       N=Key State(95) 
+'
+'The number placed in the brackets should be the internal scancode of the
+'key you wish to test. 
+'If the key is being pressed then a value of -1 (or True) will be returned 
+'otherwise the result will be 0 (or False) 
+'
+'eg.       Do  
+'          If Key State(95)
+'          Print "HELP KEY PRESSED"
+'          Else  
+'          Print "HELP KEY NOT PRESSED"
+'          End If  
+'          Loop  
+'
+'
+'------------------------------------------- 
+'Key Shift 
+'------------------------------------------- 
+'return status of control keys 
+'
+'eg.       K=Key Shift 
+'
+'This function returns a bit pattern which shows the status of the control 
+'keys, these keys can not be tested with the Inkey$ or Scancode functions. 
+'The bit pattern is as follows:- 
+'
+'          BIT           KEY         DECIMAL VALUE 
+'
+'           0      Left Shift key       +   1
+'           1      Right Shift key      +   2
+'           2      Caps Lock            +   4 (ON or OFF)
+'           3      Ctrl                 +   8
+'           4      Left Alt             +  16
+'           5      Right Alt            +  32
+'           6      Left Amiga           +  64
+'           7      Right Amiga          + 128
+'
+'The value returned can be 1 or a combination of any of the above keys.
+'For example a value of 72 (or %01001000) would be returned if the Ctrl +
+'Left Amiga keys were being held down. 
+'
+'------------------------------------------- 
+'Scanshift 
+'------------------------------------------- 
+'return shift key status 
+'
+'this function will return a value giving the status of the shift keys 
+'following an Inkey$ call, possible values are:- 
+'
+'              0 - no shift key pressed
+'              1 - left shift key pressed
+'              2 - right shift key pressed 
+'              3 - both shift keys pressed 
+'
+'eg.           Do    
+'              A$=Inkey$ 
+'              S=Scanshift   
+'              Print S 
+'              Loop  
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up the screen 
+'
+Screen Open 0,640,200,8,Hires
+Flash Off : Curs Off : Cls 0 : Paper 0
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70
+Pen 1 : Locate 0,3 : Centre "PRESS ANY KEY(s)"
+Pen 5 : Locate 0,24 : Centre "PRESS ESCAPE KEY TO QUIT"
+Pen 2 : Locate 28,8 : Print "Inkey$="
+Pen 3 : Locate 28,11 : Print "Scancode="
+Pen 4 : Locate 28,14 : Print "Key State="
+'
+'
+Rem start the main loop
+'
+Do 
+   Rem *** quit if escape key is pressed
+   '
+   If Key State(69) Then Edit 
+   '
+   Rem *** test for any inputs
+   '
+   K$=Inkey$
+   S=Scancode
+   B=Key Shift
+   '
+   Rem *** print the results
+   '
+   If K$<>""
+      Pen 2 : Locate 36,8 : Print K$
+      Pen 3 : Locate 37,11 : Print Str$(S)+"  "
+   End If 
+   If B>0
+      Pen 4 : Locate 38,14 : Print Str$(B)+" or "+Bin$(B,8)+"  "
+   Else Locate 38,14 : Print "                       "
+   End If 
+Loop 

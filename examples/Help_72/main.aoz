@@ -1,0 +1,160 @@
+'**********************************
+'*    AMOS Professional HELP 72   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Track Load    (line 20) 
+'*                                *            Track Play    (line 32) 
+'*         Ronnie Simpson         *            Track Loop On (line 44) 
+'**********************************            Track Loop Of (line 44) 
+'                                              Track Stop    (line 52) 
+'                                              Led On/Off    (line 59) 
+'                                              Vumeter       (line 71) 
+'------------------------------------------- 
+'Soundtracker notes  
+'------------------------------------------- 
+'DO NOT attempt to play a S/T module and a normal music bank at the same time. 
+'DO NOT attempt to play samples or sound effects along with S/T modules. 
+'S/T modules utilize all 4 voice channels. 
+'The Volume command has no effect with S/T modules but =Vu works ok. 
+'
+'------------------------------------------- 
+'Track Load
+'------------------------------------------- 
+'load an soundtracker module 
+'
+'                      +--->name of module to be loaded
+'                      |    +--->bank number 
+'        Track Load "Path$",13 
+'
+'If the bank does not already exist then it will be automatically created. 
+'Synthetic Instruments (.nt extension) will also be loaded.
+'
+'------------------------------------------- 
+'Track Play
+'------------------------------------------- 
+'play a loaded soundtracker module 
+'
+'                   +--->bank number of loaded module
+'                   |  +--->starting pattern number
+'        Track Play 13,1 
+'
+'The module will be played starting at the given pattern number, care must be
+'taken to ensure that this pattern number is legal or a crash is likely. 
+'
+'------------------------------------------- 
+'Track Loop On/Of  
+'------------------------------------------- 
+'enable or disable repeat play 
+'
+'These two commands are used to determine whether the module will be repeated
+'when the module end is reached. 
+'
+'------------------------------------------- 
+'Track Stop
+'------------------------------------------- 
+'stop module playing 
+'
+'Immediately stops the S/T module being played.
+'
+'------------------------------------------- 
+'Led On/Off
+'------------------------------------------- 
+'toggle high pass filter 
+'
+'Led On not only switches on the power LED on the Amigas console but it also 
+'enables the high pass filter. (reduce hiss on higher frequencies) 
+'Led Off reverses these effects. 
+'
+'A little experimenting may have to be done to find the best setting for 
+'each piece of music or sound.   
+'
+'------------------------------------------- 
+'Vumeter 
+'------------------------------------------- 
+'vulume meter
+'
+'Vumeter tests the given voice number and returns an intensity value between 
+'0-63. 
+'
+'        V=Vumeter(0)      (get current volume of voice 0) 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem *** open screen and print warning
+'
+Dim V(3),C(3),A(3)
+A(0)=4016 : A(1)=3791 : A(2)=191 : A(3)=3904
+Screen Open 0,640,200,16,Hires : Flash Off : Curs Off : Cls 0 : Screen Hide 0
+Palette $0,$EE0,$0,$88,$0,$0,$0,$0
+Dir$="AMOSPro_Examples:Music/"
+Track Load "AMOSPro_Examples:Music/Mod.tracker",6
+Set Rainbow 1,0,220,"(1,1,15)(1,-1,15)","(2,1,7)","(3,1,3)"
+Rainbow 1,3,45,220
+Reserve Zone 8 : Pen 1 : Paper 2
+Locate 2,2 : Print Border$(Zone$("   Track Load   ",1),2)
+Locate 22,2 : Print Border$(Zone$("   Track Play   ",2),2)
+Locate 62,2 : Print Border$(Zone$(" Track Loop On  ",4),2)
+Locate 2,6 : Print Border$(Zone$("   Track Stop   ",5),2)
+Locate 22,6 : Print Border$(Zone$("   Filter On    ",6),2)
+Locate 62,6 : Print Border$(Zone$("      Quit      ",8),2)
+Pen 2 : Paper 1 : Locate 42,2 : Print Border$(Zone$(" Track Loop Off ",3),2)
+Locate 42,6 : Print Border$(Zone$("   Filter Off   ",7),2)
+Set Paint 1 : For N=1 To 4 : For X=10 To 610 Step 20 : Ink N+3,0,2 : Bar X,N*20+70 To X+15,N*20+85 : Next : Next 
+Screen Show 0
+Do 
+   M=Mouse Zone
+   If Mouse Key and M>0
+      On M Gosub 1,2,3,4,5,6,7,8
+   End If 
+   V(0)=Vumeter(0)
+   V(1)=Vumeter(1)
+   V(2)=Vumeter(2)
+   V(3)=Vumeter(3)
+   For N=0 To 3
+      If V(N)>0
+         C(N)=V(N)+A(N)
+      Else 
+         If C(N)>A(N)
+            Add C(N),-4
+         End If 
+      End If 
+      If C(N)<=A(N) Then C(N)=0
+      Colour N+4,C(N)
+   Next 
+   Wait Vbl 
+Loop 
+1
+F$=Fsel$(Dir$,"Mod.tracker","please sellect an S/T Module")
+If F$>""
+   Track Load F$,6
+End If 
+Return 
+2
+Track Play 6,0
+Return 
+3
+Track Loop Of 
+Pen 2 : Paper 1 : Locate 42,2 : Print Border$(Zone$(" Track Loop Off ",3),2)
+Pen 1 : Paper 2 : Locate 62,2 : Print Border$(Zone$(" Track Loop On  ",4),2)
+Return 
+4
+Track Loop On 
+Pen 1 : Paper 2 : Locate 42,2 : Print Border$(Zone$(" Track Loop Off ",3),2)
+Pen 2 : Paper 1 : Locate 62,2 : Print Border$(Zone$(" Track Loop On  ",4),2)
+Return 
+5
+Track Stop 
+Return 
+6
+Led On 
+Pen 2 : Paper 1 : Locate 22,6 : Print Border$(Zone$("   Filter On    ",6),2)
+Pen 1 : Paper 2 : Locate 42,6 : Print Border$(Zone$("   Filter Off   ",7),2)
+Return 
+7
+Led Off 
+Pen 1 : Paper 2 : Locate 22,6 : Print Border$(Zone$("   Filter On    ",6),2)
+Pen 2 : Paper 1 : Locate 42,6 : Print Border$(Zone$("   Filter Off   ",7),2)
+Return 
+8
+Track Stop 
+Edit 

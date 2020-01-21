@@ -1,0 +1,148 @@
+'**********************************
+'*    AMOS Professional HELP 54   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *          Key$            (line 10) 
+'*                                *          Scan$           (line 38) 
+'*         Ronnie Simpson         *          Close Workbench (line 54) 
+'**********************************          Close Editor    (line 66) 
+'
+'------------------------------------------- 
+'Key$
+'------------------------------------------- 
+'`F' keys macros 
+'              +--->function key number
+'              |      +--->text to be assigned 
+'              |      |
+'eg.      Key$(1)="Any text" 
+'
+'Function key numbers can be in the range 1-20, numbers 1-10 are accessed  
+'by pressing the left amiga key together with the apprpriate function key
+'and numbers 11-20 with the right amiga key. 
+'The assigned text can be any string up to a maximum of 20 letters.
+'There a 2 special characters that can be used in your string:-
+'        ` (Alt+Quote)  generates a carriage return
+'        ' (Quote)      encloses a comment (ignored by system) 
+'
+'eg.       Key$(1)="'Does nothing'dir`"  
+'
+'Key$ can not only speed up your programing by having a set of 20 items  
+'of your choosing ready to be inserted just as if they were typed in, but
+'it can also be used in your programs as a easy way of getting some user 
+'input.  
+'The current list of F key contents is displayed whenever the help key is
+'pressed in direct mode. 
+'Whilst in the editor the contents will be displayed in the menu window
+'by pressing the appropriate Amiga key.
+'
+'------------------------------------------- 
+'Scan$ 
+'------------------------------------------- 
+'Key$ scancode 
+'
+'If you wish to use a keypress in your macro which does not have a Ascii 
+'value then the Scan$ function will have to be used. 
+'
+'               Key$(3)="HELP"+Scan$(95) 
+'
+'An optional mask parameter may also be added to cover the shift keys:-
+'
+'               Key$(4)="CTRL/ESCAPE"+Scan$(69,%00001000)  
+'
+'      SEE --- Scancode and Key Shift functions for more details.
+'
+'------------------------------------------- 
+'Close Workbench 
+'------------------------------------------- 
+'attempt to close workbench
+'
+'    NOTE-Close workbench will not work if a cli window is open. 
+'
+'Closing the workbench saves around 40K of memory and the instruction may be 
+'used both from within your program or from direct mode. 
+'
+'eg.          If Fast Free<5000 Then Close Workbench 
+'
+'------------------------------------------- 
+'Close Editor
+'------------------------------------------- 
+'close editor window 
+'
+'This is another command that can be issued when memory is running tight.
+'Close Editor releases 28K of memory to your program with no ill effects 
+'on your listings and the window will be automatically opened again when 
+'your program is finished (if there is enough memory). 
+'If there is not enough memory to reopen this window then erase existing 
+'display using the Default instruction and press the escape key. 
+'
+'eg.          Close Editor 
+'             Print "This saves 28k for my program"
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Close Editor 
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires
+Flash Off : Curs Off : Palette 0,$FF0,$F0F,$FF,$F70,$7F,$222,$333,$444,$555,$666,$777,$888,$999,$AAA,$BBB,$CCC
+Cls 0 : Paper 0 : Pen 1 : Hide 
+'
+Rem *** program the function keys
+'
+Key$(1)="THE BOY STOOD ON    "
+Key$(2)="THE BURNING DECK    "
+Key$(3)="PLAYING A GAME OF   "
+Key$(4)="CRICKET             "
+Key$(5)="THE BALL ROLLED UP  "
+Key$(6)="HIS TROUSER LEG     "
+Key$(7)="AND HIT THE         "
+Key$(8)="MIDDLE WICKET       "
+Key$(9)="                    "
+Key$(10)="                    "
+Key$(11)="MARY HAD            "
+Key$(12)="A LITTLE LAMB       "
+Key$(13)="SHE ALSO HAD        "
+Key$(14)="A CAT               "
+Key$(15)="TOMMY COOPER        "
+Key$(16)="CAME ALONG          "
+Key$(17)="AND KILLED IT...    "
+Key$(18)="JUST LIKE THAT!     "
+Key$(19)="                    "
+Key$(20)="                    "
+'
+Rem *** get the user input and produce the poems 
+'
+Locate 0,2 : Centre "HOLD DOWN LEFT AMIGA KEY AND PRESS THE FUNCTION KEYS F1-F9 IN ORDER"
+Pen 3 : Locate 0,5
+Repeat 
+   Clear Key 
+   A$=Input$(20)
+   If Left$(A$,1)>" " Then Centre A$ : Cdown : Cdown 
+Until Left$(A$,1)<"A"
+A$="P R E S S   A N Y   M O U S E   K E Y   T O   C O N T I N U E"
+For L=1 To Len(A$)
+   Add C,1,6 To 15
+   Pen C
+   Locate 8+L,23 : Print Mid$(A$,L,1)
+Next 
+Shift Up 2,6,15,1
+Repeat 
+Until Mouse Key
+Shift Off : Cls 0
+Pen 4 : Locate 0,2 : Centre "NOW DOWN THE RIGHT AMIGA KEY AND PRESS THE FUNCTION KEYS F1-F9 IN ORDER"
+Pen 5 : Locate 0,5
+Repeat 
+   Clear Key 
+   A$=Input$(20)
+   If Left$(A$,1)>" " Then Centre A$ : Cdown : Cdown 
+Until Left$(A$,1)<"A"
+A$="P R E S S   A N Y   M O U S E   K E Y   T O   Q U I T"
+For L=1 To Len(A$)
+   Add C,1,6 To 15
+   Pen C
+   Locate 12+L,23 : Print Mid$(A$,L,1)
+Next 
+Shift Up 2,6,15,1
+Repeat 
+Until Mouse Key
+Edit 

@@ -1,0 +1,159 @@
+'**********************************  
+'*    AMOS Professional HELP 37   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Dual Playfield (line 10)
+'*                                *            Dual Priority  (line 40)
+'*         Ronnie Simpson         *            Screen Hide    (line 55)
+'**********************************            Screen Show    (line 66)
+'
+'------------------------------------------- 
+'Dual Playfield
+'------------------------------------------- 
+'combine 2 screens 
+'
+'eg.        Dual Playfield 1,3 (overlay screens numbered 1 and 3)
+'
+'Both screens must be the same resolution (Hires or Lowres) although sizes 
+'may be different. 
+'Unlike the Screen Clone instruction both screens can be independently 
+'accessed with any graphic, text and screen instructions with the exception
+'that both the screen offsets must never be set to 0 at the same time. 
+'Maximum number of colours are reduced for both screens and only certain 
+'combinations are possible:- 
+'
+'               SCREEN 1      SCREEN 2      RESOLUTION 
+'                  2             2          low or hi
+'                  4             2          low or hi
+'                  4             4          low or hi
+'                  8             4          low only 
+'                  8             8          low only 
+'
+'The colours are taken from the palette of screen 1 with the second screen 
+'using colour indexes 8 to 15  
+'When drawing to the second screen the colour index numbers are automatically
+'converted by adding 8 to to the given value.
+'
+'eg.       Screen 2  (make screen number 2 the current screen) 
+'          Ink 1     (use colour index number 9 from first screens palette)
+'
+'------------------------------------------- 
+'Dual Priority 
+'------------------------------------------- 
+'set overlay priority
+'
+'As a default screen 1 will be overlaid on screen 2 this can be reversed 
+'with use of the Dual Priority instruction.
+'All colour assignments are still taken from the first screen and only the 
+'order of display is changed.
+'
+'eg.      Dual Playfield 3,4    (first screen is number 3) 
+'         Dual Priority 4,3     (overlay screen 4 over screen 3) 
+'
+'      (screen number 3 would still be treated as the first screen)
+'
+'------------------------------------------- 
+'Screen Hide 
+'------------------------------------------- 
+'remove a screen from view 
+'
+'eg.      Screen Hide 1   (temporarily hide screen 1)  
+'         Screen Hide     (temporarily hide the current screen)
+'
+'If the optional screen number is ommited then the current screen will 
+'be removed from view. 
+'
+'------------------------------------------- 
+'Screen Show 
+'------------------------------------------- 
+'restore a hidden screen 
+'
+'eg.      Screen Show 1   (restore screen 1 to display)    
+'         Screen Show     (restore current screen to display)  
+'
+'If the optional screen number is ommited then the current screen will 
+'be restored.
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** open 3 screens and set the palettes
+'
+Screen Open 2,640,8,2,Hires : Curs Off : Hide 
+Screen Display 2,,242,, : Colour 1,$FF
+Screen Open 1,320,256,8,Lowres : Flash Off : Curs Off : Cls 0
+Palette 0,$2,$4,$6,$8,$A,$C,$E,0,$200,$400,$600,$800,$A00,$C00,$E00
+Screen Open 0,320,200,8,Lowres : Flash Off : Curs Off : Cls 0
+Palette 0,$200,$400,$600,$800,$A00,$C00,$E00
+'
+'
+Rem *** prepare the graphics for the dual playfields 
+'
+For R=1 To 180 Step 3
+   Add C,1,1 To 7 : Ink C
+   Circle 160,100,R
+Next 
+Screen 1 : Screen To Front 1
+For R=1 To 180 Step 3
+   Add C,1,1 To 7 : Ink C
+   Circle 160,100,R
+Next 
+'
+'
+Rem *** define a short amal loop to scroll the screen
+'
+Channel 15 To Screen Offset 1 : Amal 15,"L: FR0=1T20;LY=R0;P;P;P;NR0;FR0=1T18;LY=20-R0;P;P;P;P;NR0;JL"
+'
+'
+Rem *** overlap the screens
+'
+Dual Playfield 0,1 : Wait Vbl 
+Dual Priority 0,1 : Screen 0
+'
+'
+Rem *** set up the text scrolling routine
+'
+Screen To Front 2 : Screen Hide 2
+Def Scroll 1,80,0 To 639,7,-1,0
+A$="YOU HAVE ALL SEEN THE WONDERFULL PARALAX SCROLLING POSSIBLE WITH DUAL PLAYFIELD...... HERE IS SOMETHING A LITTLE DIFFERENT.......PRESS ANY MOUSE KEY TO QUIT                                           "
+'
+'
+Rem *** start the main loop
+'
+Amal On 
+Wait 200
+Screen Show 2
+Screen 0
+Repeat 
+   Rem *** scrolling the text 
+   Add P,1,0 To 1999
+   If P mod(5)=0
+      Screen 2
+      Scroll 1
+      Screen 0
+   End If 
+   Rem *** printing the text
+   If P mod(50)=0
+      Add L,1,1 To Len(A$)
+      Screen 2
+      Locate 60,0 : Print Mid$(A$,L,1);
+      Screen 0
+   End If 
+   Rem *** change the circles colours 
+   If P=1
+      Add R,1,1 To 6
+      PHASE[R]
+   End If 
+Until Mouse Key
+'
+'
+Edit 
+'
+Procedure PHASE[N]
+   On N Gosub 1,6,2,4,3,5 : Pop Proc
+   1 Fade 16,0,$2,$4,$6,$8,$A,$C,$E,0,$20,$40,$60,$80,$A0,$C0,$E0 : Return 
+   2 Fade 16,0,$2,$4,$6,$8,$A,$C,$E,0,$200,$400,$600,$800,$A00,$C00,$E00 : Return 
+   3 Fade 16,0,$20,$40,$60,$80,$A0,$C0,$E0,0,$200,$400,$600,$800,$A00,$C00,$E00 : Return 
+   4 Fade 16,0,$E,$C,$A,$8,$6,$4,$2,0,$E0,$C0,$A0,$80,$60,$40,$20 : Return 
+   5 Fade 16,0,$E,$C,$A,$8,$6,$4,$2,0,$E00,$C00,$A00,$800,$600,$400,$200 : Return 
+   6 Fade 16,0,$E0,$C0,$A0,$80,$60,$40,$20,0,$E00,$C00,$A00,$800,$600,$400,$200 : Return 
+End Proc

@@ -1,0 +1,140 @@
+'**********************************  
+'*    AMOS Professional HELP 17   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *              Locate    (line 13) 
+'*                                *              Cmove     (line 27) 
+'*         Ronnie Simpson         *              At        (line 41) 
+'**********************************              X Text    (line 66) 
+'                                                Y Text    (line 66) 
+'                                                X Graphic (line 77) 
+'                                                Y Graphic (line 77) 
+'                                                Cmove$    (line 90) 
+'------------------------------------------- 
+'Locate
+'------------------------------------------- 
+'Position text cursor
+'
+'eg.   Locate X,Y     Locate X,     Locate ,Y
+'
+'X and Y are measured in characters across and down from the top left of 
+'the screen. 
+'The number of characters per line will vary acording to the size of the 
+'window in use. (the current screen is treated as window 0)  
+'If an attempt is made to locate the curser outside the window area then 
+'an error will be generated. 
+'
+'------------------------------------------- 
+'Cmove 
+'------------------------------------------- 
+'Move cursor relative to current position
+'
+'eg.   Cmove X,Y      Cmove X,     Cmove ,Y
+'
+'X and Y are measured in characters across and down from the current 
+'cursor position.
+'Negative values can also be used to move the cursor up or left from 
+'the current position. 
+'If an attempt is made to locate the curser outside the window area then 
+'an error will be generated. 
+'
+'------------------------------------------- 
+'At
+'------------------------------------------- 
+'Position cursor from within a string
+'
+'eg.       P$=At(2,10)+"cursor repositioned" 
+'
+'Let's say for example that during a game the top line of the display was  
+'continually being updated with the SCORE, HI-SCORE and LEVEL. Three strings 
+'could be set up using the At function in the initializing stages like so:-
+'
+'                    S=0:HI=0:L=1
+'                    S$=At(0,0)+"SCORE=" 
+'                    H$=At(12,0)+"HI-SCORE=" 
+'                    L$=At(25,0)+"LEVEL="
+'
+'Once set up the updating of each is simply done with a call like:-
+'
+'                    Add S,100 
+'                    Print S$;S
+'
+'Or to update all three:-
+'
+'                    Print S$;S : Print H$;HI : Print L$;L 
+'
+'------------------------------------------- 
+'X Text
+'Y Text
+'------------------------------------------- 
+'Convert a graphic coordinate to the nearest text coordinate 
+'
+'eg.         X=X Text(220)              Locate X Text(200),Y Text(100) 
+'            Print X                    Print "new cursor position"
+'
+'This function returns the text positions relative to the current window.
+'
+'------------------------------------------- 
+'X Graphic 
+'Y Graphic 
+'------------------------------------------- 
+'convert a text coordinate to a graphic coordinate 
+'
+'eg.      X=X Text(220)            Y=Y Text(97)
+'
+'These functions are the opposite to the above X Text and Y Text in that they  
+'return the graphic coordinates from the given text position.
+'Very usefull for positioning text over the graphics already 
+'on the screen.  (a pie chart or graph for example)
+'
+'------------------------------------------- 
+'Cmove$
+'------------------------------------------- 
+'return control string to cursor 
+'
+'A simple way to to print relative to the current cursor position is to set
+'up a control string with the Cmove$ function. 
+'This is done by assigning a string with the two values required:- 
+'
+'                     C$=Cmove$(x,y) 
+'
+'x and y may be any legal values and are the number of character positions 
+'that the cursor will be moved across and down.
+'
+'eg.             C$=Cmove$(5,1)
+'                Print C$+"moved 5 across and 1 down"; 
+'                Print C$+"moved again"
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Pen 6 : Paper 0 : Ink 1
+'
+'
+Box 20,10 To 620,190
+Print At(15,2)+"Sales report of AMOS Professional for w/e 11/12/92";
+Cmove -42,21 : Print "Press any mouse key to return to editor"
+Ink 11
+For X=100 To 520 Step 16
+   For Y=30 To 150 Step 8
+      Box X,Y To X+16,Y+8
+   Next 
+Next 
+Pen 7
+For Y=160 To 40 Step -16
+   Locate X Text(56),Y Text(Y-8) : Print 160-Y
+Next 
+Ink 14
+Draw 100,30 To 100,158 : Draw 100,158 To 532,158
+Pen 4
+Print At(13,21)+"SUN"+At(21,)+"MON"+At(29,)+"TUE"+At(37,)+"WED"
+Print At(45,21)+"THU"+At(53,)+"FRI"+At(61,)+"SAT"
+Ink 2
+Polyline 100,158 To 180,134 To 244,126 To 308,102 To 372,126 To 436,108 To 532,16
+Repeat 
+Until Mouse Key
+Edit 
+'
+'
+'

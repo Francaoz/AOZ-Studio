@@ -94,6 +94,7 @@ function AOZ( canvasId, manifest )
 	this.isUpdate = true;
 	this.blocks = [];
 	this.cBlocks = [];
+	this.setBufferSize = 0;
 
 	//this.renderer.setScreenDisplay();
 
@@ -1199,7 +1200,6 @@ AOZ.prototype.setBelowZScreenPosition = function( screen1, screen2 )
 }
 AOZ.prototype.default = function( contextName )
 {
-	this.currentContextName = contextName;
 	this.screenOpen( 0 );
 };
 
@@ -1707,9 +1707,9 @@ AOZ.prototype.input = function( args )
 	this.lastScanCode = 0;
 	this.inputCursor = 0;
 	if ( args.text != '' )
-	{
 		this.currentScreen.currentTextWindow.print( args.text );
-	}
+	else
+		this.currentScreen.currentTextWindow.print( '?' );
 	this.inputXCursor = this.currentScreen.currentTextWindow.xCursor;
 	this.currentScreen.currentTextWindow.anchorYCursor();
 };

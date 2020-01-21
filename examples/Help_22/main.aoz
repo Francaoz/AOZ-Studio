@@ -1,0 +1,118 @@
+'**********************************  
+'*    AMOS Professional HELP 22   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Hscroll      (line 10)  
+'*                                *            Vscroll      (line 24)  
+'*         Ronnie Simpson         *            Scroll On/Off(line 36)
+'**********************************
+'
+'------------------------------------------- 
+'Hscroll 
+'------------------------------------------- 
+'move text line or screen 1 character position to left or right
+'
+'There are 4 variations of this command
+'
+'          Hscroll 1  (move current line 1 position to the left) 
+'          Hscroll 2  (move entire screen 1 position to the left)
+'          Hscroll 3  (move current line 1 position to the right)
+'          Hscroll 4  (move entire screen 1 position to the right) 
+'
+'Do not confuse with the graphic Scroll instruction
+'
+'------------------------------------------- 
+'Vscroll 
+'------------------------------------------- 
+'move text line or screen 1 character position up or down
+'
+'There are 4 variations of this command
+'
+'      Vscroll 1  (move all text from curser line and below 1 position down) 
+'      Vscroll 2  (move all text from curser line and below 1 position up) 
+'      Vscroll 3  (move all text from top of screen to curser line up) 
+'      Vscroll 4  (move all text from top of screen to curser line down) 
+'
+'Blank lines will be inserted to fill any gaps left after scrolling. 
+'Do not confuse with the graphic Scroll instruction. 
+'  
+'-------------------------------------------   
+'Scroll On    Scroll Off 
+'------------------------------------------- 
+'toggle scrolling mode 
+'
+'The Scroll On and Scroll Off commands are used without parameters to togle
+'the type of scroll used by any window:- 
+'
+'      Scroll On  - screen scrolls up when bottom is reached 
+'      scroll Off - sets the cursor at the top of the screen when bottom 
+'                   is passed. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6
+Locate 42,22 : Centre "SCROLLING TEXT"
+'
+'
+Rem *** scroll text in all directions (Hires)
+'
+For Y=22 To 1 Step -1
+   Locate ,Y
+   Vscroll 3
+Next 
+For X=33 To 1 Step -1
+   Locate ,Y
+   Hscroll 1
+Next 
+For Y=0 To 22
+   Locate ,Y
+   Vscroll 1
+Next 
+For X=0 To 65
+   Locate ,Y
+   Hscroll 3
+Next 
+For Y=23 To 1 Step -1
+   Locate ,Y
+   Vscroll 3
+Next 
+For X=65 To 42 Step -1
+   Locate ,Y
+   Hscroll 2
+   Vscroll 1
+Next 
+Y=24
+For X=75 To 1 Step -1
+   Locate ,Y
+   Hscroll 1
+Next 
+'
+'
+Rem *** lowres demo
+'
+Screen Open 1,320,200,16,Lowres : Flash Off : Get Palette 0
+Curs Off : Cls 0 : Paper 0
+A$="AMOS Professional TEXT SCROLLING DEMONSTRATION........PRESS ANY MOUSE KEY TO QUIT...................."
+Repeat 
+   Add X,1,1 To 100
+   Add P,2,0 To 319
+   Pen 6 : Locate 38,12 : Print Mid$(A$,X,1);
+   Wait Vbl 
+   Hscroll 1
+   Wait Vbl 
+   Pen 3 : Locate 38,15 : Print Mid$(A$,X,1);
+   Wait Vbl 
+   Hscroll 1
+   Wait Vbl 
+   If P<2 Then Ink Rnd(15)
+   Plot P,86
+   Plot 319-P,111
+   Plot P,136
+Until Mouse Key
+'
+'
+Edit 

@@ -1,0 +1,160 @@
+'**********************************  
+'*    AMOS Professional HELP 18   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *           Cup     Cdown   (line 11)
+'*                                *           Cleft   Cright  (line 11)
+'*         Ronnie Simpson         *           Cup$    Cdown$  (line 21)
+'**********************************           Cleft$  Cright$ (line 21)
+'                                             Home            (line 31)
+'
+'------------------------------------------- 
+'Cup  Cdown  Cleft  Cright 
+'------------------------------------------- 
+'Move cursor 1 character position
+'
+'eg.       Cup     (move cursor up one line) 
+'          Cdown   (move cursor down one line) 
+'          Cleft   (move cursor one character left)
+'          Cright  (move cursor one character right) 
+'
+'------------------------------------------- 
+'Cup$  Cdown$  Cleft$  Cright$ 
+'------------------------------------------- 
+'Move cursor 1 character position from within a string 
+'
+'eg.         Print At(0,10)+"START"
+'            Print Cup$+Cup$+"UP"
+'            Print Cdown$+"DOWN"+Cup$+Cright$+Cright$+"RIGHT"
+'
+'
+'------------------------------------------- 
+'Home
+'------------------------------------------- 
+'Position cursor at top left of window 
+'
+'eg.       Locate 10,10 : Print "AWAY At 10,10"
+'          Home : Print "HOME At 0,0"
+'
+'This instruction is the same as:- Locate 0,0  and  At(0,0)
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up screen and print instructions
+'
+Screen Open 0,640,200,16,Hires
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Pen 7 : Curs Off : Cls 0 : Paper 0 : Hide 
+Locate ,10 : Centre "COLLECT THE RED BOXES USING THE FOUR ARROW KEYS"
+Wait 200
+'
+'
+Rem *** dimension array and set level start
+'
+Dim S(80,22)
+L=0
+'
+'
+Rem *** start the main loop
+'
+Do 
+   '
+   '
+   Rem *** clear screen and print level number reached
+   '
+   Curs Off : Cls 0 : Paper 0
+   Inc L
+   Centre "LEVEL"+Str$(L)
+   Wait 125
+   '
+   '
+   Rem *** clear keyboard buffer and set array elements to 0
+   '
+   Clear Key 
+   Paper 0
+   For X=1 To 80
+      For Y=1 To 22
+         S(X,Y)=0
+   Next : Next 
+   Cls 
+   '
+   '
+   Rem *** set the time limit and show it on the screen 
+   '
+   Paper 0 : COUNT=0
+   TIME=12500 : Ink 2 : Draw 0,4 To TIME/25,4 : Locate 63,0 : Print "TIME"
+   Paper 1 : Curs On 
+   '
+   '
+   Rem *** draw the red boxes in random positions 
+   '
+   Repeat 
+      X=Rnd(75)+2 : Y=Rnd(19)+2
+      If S(X,Y)=0 Then S(X,Y)=1 : Locate X,Y : Print " " : Inc COUNT
+   Until COUNT=L
+   '
+   '
+   Rem *** set start position of cursor and start inner loop
+   '
+   X=40 : Y=12 : Locate X,Y : Paper 7 : Ink 1
+   Repeat 
+      '
+      '
+      Rem *** update tim left
+      '
+      Dec TIME : Plot TIME/25+1,4
+      '
+      '
+      Rem *** check if arrow keyes are pressed 
+      '
+      I$=Inkey$
+      S=Scancode
+      If S>0
+         Print At(X,Y)+" "+Cleft$;
+         Add S,-75
+         On S Gosub 1,2,3,4
+         '
+         '
+         Rem *** hit on red box 
+         '
+         If S(X,Y)=1
+            S(X,Y)=0
+            Dec COUNT
+            Boom 
+         End If 
+      End If 
+      '
+      '
+      Rem *** end of inner loop
+      Wait Vbl
+      '
+   Until COUNT=0 or TIME=0
+   If TIME<1
+      Paper 0 : Pen 6
+      Locate ,5 : Centre "GAME OVER"
+      Cdown : Cdown : Centre "OUT OF TIME"
+      Cdown : Cdown : Centre "YOU REACHED LEVEL"+Str$(L)
+      Pen 15 : Cdown : Cdown : Cdown 
+      Centre "LEFT MOUSE KEY TO PLAY AGAIN         RIGHT MOUSE KEY TO QUIT"
+      Do 
+         M=Mouse Key
+         Exit If M>0
+      Loop 
+      Exit If M=2
+   End If 
+   If M=1 Then L=0
+   '
+   '
+   Rem *** end of main loop 
+   '
+Loop 
+'
+'
+Edit 
+'
+'
+Rem *** the four subroutines 
+'  
+1 If Y>1 Then Dec Y : Cup : Return Else Return 
+2 If Y<22 Then Inc Y : Cdown : Return Else Return 
+3 If X<78 Then Inc X : Cright : Return Else Return 
+4 If X>1 Then Dec X : Cleft : Return Else Return 

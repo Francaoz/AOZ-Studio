@@ -1,0 +1,142 @@
+'**********************************
+'*    AMOS Professional HELP 67   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Lprint     (line 11)
+'*                                *            Ldir       (line 21)
+'*         Ronnie Simpson         *            Open Port  (line 31)
+'**********************************            Port       (line 49)
+'                                              Dev First$ (line 60)
+'                                              Dev Next$  (line 72)
+'------------------------------------------- 
+'Lprint
+'------------------------------------------- 
+'list variables to printer 
+'
+'Lprint is exactly the same as the Print command only output is sent to
+'the printer.  
+'
+'eg.           Lprint A,B,C$ 
+'
+'------------------------------------------- 
+'Ldir   Ldir/w 
+'------------------------------------------- 
+'list a directory to the printer 
+'
+'Ldir and Ldir/w are exaxtly the same as the Dir and Dir/w commands only 
+'output is sent to the printer.
+'
+'eg.          Ldir "df0:"
+'
+'------------------------------------------- 
+'Open Port 
+'------------------------------------------- 
+'open a channel to a port
+'
+'Open Port allows input and out put to external devices, all sequential
+'file commands can be used except those relative to only disc operations.
+'
+'    Open Port 1,"PAR:"   (open channel to parallel interface) 
+'    Open Port 1,"SER:"   (open channel to RS232 port) 
+'    Open Port 1,"PAR:"   (open channel to Prefs. printer) 
+'
+'eg.      Open Port 1,"SER:" 
+'         For N=1 To 1000
+'         Print #1,"What a waste of paper!"  
+'         Next 
+'         Close 1
+'
+'------------------------------------------- 
+'Port
+'------------------------------------------- 
+'test if a channel is waiting
+'
+'This function tests if the given channel is waiting to send information,
+'if device is waiting then -1 (true) will be returned otherwise it will be 
+'0 (false) 
+'
+'eg.           P=Port(1) 
+'
+'------------------------------------------- 
+'Dev First$
+'------------------------------------------- 
+'get first device from current list
+'
+'This function returns a string containing the name of the first device  
+'which satisfies the given filter, -" " can be used to omit spaces from
+'the string returned.
+'
+'          F$=Dev First$("") 
+'          Print F$
+'
+'------------------------------------------- 
+'Dev Next$ 
+'------------------------------------------- 
+'get next device from satisfying filter
+'
+'This function returns the name of the next device from the list created by
+'the Dev First$ function, if the end of the list has been reached then an
+'empty string will be returned 
+'
+'             Print Dev First$("") 
+'             Print Dev Next$
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Reserve Zone 3
+Flash Off : Curs Off : Cls 0 : Palette $20,$D33,$3D3,$FF7,$3,$DD0,$DD : Paper 4
+Pen 1 : Locate 0,2 : Centre Border$(Zone$("  Output devices to screen   ",1),2)
+Pen 2 : Locate 0,6 : Centre Border$(Zone$("  Output devices to printer  ",2),2)
+Pen 3 : Locate 0,10 : Centre Border$(Zone$(" Output devices to RS232 port",3),2)
+Pen 5 : Paper 0 : Locate 0,15 : Centre "Click left key in the box of your choice"
+Pen 6 : Locate 0,17 : Centre "Press right mouse key to quit"
+Repeat 
+   Screen To Front 0 : Screen 0
+   Repeat : Until Mouse Key=0
+   Repeat 
+      M=Mouse Zone
+      If Mouse Key=2 Then Edit 
+   Until Mouse Key=1 and M>0
+   Screen Open 1,320,200,4,Lowres : Get Palette 0 : Curs Off : Flash Off : Cls 0
+   On M Gosub 1,2,3
+Until False
+Edit 
+1
+Paper 0 : Pen 2
+Centre "List of all mounted devices"
+Pen 1 : Print 
+A$=Dev First$("")
+Repeat 
+   Print A$
+   A$=Dev Next$
+   Wait 10
+Until A$=""
+Pen 1 : Cdown : Centre "PRESS LEFT MOUSE KEY TO RETURN"
+Repeat : Until Mouse Key=1
+Return 
+2
+Paper 0 : Pen 2
+Locate 0,5 : Centre "Listing all mounted devices to printer"
+A$=Dev First$("")
+Repeat 
+   Lprint A$
+   A$=Dev Next$
+   Wait 10
+Until A$=""
+Pen 1 : Locate 0,10 : Centre "PRESS LEFT MOUSE KEY TO RETURN"
+Repeat : Until Mouse Key=1
+Return 
+3
+Paper 0 : Pen 2
+Locate 0,5 : Centre "Listing mounted devices to RS232 port"
+Open Port 1,"SER:"
+A$=Dev First$("")
+Repeat 
+   Print #1,A$
+   A$=Dev Next$
+   Wait 10
+Until A$=""
+Close 1
+Pen 1 : Locate 0,10 : Centre "PRESS LEFT MOUSE KEY TO RETURN"
+Repeat : Until Mouse Key=1
+Return 

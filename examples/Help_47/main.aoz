@@ -1,0 +1,162 @@
+'**********************************
+'*    AMOS Professional HELP 47   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Serial Speed  (line  16) 
+'*                                *           Serial Bits   (line  26) 
+'*         Ronnie Simpson         *           Serial Parity (line  39) 
+'**********************************           Serial X      (line  59) 
+'                                             Serial Buf    (line  77) 
+'                                             Serial Fast   (line  90) 
+'                                             Serial Slow   (line 104) 
+'                                             Serial Check  (line 116) 
+'                                             Serial Error  (line 128) 
+'                                             Serial Base   (line 140) 
+'                                             Serial Status (line 151) 
+'------------------------------------------- 
+'Serial Speed
+'------------------------------------------- 
+'set baud rate 
+'
+'eg.         Serial Speed 1,1200 
+'
+'Serial speed sets the baud rate for the single channel stated and this
+'will be used for both reading and writing.  
+'
+'------------------------------------------- 
+'Serial Bits 
+'------------------------------------------- 
+'set the Nbit and Stopbit parts
+'
+'                     +--->channel identification number   
+'                     | +--->number of bits for Nbits  
+'                     | | +--->number of Stopbits    
+'                     | | |    
+'         Serial Bits C,N,S
+'
+'Assigns the number of bits for each character transmitted.
+'
+'------------------------------------------- 
+'Serial Parity 
+'------------------------------------------- 
+'set the parity checking 
+'
+'                       +--->channel identification number 
+'                       | +--->type of parity checking   
+'                       | |    
+'         Serial Parity C,P
+'
+'There are 5 different options for setting the type of parity state:-
+'
+'              -1   no parity
+'               0   even parity
+'               1   odd parity 
+'               2   space parity 
+'               3   mark parity
+'
+'The parity bit is most easily set by using the Bset and Bclr functions. 
+'
+'------------------------------------------- 
+'Serial X
+'------------------------------------------- 
+'toggle handshaking system ( XON / XOFF )
+'
+'                       +--->channel identification number 
+'                       |  +--->toggle XON/XOFF handshaking system 
+'                       |  |     
+'              Serial X 1,-1 
+'
+'
+'A value of -1 (or true) disables handshaking and any other value will turn
+'it on but control characters must be set in the following format:-  
+'
+'                     XON*$10000000+XOFF*$10000
+'
+'See your Commodore manual for more information. 
+'
+'------------------------------------------- 
+'Serial Buf
+'------------------------------------------- 
+'set the size of the serial buffer 
+'
+'                        +--->channel identification number
+'                        |   +--->size of buffer in bytes
+'                        |   | 
+'             Serial Buf 1,10000 
+'
+'Minimum buffer size is 64 bytes and default value is 512 bytes, high speed
+'transfer rates require a much larger buffer than this for efficient use.
+'
+'------------------------------------------- 
+'Serial Fast 
+'------------------------------------------- 
+'switch on fast transfer mode
+'                        
+'                         +--->channel identification number   
+'                         |
+'             Serial Fast 1
+'
+'This instruction allows faster tranfer rates by cutting out some of the 
+'internal checking.
+'WARNING: this instruction changes protocol to PARITY EVEN,NO XON/XOFF and 
+'8 Bits. 
+'
+'------------------------------------------- 
+'Serial Slow 
+'------------------------------------------- 
+'return to slow mode 
+'
+'                         +--->channel identification number 
+'                         |
+'             Serial Slow 1
+'
+'This instructions resets system to slow mode and reactivates internal 
+'error checking. 
+'
+'------------------------------------------- 
+'Serial Check
+'------------------------------------------- 
+'report on serial device status
+'
+'                          +--->channel identification number
+'                          | 
+'eg.        C=Serial Check(1)
+'
+'This function returns 0 (or false) if the last instruction is still being 
+'executed or -1 (or true) if the operation is complete.
+'
+'------------------------------------------- 
+'Serial Error
+'------------------------------------------- 
+'report of last transfer 
+'
+'                          +--->channel identification number    
+'                          | 
+'eg.        E=Serial Error(1)
+'
+'This function returns 0 (or false) if the last instruction was a success
+'or -1 (or true) if the last operation produced a fault. 
+'
+'------------------------------------------- 
+'Serial Base 
+'------------------------------------------- 
+'return base address 
+'
+'eg.        B=Serial Base
+'
+'This function will return the base address in memory of the I/O structure 
+'of the current channel. 
+'WARNING this instruction is for experts only! 
+'
+'------------------------------------------- 
+'Serial Status 
+'------------------------------------------- 
+'check on status of port 
+'  
+'eg.           S=Serial Status(number) 
+'
+'This function returns a bit map which provides information on the current 
+'condition of the Serial port, the number parameter is the serial channel
+'number that you wish to access. A total of 16 bits can be read giving 
+'various details of the parallel port. (see User Guide for a full list)
+'
+'------------------------------------------- 

@@ -1,0 +1,132 @@
+'**********************************
+'*    AMOS Professional HELP 42   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *              Input$    (line 10) 
+'*                                *              Wait Key  (line 22) 
+'*         Ronnie Simpson         *              Key Speed (line 33) 
+'**********************************              Clear Key (line 46) 
+'                                                Put Key   (line 58) 
+'------------------------------------------- 
+'Input$
+'------------------------------------------- 
+'input x number of characters into a string
+'
+'eg.       I$=Input$(5)
+'
+'The number in the brackets denotes how many characters are to be input into 
+'the string. 
+'The program will halt until that number of characters is reached. 
+'The result is always a string even if numbers are input.
+'
+'------------------------------------------- 
+'Wait Key
+'------------------------------------------- 
+'wait for a key press
+'
+'eg.       Print "I'M WAITING ON A KEY PRESS"
+'          Wait Key  
+'          Print "NOW WE CAN GO ON"
+'
+'Halts program until a key is pressed. 
+'
+'------------------------------------------- 
+'Key Speed 
+'------------------------------------------- 
+'alter keyboard delay and repeat speeds
+'
+'                 +--->Delay before repeating starts in 1/50th. of a second. 
+'                 |  +--->repeat speed in 1/50th. of a second. 
+'                 |  | 
+'       Key Speed 10,5 
+'
+'Once the keyspeed has been altered it will stay in effect until the next
+'key speed instruction, even when program has stopped running. 
+'
+'------------------------------------------- 
+'Clear Key 
+'------------------------------------------- 
+'flush the keyboard buffer 
+'
+'Clear Key requires no parameters and flushes the keyboard buffer of any 
+'unwanted characters, it is especialy useful just before a Wait Key to 
+'ensure that a fresh key is pressed. 
+'
+'eg           Clear Key
+'             Wait Key 
+'
+'------------------------------------------- 
+'Put Key 
+'------------------------------------------- 
+'insert a string to the keyboard buffer
+'
+'eg.      Put Key P$ 
+'
+'Put Key places a string in the keyboard buffer as if it had been typed
+'in from the keyboard. 
+'The string can also include a Return character. ( Chr$(13) )
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up the screen 
+'
+Screen Open 0,640,200,8,Hires
+Flash Off : Curs Off : Cls 1 : Paper 1 : Pen 4 : Hide 
+Palette $0,$A00,$A0,$A,$FF0,$F0F,$FF,$F70
+'
+Rem *** using input$ 
+'
+Locate 0,12 : Centre "PLEASE INPUT A 5 LETTER CODEWORD"
+Locate 30,14 : I$=Input$(5)
+Locate 0,12 : Centre "THIS CODEWORD WILL BE REQUIRED LATER DO NOT FORGET IT!" : Wait 200
+Fade 2 : Wait 30 : Curs Off 
+Cls 2 : Paper 2
+Palette $0,$A00,$40,$A,$FF0,$F0F,$FF,$F70
+'  
+Rem *** using key speed
+'
+Locate 0,12 : Centre "TO SHOW HOW DIFFICULT THINGS CAN GET WHEN ALTERING KEY SPEED DELAY AND REPEAT"
+Locate 0,14 : Centre "TRY TYPING IN YOUR NAME NOW  (press return when you are finished)"
+Locate 20,16
+Clear Key 
+Key Speed 0,0
+Input A$
+Key Speed 10,1
+Locate 20,19 : Centre "KEYBOARD RETURNED TO NORMAL SPEED SETTINGS"
+Wait 150
+Fade 2 : Wait 30 : Curs Off 
+Cls 3 : Paper 3
+Palette $0,$A00,$A0,$A,$FF0,$F0F,$FF,$F70
+Clear Key 
+Locate 0,3 : Centre "DO YOU REMEMBER YOUR CODEWORD?"
+Locate 0,5 : Centre "TYPE IT IN NOW-"
+Locate 36,7 : Input C$
+If C$<>I$
+   Clear Key 
+   Locate 0,3 : Cline : Centre "WRONG!!!!---TRY AGAIN"
+   Locate 36,7 : Cline : Input C$
+   Locate 0,9
+End If 
+If C$=I$
+   Centre "WELL DONE YOU REMEMBERED"
+Else 
+   Centre "HOW COME I CAN REMEMBER - BUT YOU MANAGED TO GET IT WRONG"
+   Locate 0,11 : Centre "YOUR ORIGINAL CODEWORD WAS "+I$
+End If 
+'
+Rem *** using put key
+'
+Pen 5 : Locate 0,14 : Centre "THIS TIME I WANT YOU TO TRY TO GET IT WRONG"
+Locate 0,16 : Centre "PLEASE TYPE IN A DIFFERENT 5 LETTERS"
+Clear Key 
+For N=1 To 5
+   Wait Key 
+   Clear Key 
+   Put Key Mid$(I$,N,1)
+   N$=Input$(1) : Locate 36+N,18 : Print N$
+Next 
+Locate 0,20 : Centre "HOW'S THAT!!!!"
+Pen 4 : Locate 0,23 : Centre "PRESS ANY KEY TO QUIT"
+Clear Key 
+Wait Key 
+Edit 

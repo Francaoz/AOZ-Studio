@@ -1,0 +1,154 @@
+'**********************************  
+'*    AMOS Professional HELP 27   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *               Set Bob (line 11)
+'*                                *               X Bob   (line 50)
+'*         Ronnie Simpson         *               Y Bob   (line 50)
+'**********************************               I Bob   (line 62)
+'
+'
+'------------------------------------------- 
+'Set Bob 
+'------------------------------------------- 
+'set bob drawing mode
+'
+'           +---->bob identification number  
+'           | +---->bob background replacement type
+'           | |   +---->screen planes used 
+'           | |   |      +---->blitter mode
+'           | |   |      |   
+'   Set Bob 1,0,%1111,%11100010
+'
+'There are 3 types of the background replacement types:- 
+'
+' 1) A value of 0 will save and replace the background under your bob this 
+'    is the default value. 
+' 2) A value of greater than 0 will result in the background under your bob
+'    being replaced with a solid block of colour, this is much faster than 
+'    option 1 and as long as your bob is moving over a solid block of colour 
+'    such as a blue sky then this option is advised. The colour used will be 
+'    the value stated in this parameter minus 1. 
+' 3) Any negative value will will cause the redrawing process to be  
+'    turned off. 
+'
+'Screen planes used
+'
+'This is a bit map representing the screen planes that your bobs will be 
+'drawn on. Each plane is assosiated with 1 bit and depending on the screen 
+'mode in use changing some of these bits to 0 will result in some or all of
+'the bobs colours being omitted. 
+'The default value is to draw on all availiable bit planes.
+'
+'Blitter mode
+'
+'As far as bobs are concerned the the blitter mode is normally set to one
+'of two values:- 
+'    1) %11100010    (bob used with a mask)
+'    2) %11001010    (bob used without a mask) 
+'
+'------------------------------------------- 
+'X Bob 
+'Y Bob 
+'------------------------------------------- 
+'return a bobs coordinate(s) 
+'
+'eg    X=X Bob(2)  (return bob number 2's X coordinate)
+'      Y=Y Bob(3)  (return bob number 3's Y coordinate)
+'
+'These functions return the bob's coordinates measured in pixels across
+'and down relative to the current screen.
+'
+'------------------------------------------- 
+'I Bob 
+'------------------------------------------- 
+'return the current image of a bob 
+'
+'eg.        I=I Bob(4) 
+'
+'The above example would return the image number being used by bob number 4
+'at the time the call was made. If the bob is not being displayed then a 
+'value of zero will be returned. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** reserve some memory for the arrays 
+'
+Dim X(4),Y(4),DY(4),DX(4)
+Load "AMOSPro_Examples:OBJECTS/BOBS.abk"
+'
+'
+Rem *** set out some variables 
+'
+ID=1 : BT=1 : SP=%1111 : BM=%11100010 : X=140 : Y=80 : DY=2 : DX=2
+Global ID,BT,SP,BM
+'
+'
+Rem *** re-initialize if necessary 
+'
+RESTART:
+Screen Open 0,640,200,16,Hires
+Reserve Zone 4
+Flash Off : Curs Off : Get Sprite Palette : Cls 0 : Paper 0 : Pen 9
+Locate 50,1 : Print Border$(Zone$("BOB BACKGROUND TYPE UP",1),1)
+Locate 50,4 : Print Border$(Zone$("BOB BACKGROUND TYPE DOWN",2),1)
+Locate 50,10 : Print Border$(Zone$("SCREEN PLANES PLUS",3),1)
+Locate 50,13 : Print Border$(Zone$("SCREEN PLANES MINUS",4),1)
+Pen 5 : Locate 48,16 : Print "take your pick using left button"
+Pen 7 : Locate 50,18 : Print "press right mouse key to quit"
+Pen 2 : MARKUP
+Locate 0,22 : Print "X Bob(1)="
+Double Buffer 
+Autoback 0
+'
+'
+Rem *** set modes of bob 1 
+'
+Set Bob ID,BT,SP,BM
+Bob 1,X,Y,ID
+Bob 2,X,Y,3
+'
+'
+Rem *** await user input 
+'
+Do 
+   M=Mouse Zone
+   If M>0 and Mouse Key=1
+      On M Proc BTUP,BTDOWN,SPUP,SPDOWN
+      Exit 
+   End If 
+   Autoback 1
+   Bob 1,X,Y,ID
+   Bob 2,330-X,80-Y,3
+   Wait Vbl 
+   Autoback 0
+   A$=Str$(X Bob(1))+"  "
+   Locate 9,22 : Print A$
+   Add X,DX : If X>280 or X<2 Then DX=-DX
+   Add Y,DY : If Y>80 or Y<2 Then DY=-DY
+   If Mouse Key=2 Then Edit 
+Loop 
+'
+'
+Goto RESTART
+Procedure MARKUP
+   Locate 48,7 : Print "Set Bob 1,"+","+Cleft$+Str$(BT)+","+Bin$(SP,4)+","+Bin$(BM,8)+"  "
+End Proc
+Procedure BTUP
+   Inc BT
+   If BT>15 Then BT=15
+End Proc
+Procedure BTDOWN
+   Dec BT
+   If BT<-1 Then BT=-1
+End Proc
+Procedure SPUP
+   Shared SP
+   Inc SP
+   If SP>15 Then SP=15
+End Proc
+Procedure SPDOWN
+   Shared SP
+   Dec SP
+   If SP<0 Then SP=0
+End Proc

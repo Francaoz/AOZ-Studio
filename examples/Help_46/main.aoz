@@ -1,0 +1,178 @@
+'**********************************
+'*    AMOS Professional HELP 46   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Serial Open   (line 12)
+'*                                *           Serial Close  (line 48)
+'*         Ronnie Simpson         *           Serial Send   (line 64)
+'**********************************           Serial Out    (line 75)
+'                                             Serial Get    (line 88)
+'                                             Serial Input$ (line 98)
+'
+'------------------------------------------- 
+'Serial Open 
+'------------------------------------------- 
+'open a serial channel for input or output 
+'
+'The basic form of the instruction has only two parameters:- 
+'
+'                   +--->channel identification number 
+'                   | +--->port number   
+'                   | |  
+'       Serial Open 1,0  
+'
+'The channel identification number can range from 0 to 4.
+'The port number is normally set to a value of zero unless you are using 
+'a MULTI SERIAL card in which case numbers from 1 onwards will identify
+'the port. 
+'
+'Three other optional parameters can also be added:- 
+'
+'                        +--->shared ON/OFF  
+'                        |  +--->X disabled ON/OFF 
+'                        |  |  +--->protocol  minitel/7 wires  
+'                        |  |  | 
+'       Serial Open 1,0,-1,-1,-1 
+'
+'The shared flag informs AMOS that the device can be shared with other tasks 
+'which may be running at the same time avalue of 0 (or false) will grab the
+'channel for AMOS use only and a value of -1 (or true) will allow the port 
+'to be shared.    WARNING-use with extreme caution.
+'
+'The Xdisabled toggles XON/XOFF checking during data transfer. 
+'
+'The protocol default value of 0 (or false) sets the system used to the
+'French Minitel protocol and a value of -1 (or true) selects the   
+'alternative 7 wires system. 
+'
+'------------------------------------------- 
+'Serial Close
+'------------------------------------------- 
+'close 1 or all of the serial channels 
+'
+'If the Serial Close instruction is used without any parameters then all 
+'currently opened serial channels will be closed otherwise only the stated 
+'channel will be closed. 
+'
+'
+'eg.          Serial Close        (close all serial channels)
+'             Serial Close 1      (close only channel number 1)
+'
+'Please note that all channels will be automatically closed whenever a 
+'program is run. 
+'
+'------------------------------------------- 
+'Serial Send 
+'------------------------------------------- 
+'output a string to a serial channel 
+'
+'eg.       Serial Send 1,A$
+'
+'Sends the string to the stated serial channel but does not check whether
+'data has actually been transmitted this can be monitered with the Serial
+'Check function. 
+'
+'------------------------------------------- 
+'Serial Out
+'------------------------------------------- 
+'output a memory block to a serial channel 
+'
+'                +--->channel identification number
+'                | +--->address in memory  
+'                | | +--->length in bytes  
+'                | | | 
+'     Serial Out 1,A,L 
+'
+'This instruction is similar to Serial Send except that it sends raw data
+'
+'------------------------------------------- 
+'Serial Get
+'------------------------------------------- 
+'get a byte of data from serial port 
+'
+'eg.        S=Serial Get(1)  
+'
+'The Serial Get function reads a single byte from the stated channel if
+'nothing is availiable then a value of -1 will be returned.  
+'
+'------------------------------------------- 
+'Serial Input$ 
+'------------------------------------------- 
+'get a string from serial port 
+'
+'eg.        S$=Serial Input$(1)
+'
+'The Serial Input$ instruction reads an entire string of characters if 
+'nothing is availiable then an empty string ("") will be returned otherwise
+'the string will contain all bytes that have been sent.
+'Care must be taken to read this data regularly to avoid overloading system
+'especially when using high speed data transfer rates. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** The following program will allow 2 computers to communicate with 
+'       each other in a basic sort of way. Each computer must be running 
+'       this same program and be connected through the serial port with
+'       a null modem lead. 
+'
+'
+Rem *** open a control and a text screen 
+'
+Screen Open 0,640,160,8,Hires
+Flash Off : Curs Off : Cls 1 : Paper 1
+Palette $0,$700,$F0,$F,$FF0,$F0F,$FF,$F70
+Screen Open 1,640,32,8,Hires
+Flash Off : Curs Off : Cls 0 : Paper 0
+Get Palette 0
+Screen Display 1,,216,,
+Reserve Zone 3
+'
+Rem *** open serial port for data trnsportation
+'
+Serial Open 2,1
+'
+Rem *** set 3 control buttons
+'
+Screen 1 : Pen 5 : Locate 15,1 : Print Border$(Zone$("  SEND  ",1),2)
+Locate 35,1 : Print Border$(Zone$(" RECEIVE ",2),2)
+Pen 6 : Locate 55,1 : Print Border$(Zone$("  QUIT  ",3),2)
+'
+Rem *** start main loop
+'
+Do 
+   Repeat 
+      M=Mouse Zone
+   Until Mouse Key=1 and M>0
+   On M Proc SEND,RECEIVE,QUIT
+Loop 
+'
+'
+Procedure SEND
+   Screen 0 : Pen 6 : Cdown : Print "INPUT DATA TO BE SENT" : Pen 4
+   Input L$
+   Serial Send 2,L$+Chr$(13)+Chr$(31)
+   Repeat 
+   Until Serial Check(2)
+   Screen 0 : Pen 6 : Cdown : Print "DATA TRANSPORTED"
+   Screen 1
+End Proc
+'
+'
+Procedure RECEIVE
+   Screen 0 : Pen 6 : Cdown : Print "READY TO RECEIVE" : Screen 1
+   Repeat : Until Mouse Key=0
+   Do 
+      Exit If Mouse Key
+      L$=Serial Input$(2)
+      If L$<>""
+         Screen 0 : Pen 4 : Print L$; : Screen 1
+      End If 
+   Loop 
+   Screen 0 : Cdown : Pen 6 : Print "SELECT AN OPTION" : Screen 1
+End Proc
+'
+'
+Procedure QUIT
+   Serial Close 2
+   Edit 
+End Proc

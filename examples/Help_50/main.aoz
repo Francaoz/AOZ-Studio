@@ -1,0 +1,188 @@
+'**********************************
+'*    AMOS Professional HELP 50   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Mouse Key   (line 12)
+'*                                *           Mouse Click (line 29)
+'*         Ronnie Simpson         *           Limit Mouse (line 43)
+'**********************************           X Screen    (line 57)
+'                                             Y Screen    (line 57)
+'                                             X Hard      (line 73)
+'                                             Y Hard      (line 73)
+'------------------------------------------- 
+'Mouse Key 
+'------------------------------------------- 
+'check current status of mouse buttons 
+'
+'eg.          M=Mouse Key
+'
+'value returned is a bit pattern in the following format 
+'
+'       bit 0 set if left mouse key is pressed    (decimal value of +1)
+'       bit 1 set if right mouse key is pressed   (decimal value of +2)
+'       bit 1 set if Third mouse key is pressed   (decimal value of +4)
+'
+'eg.    If Mouse Key=1 Then Print "left key held down" 
+'       If Mouse Key=2 Then Print "right key held down"
+'       If Mouse Key=3 Then Print "Both keys held down"
+'
+'------------------------------------------- 
+'Mouse Click 
+'------------------------------------------- 
+'check for a mouse click 
+'
+'eg.    M=Mouse Click
+'
+'The Mouse Click function works in a similar manner and returns the same 
+'format of imformation as the above Mouse Key function with the exception
+'that it checks whether the user has clicked a button rather than the  
+'current status of the mouse keys. 
+'Each time this function is used any bits that were set will be cleared so 
+'only a single keypress can be tested with this function.
+'
+'------------------------------------------- 
+'Limit Mouse 
+'------------------------------------------- 
+'restrict the movement of the mouse
+'
+'                     +----> (coordinates defining a rectangle)
+'              _______|______  
+'             |              | 
+'Limit Mouse 160,100 To 200,160
+'
+'The mouse pointer is restricted to the rectangle defined by the given 
+'hardware coordinates. 
+'To return the mouse to the full screen area the use Limit Mouse without 
+'any parameters. 
+'------------------------------------------- 
+'X Screen
+'Y Screen
+'------------------------------------------- 
+'convert hardware coordinates to screen coordinates
+'
+'eg.       X=X Screen(200) 
+'          Y=Y Screen(Y Mouse) 
+'
+'The values returned by these functions are relative to the current screen 
+'and an optional screen number may be included to to return the value
+'relative to the given screen number.  
+'
+'eg.       X=X Screen(1,X Mouse)     (relative to screen 1)
+'          Y=Y Screen(2,150)         (relative to screen 2)
+'
+'------------------------------------------- 
+'X Hard
+'Y Hard
+'------------------------------------------- 
+'convert screen coordinates to hardware coordinates
+'
+'Similar in operation to the above X Screen and Y Screen functions but 
+'convert values to hardware coordinates. 
+'Once again an optional screen number may be included to return the value
+'relative to a particular screen.
+'
+'eg.        X=X Hard(1,160)      (with optional screen number) 
+'           Y=Y Hard(150)        (relative to current screen)
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Dim X(7),Y(7)
+Global X,Y
+'
+Rem *** open screen and reserve some memory for screen zones 
+'
+Screen Open 0,320,200,8,Lowres
+Reserve Zone 5
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,,,,,,,,,,$F,$FF0,$F00
+Flash Off : Curs Off : Cls 0 : Paper 0
+'
+Rem *** change mouse shape to an image from the sptite bank
+'
+Change Mouse 4
+Limit Mouse 138,60 To 438,240
+'
+Rem *** set out the screen zones 
+'
+Pen 2 : Locate 2,2 : Print Border$(Zone$("CLICK HERE FOR MULTI MOUSE",1),2)
+Pen 1 : Locate 20,6 : Print Border$(Zone$("CLICK HERE TO QUIT",2),4)
+Pen 3 : Locate 2,12 : Print Border$(Zone$("CLICK HERE FOR TRICKY MOUSE",3),1)
+Pen 7 : Locate 9,22 : Print Border$(Zone$("CLICK HERE FOR NORMAL MOUSE",4),3)
+Pen 6 : Locate 7,17 : Print Border$(Zone$("CLICK HERE FOR AWKARD MOUSE",5),5)
+M=4 : For N=1 To 7 : Sprite N,0,0,1 : Next 
+'
+Rem *** start the main loop
+'
+Do 
+   Z=Mouse Zone
+   If Mouse Key and Z>0
+      M=Z
+      On M Gosub 1,2,3,4,5
+   End If 
+   '
+   If M=1 Then MULTI
+   If M=3 Then TRICKY
+   If M=5 Then AWKARD
+Loop 
+'
+1 Show On 
+For N=1 To 7
+   X(N)=X Mouse
+   Y(N)=Y Mouse
+   Sprite N,X(N),Y(N),1
+Next 
+Return 
+'
+'
+2 Edit 
+'
+'
+3 For N=1 To 7 : Sprite N,0,0, : Next 
+X=X Mouse : Y=Y Mouse : Sprite 1,X,Y,1 : Hide On 
+Return 
+'
+'
+4 Show On 
+For N=1 To 7 : Sprite N,0,0, : Next 
+Return 
+'
+'
+5 Show On 
+For N=1 To 7 : Sprite N,0,0, : Next 
+Return 
+'
+'
+'
+Procedure MULTI
+   Shared X(),Y()
+   X(0)=X Mouse : Y(0)=Y Mouse
+   For N=1 To 7
+      X=Abs(X(N)-X(N-1))
+      Y=Abs(Y(N)-Y(N-1))
+      If X(N)>X(N-1) Then Add X(N),-(X/4)
+      If X(N)<X(N-1) Then Add X(N),X/4
+      If Y(N)>Y(N-1) Then Add Y(N),-(Y/4)
+      If Y(N)<Y(N-1) Then Add Y(N),Y/4
+      Sprite N,X(N),Y(N),1
+   Next 
+End Proc
+Procedure TRICKY
+   A=X Mouse : C=Y Mouse
+   Repeat 
+      Wait Vbl 
+      B=X Mouse : D=Y Mouse
+   Until A<>B or C<>D or Mouse Key
+   If A<B and X>142 Then Add X,-4
+   If A>B and X<434 Then Add X,4
+   If C<D and Y>64 Then Add Y,-4
+   If C>D and Y<236 Then Add Y,4
+   Limit Mouse 138,60 To 438,240
+   X Mouse=X : Y Mouse=Y : Sprite 1,X,Y,1
+End Proc
+Procedure AWKARD
+   Repeat 
+      If Rnd(29)=1
+         X Mouse=X Mouse+Rnd(2)-1
+         Y Mouse=Y Mouse+Rnd(2)-1
+      End If 
+   Until Mouse Key
+End Proc

@@ -1,0 +1,184 @@
+'**********************************
+'*    AMOS Professional HELP 74   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *             Sam Play (line  12)
+'*                                *             Sam Bank (line  42)
+'*         Ronnie Simpson         *             Sam Raw  (line  53)
+'**********************************             Sam Loop (line  71)
+'                                               Sam Stop (line  80)
+'                                               Sload    (line  92)
+'                                               Sam Swap (line 110)
+'------------------------------------------- 
+'Sam Play
+'------------------------------------------- 
+'play a sample 
+'
+'There are 3 possible formats of this instruction for playing samples from 
+'the current bank:-
+'                  Sam Play SN         (SN=sample number)
+'                  Sam Play VB,SN      (VB=voice bitmap) 
+'                  Sam Play VB,SN,P    (P=pitch) 
+'                  
+'Sample number can range from 1 to the maximum number of samples contained in
+'the current sample bank.
+'The voice bitmap parameter determines which combination of voice channels 
+'(0-3) will be used, If the bit is set the channel will be used:-
+'
+'              Voice 0    bit 0    decimal value of +1 
+'              Voice 1    bit 1    decimal value of +2 
+'              Voice 2    bit 2    decimal value of +4 
+'              Voice 3    bit 3    decimal value of +8 
+'
+'eg.      Sam Play 15,1   (play sample number 1 through all 4 channels)
+'         Sam Play 9,2    (play sample number 2 through channels 3 and 0)
+'
+'The pitch parameter is measured in hertz and will vary depending on the 
+'original sampling rate typical values may range from 1000 to 12000, altering
+'this will change the playback speed of the sample.
+'
+'eg.           Sam Play 15,4,5000  
+'
+'------------------------------------------- 
+'Sam Bank
+'------------------------------------------- 
+'change the current sample bank
+'
+'Sam Bank assigns a new sample bank number to be used for all future Sam Play
+'commands, this allows several sample bank to be held in memory at the same
+'and be able to flick between them at the appropiate point in your program.
+'
+'eg.            Sam Bank 6 
+'
+'------------------------------------------- 
+'Sam Raw 
+'------------------------------------------- 
+'play a raw sample 
+'
+'Sam Raw plays a raw sample stored anywhere in memory:-
+'
+'           Sam Raw VB,address,length,frequency
+'
+'VB is the voice bitmap (see Sam Play) 
+'Address is the start address of the sample in memory. (normally a bank) 
+'Length is the length of sample to be played.
+'Frequency is measured in hertz and may be different from the original 
+'sampling rate.
+'
+'eg.        Sam Raw 15,start(9),length(9),5000 
+'          (play the raw sample stored in bank 9)
+'
+'------------------------------------------- 
+'Sam Loop On/Off 
+'------------------------------------------- 
+'toggle repeat mode
+'
+'As a default samples are played only once, use of the Sam Loop On command 
+'informs AMOS Pro. to continually loop the samples. The looping can be 
+'terminated with Sam Loop Off. 
+'
+'------------------------------------------- 
+'Sam Stop
+'------------------------------------------- 
+'stop a sample being played
+'
+'If used without any parameters this command will silence all voice channels,
+'but an optional vioce bitmap may be added to stop sample being played on
+'only the selected channels (see Sam Play for bit-patterns)
+'
+'With this instruction it is possible to have music playing on 2 channels
+'and double buffered samples playing on the remaining 2. (not Tracker music) 
+'
+'------------------------------------------- 
+'Sload 
+'------------------------------------------- 
+'load parts of a sample
+'
+'This instruction allows the double buffered loading of very large samples,
+'parts of the sample are loaded into a previously reserved area of memory
+'and the Pof()= instruction can be used to set the file pointer ready for
+'loading the following part. This double buffered system is designed for 
+'fast loading hard drives so floppy disc users will be restricted to large 
+'samples being played at a slow rate of 4000 to 5000 hertz.
+'
+'         Sload file_number,length To Address  
+'
+'File_number is the number of a file previously opened with Open In. 
+'Length is the number of bytes to be loaded. 
+'Address is the start address of reserved area of memory.
+'
+'------------------------------------------- 
+'Sam Swap
+'------------------------------------------- 
+'switch buffers
+'
+'This command initialises the sound swapping of double buffered samples, the 
+'swapping will only take place when the initial buffer has been played.
+'
+'          Sam Swap VB to address,length 
+'
+'See Sam Play for details of the VB settings. (voice bitmap) 
+'Address is the start address in memory of the next buffer. (chipmem only) 
+'Length is the number of bytes to be played. 
+'
+'The function =Sam Swapped is used to determine when the new buffer set up 
+'with Sam Swap has started playing thus allowing the loading of the next part
+'of the sample. This is done by checking a voice channel 0-3 (not a bitmap)
+'until it returns a value of -1 (true) 
+'
+'           Repeat : S=Sam Swapped(0) : Until S
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Dim X(11),Y(11),DX(11),DY(11)
+Load "AMOSPro_Examples:samples/mixture.abk",5
+N$="ABCDEFGHIJ"
+Rem *** grab some bobs from a 4 colour screen
+'
+Screen Open 0,320,200,4,Lowres : Curs Off : Flash Off : Cls 0 : Paper 0
+Ink 3 : Circle 7,7,7 : Ink 2 : Paint 4,4 : Get Bob 1,0,0 To 15,15 : Cls 0
+Pen 2 : Ink 1 : For N=2 To 11 : Locate 1,1 : Print Mid$(N$,N-1,1)
+Circle 11,11,7 : Get Bob N,4,4 To 19,19 : Next 
+For N=1 To 11 : Hot Spot N,$11 : Next 
+'
+Rem *** set out the main screen and place the bobs 
+'
+Screen Open 0,320,200,8,Lowres : Curs Off : Flash Off : Cls 0 : Paper 0 : Hide 
+Pen 6 : Locate 0,10 : Centre "A NOISY DEMO  by R. Simpson"
+Pen 4 : Locate 0,14 : Centre "Press right mouse key to quit"
+Wait 150 : Fade 6 : Wait 80 : Cls 7
+Ink 4 : For N=1 To 50 : Plot Rnd(319),Rnd(199) : Next 
+Ink 5 : For N=1 To 50 : Plot Rnd(319),Rnd(199) : Next 
+Ink 2 : Box 0,0 To 319,199 : Double Buffer 
+Bob 1,100,100,1 : X(1)=100 : Y(1)=100 : DX(1)=4 : DY(1)=4
+For N=2 To 11 : Bob N,Rnd(300)+10,Rnd(180)+10,N : DX(N)=Rnd(3) : DY(N)=Rnd(3)
+   If Rnd(1)=0 Then DX(N)=Rnd(2)-3
+   If Rnd(1)=0 Then DY(N)=Rnd(2)-3
+   X(N)=X Bob(N)
+   Y(N)=Y Bob(N)
+Next 
+Set Rainbow 1,7,200,"","","(7,1,15)(7,-1,15)" : Rainbow 1,0,42,200
+Fade 5,0,$8AF,$FA8,$8FA,$572,$257,$CC2,0 : Wait 60
+'
+Rem *** play a different sample for each collision 
+'
+Do 
+   For N=2 To 11
+      Add X(N),DX(N)
+      Add Y(N),DY(N)
+      If Y(N)<10 or Y(N)>190 Then DY(N)=-DY(N)
+      If X(N)<10 or X(N)>310 Then DX(N)=-DX(N)
+      Bob N,X(N),Y(N),
+   Next 
+   Add X(1),DX(1)
+   Add Y(1),DY(1)
+   If Y(1)<10 Then Y(1)=10 : DY(1)=4 : Sam Play 1
+   If Y(1)>190 Then Y(1)=190 : DY(1)=-4 : Sam Play 3
+   If X(1)<10 Then X(1)=10 : DX(1)=4 : Sam Play 4
+   If X(1)>310 Then X(1)=310 : DX(1)=-4 : Sam Play 5
+   Bob 1,X(1),Y(1),
+   If Bob Col(1)
+      C=Col(-1) : Sam Play C+5 : DX(1)=-DX(1) : DY(1)=-DY(1)
+   End If 
+   If Mouse Key=2 Then Edit 
+Loop 

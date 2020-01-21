@@ -1,0 +1,120 @@
+'**********************************
+'*    AMOS Professional HELP 83   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *             Talk Misc    (line 10) 
+'*                                *             Talk Stop    (line 26) 
+'*         Ronnie Simpson         *             Mouth Width  (line 34) 
+'**********************************             Mouth Height (line 46) 
+'                                               Mouth Read   (line 56) 
+'------------------------------------------- 
+'Talk Misc 
+'------------------------------------------- 
+'set volume and frequency of narrator voice
+'
+'This instruction is used to quickly alter both th frequency and volume of 
+'voice used by the narrator. 
+'
+'                        +--->Volume 
+'                        |   +--->Frequency
+'             Talk Misc 64,20000 
+'
+'Volume can range from 0 (silent) to 64 (maximum volume).
+'Frequency may be set from 5000 to 25000 with the higher frequences taking 
+'more of the processor time in multi-task mode.
+'
+'------------------------------------------- 
+'Talk Stop 
+'------------------------------------------- 
+'stop speach in multi-task mode
+'
+'This instruction is used without parameters and will simply terminate a 
+'say instruction whilst in multi-task mode.
+'
+'------------------------------------------- 
+'Mouth Width 
+'------------------------------------------- 
+'return height of the mouth
+'
+'If the narrator mouth is being displayed (multi-task mode only) this
+'function will return the width of the mouth (in pixels) at the time 
+'the function is called. A negative value will be returned if no speach
+'is taking place.
+'
+'eg.                W=Mouth Width
+'
+'------------------------------------------- 
+'Mouth Height
+'------------------------------------------- 
+'return the width of the mouth 
+'
+'This function is exactly the same as the above =Mouth Width only it returns 
+'the height of the mouth (in pixels).
+'eg.                W=Mouth Height 
+'
+'------------------------------------------- 
+'Mouth Read
+'------------------------------------------- 
+'read mouth position 
+'
+'This function waits for any mouth movement and reads the new mouth values 
+'into the Mouth Width and Mouth Height functions.
+'
+'eg.               R= Mouth Read 
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem ***  tidy up the display and draw a simple face
+'
+Palette $30,$C77,$700,,$FFF,$FF,$0,$30
+Curs Off : Pen 5 : Cls 7
+X=150 : Y=110 : MX=2 : MY=1
+Ink 6 : Circle 130,40,15 : Circle 170,40,15 : Circle 132,44,3 : Circle 172,44,3
+Draw 150,60 To 140,90 : Draw To 160,90 : Draw To 150,60 : Ellipse 150,70,60,70
+Ink 4 : Paint 130,45 : Paint 170,45 : Ink 1 : Paint 160,10 : Ink 2 : Paint 155,80
+Paper 7 : Pen 15 : Locate 0,24 : Centre "Just enter an empty string to quit." : Pen 5
+'
+Rem *** set the frequency and volume 
+'
+Talk Misc 64,20000
+A$="Welkum my friend to the talking masheen. ,,,,,Pleeze entur below enything u want me too say,           "
+'
+Rem *** start the main loop
+'
+Do 
+   Say A$,1
+   Do 
+      Rem *** wait for the mouth to move and read new sizes
+      '
+      Mouth Read 
+      '
+      Rem *** erase the last mouth drawn if necessary
+      '
+      If SX>=0
+         Ink 1
+         Draw X-SX*MX,Y To X,Y-SY*MY
+         Draw To X+SX*MX,Y
+         Draw To X,Y+SY*MY
+         Draw To X-SX*MX,Y
+      End If 
+      Rem *** get the new mouth sizes
+      '
+      SX=Mouth Width
+      SY=Mouth Height
+      '
+      Rem *** check for a negative value- if not then draw the next mouth
+      '
+      Exit If SX<0
+      Ink 3
+      Draw X-SX*MX,Y To X,Y-SY*MY
+      Draw To X+SX*MX,Y
+      Draw To X,Y+SY*MY
+      Draw To X-SX*MX,Y
+   Loop 
+   '
+   Rem *** get the user input 
+   '
+   Locate 0,21 : Cline : Cdown : Cline : Locate 0,20
+   Print "What do you want me to say:-" : Input A$
+   If A$="" : Edit : End If 
+   Curs Off 
+Loop 

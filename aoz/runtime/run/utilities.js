@@ -438,7 +438,16 @@ Utilities.prototype.getProperty = function ( obj, prop, noCase )
 	if ( typeof prop != 'string' )
 		return obj[ prop ];
 	if ( noCase )
-		return obj[ prop.toLowerCase() ];
+	{
+		prop = prop.toLowerCase();
+		for ( p in obj )
+		{
+			if ( p.toLowerCase() == prop )
+			{
+				return obj[ p ];
+			}
+		}
+	}
 	return obj[ prop ];
 };
 Utilities.prototype.cleanObject = function ( obj, exclude, noCase )

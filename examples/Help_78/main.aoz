@@ -1,0 +1,166 @@
+'**********************************
+'*    AMOS Professional HELP 78   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Reserve     (line  13) 
+'*                                *           Listbank    (line  35) 
+'*         Ronnie Simpson         *           Erase       (line  45) 
+'**********************************           Start       (line  57) 
+'                                             Length      (line  65) 
+'                                             Load/Save   (line  75) 
+'                                             Bank Swap   (line  93) 
+'                                             Bload/Bsave (line 102) 
+'------------------------------------------- 
+'Reserve 
+'------------------------------------------- 
+'reserve a bank
+'
+'Banks used for Sprites,Bobs etc. are normally allocated automatically by the
+'system, the Reserve command allows the creation of other banks for your own 
+'uses. There are 4 types that can be utilised:-
+'
+'            Reserve As Work number,length    (temporary workspace)  
+'       Reserve As Chip Work number,length    (temporary workspace)  
+'            Reserve As Data number,length    (permanent workspace)  
+'       Reserve As Chip Data number,length    (permanent workspace)  
+'
+'Chip memory should be used for instructions which have to access the blitter. 
+'Bank numbers can range from 1-65535.
+'Length is the amount of memory to be reserved.
+'Permanent banks will be automatically saved along with your program.
+'To avoid confusion the following banks are normally used by:- 
+'
+'     1-Sprite and bob definitions         2-Icon definitions  
+'     3-Music                              4-Amal  
+'------------------------------------------- 
+'Listbank
+'------------------------------------------- 
+'list all banks in use 
+'
+'This instruction will list all the currently reserved banks to the screen 
+'along with their memory location and length, normally the length will be in 
+'bytes but in the case of sprites and icons the value will be the total
+'number of images stored in the bank.
+'
+'------------------------------------------- 
+'Erase 
+'------------------------------------------- 
+'erase 1 or more banks 
+'
+'The Erase instruction will erase the bank(s) and return the memory to the 
+'program. There are 3 possible formats 
+'
+'           Erase 7        (erase only the given bank number)  
+'           Erase Temp     (erase all temporary banks) 
+'           Erase All      (erase all reserved banks)
+'
+'------------------------------------------- 
+'Start 
+'------------------------------------------- 
+'get start address of bank 
+'
+'This function returns the start address in memory of the given bank number. 
+'
+'                     S=Start(8) 
+'------------------------------------------- 
+'Length
+'------------------------------------------- 
+'get length of a bank  
+'
+'This function will normally return the length of a bank in bytes but in the 
+'case of sprite or icon banks the value will be the total number of images.
+'Zero will be returned if the bank does not exist. 
+'
+'                     L=Length(3)
+'------------------------------------------- 
+'Load    Save
+'------------------------------------------- 
+'load or save a bank 
+'
+'Load- If the given file contains more then 1 bank then all the banks will be
+'      loaded and existing banks will be erased. 
+'      If only one bank is being loaded then only that bank will be replaced.
+'      If the optional bank destination number is omitted then the data will 
+'      be loaded into the bank from which it was saved.
+'
+'                     Load "Df0:Music.abk",7 
+'
+'Save- If the optional bank number is omitted then all currently reserved
+'      banks will be saved in a single file otherwise only the given bank
+'      number will be saved. 
+'
+'                     Save "Df0:data.abk",7
+'------------------------------------------- 
+'Bank Swap 
+'------------------------------------------- 
+'flip 2 bank pointers
+'
+'This instruction simply switches the given bank number pointers, useful if
+'you wish to have more than 1 piece of music or sprite banks for example.  
+'
+'                     Bank Swap 1,2
+'------------------------------------------- 
+'Bload    Bsave
+'------------------------------------------- 
+'save or load a block
+'
+'Bsave will save a block of memory as binary data. 
+'
+'               Bsave "filename", start to finish
+'
+'Start and finish are the addresses in memory enclosing the block to be saved. 
+'
+'Bload will load binary data to the given address without altering the data
+'in any way. 
+'
+'               Bload "filename",address 
+'
+'Another form of the Bload instruction will load the data into a bank. 
+'
+'               Bload "filename",bank_number 
+'
+'The bank must have been previously reserved and must be large enough to 
+'hold all of the incomming data. 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Dim X(6),Y(6),DX(6),DY(6)
+Rem *** load 3 banks 
+'
+Load "AMOSPro_examples:Objects/Faces_A.abk" : Bank Swap 1,2
+Load "AMOSPro_examples:Objects/Faces_B.abk" : Bank Swap 1,3
+Load "AMOSPro_examples:Objects/Faces_C.abk"
+'
+Rem *** set start positions of bobs
+'
+Screen Open 0,320,200,4,Lowres
+Flash Off : Curs Off : Palette 0,$0,$22,$440 : Cls 0
+For N=1 To 6
+   OOPS:
+   X(N)=Rnd(280)+8 : Y(N)=Rnd(150)+8 : DX(N)=Rnd(4)-2 : DY(N)=Rnd(4)-2
+   If DX(N)=0 or DY(N)=0 Then Goto OOPS
+Next 
+'
+Rem *** create a rainbow 
+'
+Set Rainbow 1,0,205,"(1,1,1)","(2,1,1)","(1,-1,1)"
+Rainbow 1,0,50,205
+'
+Paper 0 : Pen 2 : Locate 0,22 : Centre "Press left mouse key to swap banks"
+Pen 3 : Locate 0,23 : Centre "Press right mouse key to quit"
+Double Buffer 
+'
+Rem *** the main loop
+'
+Do 
+   Exit If Mouse Key=2
+   Add N,1,1 To 6
+   Add X(N),DX(N)
+   Add Y(N),DY(N)
+   If X(N)<3 or X(N)>285 Then DX(N)=-DX(N)
+   If Y(N)<3 or Y(N)>165 Then DY(N)=-DY(N)
+   Bob N,X(N),Y(N),N
+   If Mouse Key=1 Then Add B,1,2 To 3 : Bank Swap 1,B : Repeat : Until Mouse Key=0
+Loop 
+'
+Edit 

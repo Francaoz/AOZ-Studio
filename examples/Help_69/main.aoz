@@ -1,0 +1,155 @@
+'**********************************
+'*    AMOS Professional HELP 69   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *
+'*                                *              Sequential files
+'*         Ronnie Simpson         *
+'**********************************
+'
+'
+'------------------------------------------- 
+'Sequential files
+'------------------------------------------- 
+'These are the standard Amiga disc files which can only be read in the 
+'sequence in which they were created, if you wish to change a value in the 
+'middle of the list then all of that file up to and including this value must
+'be read, the value altered and then the complete file saved back to disc. 
+'
+'------------------------------------------- 
+'Open In      Open Out 
+'------------------------------------------- 
+'open a file for input or output 
+'
+'                       +--->Channel number 1-10 
+'                       |    +---> name of file
+'              Open Out 1,"name" 
+'
+'              Open In 2,"name"
+'
+'Open Out opens a channel for writing, Open In opens a channel for reading 
+'The channel can not be opened for reading and writing at the same time. 
+'
+'------------------------------------------- 
+'Append
+'------------------------------------------- 
+'add information to the end of an existing file
+'
+'               Append 3,"name"
+'
+'Append opens a channel for output, if the file alresdy exists then the new
+'data will be added to the end.
+'
+'------------------------------------------- 
+'Close 
+'------------------------------------------- 
+'close a file
+'
+'This instruction is used to close a channel opened with Open In or Open Out,
+'do not forget to do this or any changes made to the file will be ignored. 
+'
+'------------------------------------------- 
+'Print #    Input #
+'------------------------------------------- 
+'output or input to a sequential file
+'
+'          Print #4,A,B,C$   (output to the given channel number)
+'          Input #4,A,B,C$   (input from the given channel number) 
+'
+'N.B.      Print # may be typed as ?#
+'
+'------------------------------------------- 
+'Line Input# 
+'------------------------------------------- 
+'input a list of variables not separated by a comma
+'
+'This instruction is identical to Input# except that it does not expect data 
+'to be separated by a comma. This allows you to separate your list of data 
+'with any character you wish, by-passing the problem arising when commas are 
+'already present in the incoming text. 
+'
+'             Line Input #channel,separator,variable list
+'
+'If the separator is ommited it will be assumed a return character is
+'being used. 
+'
+'------------------------------------------- 
+'Set Input 
+'------------------------------------------- 
+'set end of line characters
+'
+'This instruction sets the end of line characters which will be used to
+'terminate a line of data. 
+'
+'      Set Input 13,10 
+'
+'the 2 parameters are Ascii values to be used as separators if only a single 
+'character is required enter second with a value of -1 
+'
+'      Set Input 10,-1     (this is the Amiga default of a single line feed) 
+'
+'------------------------------------------- 
+'=Input$ 
+'------------------------------------------- 
+'input X number of characters
+'
+'          X$=Input$(1,20) (read 20 characters from channel number 1)
+'
+'------------------------------------------- 
+'=Eof
+'------------------------------------------- 
+'test for end of file
+'
+'          E=Eof(2)  (test for end of file on channel 2) 
+'
+'If end of file has been reached a value of -1 (true) will be returned 
+'otherwise it will be 0 (false). 
+'
+'------------------------------------------- 
+'=Lof
+'------------------------------------------- 
+'get length of file
+'
+'          L=Lof(3)  (returns the length of file from disc)
+'
+'------------------------------------------- 
+'=Pof
+'------------------------------------------- 
+'position of file pointer
+'
+'Pof is a reserved variable holding the position of the file pointer for the 
+'givel channel.
+'
+'          P=Pof(1)       (get position of file pointer) 
+'          Pof(2)=50      (set position of file pointer) 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Screen Open 0,640,200,8,Hires : Hide 
+Flash Off : Curs Off : Cls 0 : Paper 0
+Palette $300,$F8F,$99F,$6F6,$AA0,$B0,$F94,$49F
+Flash 1,"(F8F,5)(A0A,5)"
+Pen 1 : Locate 1,1 : Centre Border$("THE JOKE MACHINE",4)
+Dir$="AMOSPro_Examples:Examples/H-6/"
+Open In 1,"jokes"
+For N=1 To 10
+   Input #1,Q$ : If Right$(Q$,1)<>"?" Then Q$=Q$+"?"
+   Pen 2 : Locate 0,23 : Centre "Press left mouse key for the answer              Right mouse key to quit"
+   Pen Rnd(4)+3 : Locate 0,Rnd(15)+4 : Print "Q: ";Q$
+   Repeat : M=Mouse Key
+      If M=2 Then Exit 2
+   Until M=1
+   Repeat : Until Mouse Key=0
+   Input #1,A$ : If Right$(A$,1)<>"." Then A$=A$+"."
+   Print : Print "A: ";A$
+   Pen 2 : Locate 0,23 : Centre "Press left mouse key to continue                 Right mouse key to quit"
+   Repeat : M=Mouse Key
+      If M=2 Then Exit 2
+   Until M=1
+   Repeat : Until Mouse Key=0
+   Cls 0,0,32 To 639,199
+Next 
+Close 1
+Cls 0 : Locate 0,12 : Centre "Th...th...tha...tha...that's all folks!"
+Wait 75 : Fade 10 : Wait 150
+Edit 

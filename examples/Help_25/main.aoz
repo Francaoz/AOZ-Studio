@@ -1,0 +1,139 @@
+'**********************************  
+'*    AMOS Professional HELP 25   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *              Flash      (line 11)
+'*                                *              Flash Off  (line 27)
+'*         Ronnie Simpson         *              Shift Up   (line 39)
+'**********************************              Shift Down (line 56)
+'                                                Shift Off  (line 69)
+'
+'------------------------------------------- 
+'Flash 
+'------------------------------------------- 
+'define a colour flashing sequence 
+'
+'             +----> the colour index number to be cycled
+'             |    +---->the colour in the standard RGB format 
+'             |    |  +---->the delay before the next colour change  
+'             |    |  |  
+'       Flash 1,"(F00,5)(0F0,5)(00F,5)"
+'
+'The delay is measured in 1/50ths of a second. 
+'The entire sequence is continually repeated from first to last until
+'a Flash Off instruction is used.
+'A maximum of 16 colour changes are allowed for each flash instruction.
+'
+'------------------------------------------- 
+'Flash Off 
+'------------------------------------------- 
+'turn off a colour flashing sequence 
+'
+'eg        Flash Off 
+'
+'The Flash Off instruction not only turns off user defined sequences but 
+'also stops the automatic flashing sequence assigned to the curser.
+'This instruction should be used before loading pictures to maintain all 
+'the colours of the loaded palette.
+'
+'------------------------------------------- 
+'Shift Up
+'------------------------------------------- 
+'rotate some or all of the values in the colour registers upwards
+'
+'             +---->the delay in 1/50ths. of a second
+'             | +---->the first index number in sequence 
+'             | | +---->the last number in the sequence
+'             | | | +---->the type of rotation - 0 or 1
+'             | | | |
+'    Shift Up 1,2,6,1
+'
+'If the type of rotation is set to 1 the last number will be copied to 
+'the first and the colours will cycle continuously, the other alternative
+'is to set type of rotation to 0 in which case the colour in the first 
+'register will be copied to the rest of the sequence.
+'
+'------------------------------------------- 
+'Shift Down
+'------------------------------------------- 
+'rotate some or all of the values in the colour registers downwards
+'
+'eg.    Shift Down 5,1,14,0  
+'
+'
+'Shift Down works in exactly the same way as Shift Up (see above) with 
+'the exception that the colours are rotated downwards
+'Flash, Shift Up and Shift Down work under the interupt system and do not
+'affect or slow down the running of the program. 
+'
+'------------------------------------------- 
+'Shift Off 
+'------------------------------------------- 
+'turn off colour rotation cycles 
+'
+'eg.     Shift Off 
+'
+'Shift Off immediatly terminates all colour rotations set up with
+'the Shift Up or Shift Down instructions.
+'After a colour rotation has been stopped with the Shift Off instruction the 
+'palette is NOT returned to its origonal state.
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+'
+Dim X(3),Y(3)
+Screen Open 0,320,200,32,Lowres : Flash Off : Curs Off : Cls 0
+Screen Open 1,320,200,32,Lowres : Flash Off : Curs Off : Cls 0
+Hide 
+Do 
+   Shift Off 
+   Screen 1
+   For C=0 To 31
+      Colour C,0
+   Next 
+   Cls 0
+   Screen To Front 0 : Screen 0
+   For C=0 To 31
+      Colour C,0
+   Next 
+   Cls 0
+   For N=1 To 3
+      X=150+Rnd(20) : Y=199
+      DX=Rnd(8)-4 : DY=Rnd(2)-5
+      For C=2 To 31
+         Ink C
+         Add X,DX
+         Add Y,DY
+         Plot X,Y
+      Next 
+      X(N)=X : Y(N)=Y
+   Next 
+   Screen 1
+   For N=1 To 3
+      For T=1 To 16
+         DX=Rnd(4)-2
+         DY=Rnd(4)-2
+         For C=1 To 30 : Ink C+1
+            Plot X(N)+(C*DX)+Rnd(2)-1,Y(N)+(C*DY)+Rnd(2)-1
+         Next 
+      Next 
+   Next 
+   Screen 0 : Colour 1,$A60
+   Shift Up 8,0,31,0
+   While Colour(31)<1
+   Wend 
+   Cls 0
+   Flash 0,"(AAA,1)(00A,1)(722,1)(00A,1)" : Wait 12 : Flash Off 
+   Screen To Front 1 : Screen 1
+   Add P,1,1 To 3
+   Restore(P)
+   For C=0 To 31
+      Read R
+      Colour C,R
+   Next 
+   Shift Up 3,2,31,1 : Wait 91
+   Shift Up 4,0,31,0 : Wait 121
+Loop 
+1 Data 0,0,$F,$E,$D,$C,$B,$A,$9,$8,$7,$6,$5,$4,$3,$2,$1,$A0,$E0,$D0,$C0,$B0,$A0,$90,$80,$70,$60,$50,$40,$30,$20,$10
+2 Data 0,0,$A,$E,$D,$C,$B,$A,$9,$8,$7,$6,$5,$4,$3,$2,$1,$A00,$E00,$D00,$C00,$B00,$A00,$900,$800,$700,$600,$500,$400,$300,$200,$100
+3 Data 0,0,$A00,$E00,$D00,$C00,$B00,$A00,$900,$800,$700,$600,$500,$400,$300,$200,$100,$A0,$E0,$D0,$C0,$B0,$A0,$90,$80,$70,$60,$50,$40,$30,$20,$10,

@@ -1,0 +1,137 @@
+'**********************************
+'*    AMOS Professional HELP 65   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *         Paste Icon        (line 19)
+'*                                *         Get Icon          (line 32)
+'*         Ronnie Simpson         *         Get Icon Palette  (line 50)
+'**********************************         Del Icon          (line 60)
+'                                           Make/No Icon Mask (line 71)
+'                                           Ins Icon          (line 88)
+'------------------------------------------- 
+'Icons 
+'------------------------------------------- 
+'Icons are images for producing background screens which save on memory over 
+'a normal graphic image. These screens are produced by using the icons as a  
+'set of building blocks which once in place can not be moved or animated 
+'(unlike sprites), a map definer program is included to help produce the maps. 
+'
+'------------------------------------------- 
+'Paste Icon
+'------------------------------------------- 
+'place icon on screen
+'
+'                       +--->screen X coordinate 
+'                       |  +--->screen Y coordinate
+'                       |  | +--->icon image number
+'           Paste Icon 10,20,1 
+'
+'The icon images are are stored in a bank (like sprites) and will be saved 
+'along with your program.
+'
+'------------------------------------------- 
+'Get Icon
+'------------------------------------------- 
+'grab an icon
+'
+'This instruction is similar to the get bob command and will grab an image 
+'from the screen and place a copy in the icon bank.
+'
+'                    +--->icon image number
+'                    |   +--->top left screen coordinates
+'                    |   |        +--->bottom right screen coordinates 
+'           Get Icon 1,10,20 To 30,40
+'
+'An optional screen number may also be included to grab the image from a 
+'screen other than the current screen. 
+'
+'           Get Icon 2,1,10,20 To 30,40   (grab image from screen 2) 
+'
+'------------------------------------------- 
+'Get Icon Palette
+'------------------------------------------- 
+'set screen colours to icon palette
+'
+'Once your icons are loaded into the bank the current screen colours can be
+'set to those of the icons. The command is used without parameters.
+'
+'           Get Icon Palette 
+'
+'------------------------------------------- 
+'Del Icon
+'------------------------------------------- 
+'delete one or more icons  
+'
+'             Del Icon 1       (delete only icon number1)
+'             Del Icon 1 To 5  (delete icons 1 to 5 inclusive) 
+'
+'Deletes the given icon images from the bank, when last icon is deleted
+'entire bank will be erased. 
+'
+'------------------------------------------- 
+'Make Icon Mask   No Icon Mask 
+'------------------------------------------- 
+'make colour 0 transparent 
+'
+'             Make Icon Mask     (make mask for all icons)   
+'             Make Icon Mask 2   (make mask for only icon number 2)
+'
+'Normally icons drawn on the screen will replace any existing graphics 
+'including parts of the icon containing the colour 0, once a mask is made
+'the icon will be overlaid with colour 0 becoming transparent. 
+'
+'Icon masks can be removed with the No Icon mask instruction:- 
+'
+'             No Icon Mask     (remove mask of all icons)    
+'             No Icon Mask 2   (remove mask of icon number 2 only) 
+'  
+'------------------------------------------- 
+'Ins Icon
+'------------------------------------------- 
+'Insert a space into the icon bank 
+'
+'This command will insert a space into the bank at the given point, all
+'existing images will be moved up one number and this for example would allow
+'you to grab another image into the middle of a bank without erasing any 
+'existing images.
+'
+'           Ins Icon 3 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up screen and print instructions
+Default : Screen Open 0,680,640,8,Lowres
+Palette $0,$FF0,$F77,$FF,$111,$333,$555,$777
+Curs Off : Flash Off : Cls 0 : Paper 0 : Hide 
+Set Rainbow 0,0,256,"","","(16,1,2)" : Rainbow 0,1,48,256
+Pen 1 : Locate 13,5 : Print "ON THE NEXT SCREEN"
+Pen 2 : Locate 2,8 : Print "Scroll around the screen using the mouse"
+Locate 3,10 : Print "Press left mouse key to paste an Icon"
+Locate 7,12 : Print "Press right mouse key to quit"
+Locate 6,20 : Print "Press any mouse key to continue"
+Repeat : Until Mouse Key : Screen Hide : Wait Vbl : Cls 0
+'
+Rem *** draw and grab an icon  
+Ink 3 : Box 0,0 To 30,30
+Draw 0,0 To 30,30 : Draw 0,30 To 30,0
+Ink 5 : Paint 15,5 : Ink 7 : Paint 15,25
+Ink 4 : Paint 5,15 : Ink 6 : Paint 25,15
+Get Icon 1,0,0 To 31,31 : Cls 0 : 
+'
+Rem *** set out the demo screen
+Ink 1 : Pen 1 : Paper 0
+COUNT=1
+For Y=0 To 15
+   For X=0 To 19
+      Locate X*4+1,Y*4+1 : Print COUNT
+      Inc COUNT
+   Next 
+Next 
+Screen Show : Show : Change Mouse 2
+'
+Do 
+   Screen Offset 0,X Mouse-128,Y Mouse-46
+   If Mouse Key=1 Then Paste Icon X Screen(X Mouse),Y Screen(Y Mouse),1
+   If Mouse Key=2 Then Edit 
+   Wait Vbl 
+Loop 

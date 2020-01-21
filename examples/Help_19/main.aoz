@@ -1,0 +1,224 @@
+'**********************************  
+'*    AMOS Professional HELP 19   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *           X Curs          (line 11)
+'*                                *           Y Curs          (line 11)
+'*         Ronnie Simpson         *           Set Curs        (line 22)
+'**********************************           Memorize X / Y  (line 45)
+'                                             Remember X / Y  (line 60)
+'                                             Curs On / Off   (line 75)
+'------------------------------------------- 
+'X Curs
+'Y Curs
+'------------------------------------------- 
+'Return current X or Y text cursor position
+'
+'eg.                Locate 5,10  
+'                   Print X Curs,Y Curs
+'
+'Would print        5      10
+'
+'------------------------------------------- 
+'Set Curs  
+'------------------------------------------- 
+'Change the cursor shape 
+'
+'The cursor shape is determined by a set of 8 bit patterns. Each pattern 
+'represents 1 line of the cursor shape, giving a matrix of 8*8 or 64 pixels  
+'which can be either on or off.
+'For example to change the cursor shape to a small square:-  
+'
+'Matrix design            convert to binary         Convert to decimal 
+'
+'   --------                  %00000000                      0 
+'   -******-                  %01111110                    126 
+'   -*----*-                  %01000010                     66 
+'   -*----*-                  %01000010                     66 
+'   -*----*-                  %01000010                     66 
+'   -*----*-                  %01000010                     66 
+'   -******-                  %01111110                    126 
+'   --------                  %00000000                      0 
+'    
+'                   Set Curs 0,126,66,66,66,66,126,0 
+'                
+'------------------------------------------- 
+'Memorize X
+'Memorize Y  
+'------------------------------------------- 
+'Save current X or Y cursor coordinates
+'
+'The Memorize X and Memorize Y instructions store the current cursor position. 
+'Used in conjunction with the Remember X and Rember Y commands. (see below)
+'
+'Eg.       Locate 15,3 
+'          Memorize Y  
+'          Print "X=15"
+'          Remember X
+'          Print "Back to X=15"
+'
+'------------------------------------------- 
+'Remember X  
+'Remember Y  
+'------------------------------------------- 
+'Restore cursor to a saved position
+'
+'The Remember X and Remember Y instructions will restore the cursor to the 
+'position save with the Memorize X and Memorize Y Instructions. (see above)
+'
+'Eg.       Locate 15,3 
+'          Memorize X  
+'          Print "X=15  Y=3" 
+'          Remember X
+'          Print "Back to X=15 but Y=4"
+'
+'------------------------------------------- 
+'Curs On 
+'Curs Off
+'------------------------------------------- 
+'Show or hide text cursor
+'
+'eg.       Curs Off   (stop cursor being shown on screen)
+'          Curs On    (show text cursor on screen) 
+'
+'This instruction only affects the current window and will have no effect
+'on any other windows opened.
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Dim L(8),P(64),X(64),Y(64)
+Global L(),P(),X(),Y()
+Rem *** tidy up screen and print titles etc. 
+'
+Screen Open 0,320,200,16,Lowres
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0
+Pen 6 : Centre "TEXT CURSOR DESIGNER"
+Pen 2 : Locate 0,2 : Print "     MATRIX           BINARY    DECIMAL"
+Pen 6 : Locate 0,20 : Centre "USE LEFT MOUSE KEY TO CLICK ON"
+Cdown : Centre "GRID AND CHANGE CURSOR SHAPE"
+Pen 1 : Locate 0,23 : Centre "RIGHT MOUSE KEY TO QUIT"
+Set Tab 3
+'  
+'
+Rem *** draw grid
+'
+Reserve Zone 64
+Ink 12
+For X=0 To 7
+   For Y=0 To 7
+      X(Y*8+X+1)=X*16
+      Y(Y*8+X+1)=Y*16+26
+   Next 
+Next 
+For N=1 To 64
+   Box X(N),Y(N) To X(N)+16,Y(N)+16
+   Set Zone N,X(N),Y(N) To X(N)+16,Y(N)+16
+   Read P(N)
+Next 
+'
+'
+Rem *** set up a new cursor shape
+'
+For D=1 To 8
+   Read L(D)
+Next 
+Set Curs L(1),L(2),L(3),L(4),L(5),L(6),L(7),L(8)
+Curs On 
+'
+'
+Rem *** list binary and decimal numbers to screen and fill grid
+MARKUP
+For N=1 To 64
+   GRID[N]
+Next 
+'
+'
+Rem *** start main loop
+'
+Do 
+   While Mouse Key : Wend 
+   Repeat : Until Mouse Key
+   M=Mouse Zone
+   If M>0 and Mouse Key=1
+      CHANGE[M]
+      X=M mod 8
+      L=M/8+1
+      If X=0
+         X=8
+         Dec L
+      End If 
+      On X Gosub 1,2,3,4,5,6,7,8
+      MARKUP
+   End If 
+   If Mouse Key=2 Then Exit 
+Loop 
+'
+'
+Edit 
+'
+'
+Rem *** new cursor data
+'
+Data 1,0,0,0,0,0,0,0
+Data 1,1,0,0,0,0,0,0
+Data 1,1,1,0,0,0,0,0
+Data 1,1,1,1,0,0,0,0
+Data 1,1,1,1,1,0,0,0
+Data 1,1,1,1,1,1,0,0
+Data 1,1,1,1,1,1,1,0
+Data 1,1,1,1,1,1,1,1
+Data 128,192,224,240,248,252,254,255
+'
+'
+Rem *** procedure for listing binary and decimal numbers to screen 
+'
+Procedure MARKUP
+   Pen 5 : Curs Off 
+   Locate 21,4
+   Memorize X 
+   Memorize Y 
+   For L=1 To 8
+      Remember X 
+      Print Bin$(L(L),8),L(L)
+      Cdown 
+   Next 
+   Set Curs L(1),L(2),L(3),L(4),L(5),L(6),L(7),L(8)
+   Locate 18,10 : Curs On 
+End Proc
+'
+'
+Rem *** procedure for painting grid
+'
+Procedure GRID[N]
+   If P(N)=1
+      Ink 4
+      Paint X(N)+8,Y(N)+8
+   Else 
+      Ink 11
+      Paint X(N)+8,Y(N)+8
+   End If 
+End Proc
+'
+'
+Rem *** procedure for testing grid contents
+'
+Procedure CHANGE[M]
+   If P(M)=0
+      P(M)=1
+   Else P(M)=0
+   End If 
+   GRID[M]
+End Proc
+'
+'
+Rem *** subroutines for changing bit patterns of curser lines
+'
+1 Bchg 7,L(L) : Return 
+2 Bchg 6,L(L) : Return 
+3 Bchg 5,L(L) : Return 
+4 Bchg 4,L(L) : Return 
+5 Bchg 3,L(L) : Return 
+6 Bchg 2,L(L) : Return 
+7 Bchg 1,L(L) : Return 
+8 Bchg 0,L(L) : Return 

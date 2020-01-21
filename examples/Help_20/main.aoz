@@ -1,0 +1,198 @@
+'**********************************  
+'*    AMOS Professional HELP 20   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *              Cline     (line 11) 
+'*                                *              Curs Pen  (line 25) 
+'*         Ronnie Simpson         *              Centre    (line 36) 
+'**********************************              Set Tab   (line 46) 
+'                                                =Tab$     (line 60) 
+'                                                Repeat$   (line 74) 
+'------------------------------------------- 
+'Cline 
+'------------------------------------------- 
+'clear all or part of the current line 
+'
+'Using Cline with no parameters will clear the current text cursor line. 
+'
+'eg.         Locate ,10 : Cline  
+'
+'If a number is placed after the instruction then that number of 
+'characters will be deleted. (starting from the cursor position) 
+'
+'eg.           Locate 7,10 : Cline 5 
+'
+'------------------------------------------- 
+'Curs Pen
+'------------------------------------------- 
+'sellect a colour index to be used by the cursor 
+'
+'eg.      Curs Pen 5  (change cursor colour to colour index 5) 
+'
+'This instruction only affects the current window. 
+'By default the cursor uses a built in flash sequence and if you wish to 
+'animate the new colour assigned then a flash sequence will have to be 
+'set up for the index used. (see Flash instruction for details)
+'------------------------------------------- 
+'Centre
+'------------------------------------------- 
+'centre a line of text on screen 
+'
+'Used in place of the print command this instruction will place the text 
+'in the middle of the current line.
+'
+'eg.      Locate ,5 : Centre "print in the middle of a line" 
+'
+'------------------------------------------- 
+'Set Tab 
+'------------------------------------------- 
+'set tabulation distance (measured in characters)
+'
+'eg.              Set Tab 4  
+'                 Print "a","b","c"
+'                 Set Tab 2
+'                 Print "a","b","c"
+'
+' would print     a   b   c    
+'                 a b c    
+'
+'Default  tabulation value is 3 characters 
+'------------------------------------------- 
+'=Tab$   
+'------------------------------------------- 
+'print tabulation  (move cursor to next tab position)  
+'
+'eg.              Set Tab 4  
+'                 Print "a"+Tab$+"b"+Tab$+"c"
+'                 Set Tab 2
+'                 Print "a"+Tab$+"b"+Tab$+"c"
+'
+' would print     a   b   c    
+'                 a b c    
+'
+'See Set Tab (above) for details of setting the tabulation value.
+'------------------------------------------- 
+'Repeat$ 
+'------------------------------------------- 
+'repeat a string X number of times 
+'
+'eg                A$="abcd" 
+'                  B$=Repeat$(A$,3)      (B$=A$ repeated 3 times)  
+'                  Print Repeat$(A$,4)   (print A$ repeated 4 times) 
+'                  Print B$  
+'
+'would print       abcdabcdabcdabcd
+'                  abcdabcdabcd
+'                    
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6
+'
+'
+Rem *** centre title on top line 
+'
+Home : Centre "TEXT INPUT / OUTPUT DEMO"
+'
+'
+Rem *** change tabulation
+'
+Set Tab 10
+'
+'
+Rem *** set new curser colour  
+'
+Curs Pen 4
+'
+'
+Rem *** Get user to input a string to work with  
+'
+Pen 9 : Locate 0,12 : Print "Please enter your first name - then press return  ";
+Pen 4 : Input "";F$
+'
+'
+Rem *** using repeat$ for multiple 
+'
+Clw : Curs Off 
+For Y=1 To 23
+   R$=Repeat$(F$,Y)
+   Print R$
+Next 
+Wait 30
+'
+'
+Rem *** using Cline
+'
+For Y=1 To 12
+   Locate ,12+Y : Cline 
+   Locate ,12-Y : Cline 
+   Wait 2
+Next 
+Wait 30
+'
+'
+Rem *** change tabulation
+'
+For X=79 To 0 Step -1
+   Set Tab X
+   Locate ,12
+   Print Tab$+" "
+   Wait 1
+Next 
+Home 
+For N=1 To 23
+   Set Tab N
+   Print Tab$+F$
+   Wait 2
+Next 
+Wait 30
+Set Tab 1
+Home : Clw 
+R$=F$+" "
+For N=1 To(2500/(Len(F$)+1))
+   Add C,1,1 To 11
+   Pen C
+   Print R$;
+Next 
+Wait 30
+'
+'
+Rem *** using Cline with parameters
+'
+Locate 0,24 : Cline 
+For Y=1 To 12
+   For X=1 To 39
+      Locate 2,Y
+      Cline X
+      Locate 77-X,Y
+      Cline X
+      Locate 2,23-Y
+      Cline X
+      Locate 77-X,23-Y
+      Cline X
+   Next 
+Next 
+'
+'
+Rem *** fancy ending 
+'
+For Y=1 To 5
+   Read R$
+   For X=1 To 45
+      Add C,1,1 To 11
+      Pen C
+      Locate X+15,9+Y : Print Mid$(R$,X,1)
+   Next 
+Next 
+Wait 150
+Edit 
+'
+'
+Data "*****  *   *  *****      *****  *    *  ****"
+Data "  *    *   *  *          *      **   *  *   *"
+Data "  *    *****  ****       ****   * *  *  *   *"
+Data "  *    *   *  *          *      *  * *  *   *"
+Data "  *    *   *  *****      *****  *   **  ****"

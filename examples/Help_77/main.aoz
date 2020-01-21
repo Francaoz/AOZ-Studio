@@ -1,0 +1,154 @@
+'**********************************
+'*    AMOS Professional HELP 77   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *          Zoom           (line 11)
+'*                                *          Ntsc           (line 31)
+'*         Ronnie Simpson         *          Display height (line 44)
+'**********************************          Areg / Dreg    (line 54)
+'                                            Pload          (line 54)
+'                                            Call           (line 54)
+'------------------------------------------- 
+'Zoom
+'------------------------------------------- 
+'magnify or reduce an area of the screen 
+'
+'               +--->source screen number
+'               |      +--->source rectangular area  
+'               |      |         +--->destination screen number  
+'               |      |         |      +--->destination rectangular area
+'               |   ___|___      |   ___|___ 
+'               |  / \   / \     |  / \   / \
+'          Zoom 1,10,20,30,40 To 2,50,60,70,80 
+'
+'The Zoom instruction will enlarge or reduce the source rectangular area from
+'the given source screen and resize it to fit exactly into the defined area
+'in the destination screen. The rectangles are entered as top left x,y to
+'bottom right x,y and the source and destination screen numbers can be any 
+'opened screens and not necessarily different although an error will be
+'generated if any of the sizes fall outside the bounds of the screen.
+'
+'------------------------------------------- 
+'Ntsc
+'------------------------------------------- 
+'return type of display
+'
+'This function will return -1 (true) if the NTSC mode is in operation or 
+'0 (false) if it is in PAL.  
+'Amos Professional automatically compensates for the difference in the 
+'speed of the screen refresh, (50 per sec. in PAL, 60 in NTSC) but care must 
+'be taken with Amal as this is not slowed down when in NTSC mode.
+'
+'eg.            If Ntsc Then Screen Open 0,320,200,16,Lowres 
+'
+'------------------------------------------- 
+'Display Height
+'------------------------------------------- 
+'return screen height
+'
+'This function is used to determine what type of screen display is is use
+'and will return either 311 if the system is in PAL or 263 in NTSC.
+'
+'     If Display Height=263 Then Print "Amal runs faster in this mode" 
+'
+'------------------------------------------- 
+'Pload / Call / Areg / Dreg  
+'------------------------------------------- 
+'Using assembly language 
+'
+'Amos Professional is so powerful it is rarely useful to resort to machine 
+'code routines but the following commands have been included for existing
+'machine code programmers who may wish to use a special routine. 
+'
+'WARNING  reckless use of the following commands will almost certainly result
+'in your machine crashing and unless you are fully familiar with machine code  
+'you are advised to ignore them. 
+'
+'Pload     (load machine code to a bank) 
+'
+'          Pload "filename",bank-number
+'
+'Once the program is loaded it may be saved as an abk. file in the normal way. 
+'The loaded program must be in the standard amiga format and the following 
+'restrictions apply:-
+'
+'  1) the code must be totally relocatable 
+'  2) only the code chunk will be loaded 
+'  3) the program must be terminated with a single RTS instruction.
+'
+'Call   (call a machine code program)
+'
+'          Call address[,params] 
+'
+'The address may be the absolute location or the number of the bank. 
+'On entry registers D0-D7 and A0-A2 will be loaded from the values in the
+'Areg and Dreg arrays. 
+'Params is a list of parameters which will be pushed onto the A3 stack by the
+'Call command, these parameters need to be removed in reverse order. 
+'
+'Areg   (pass information to the 68000's address registers)
+'
+'         A=Areg(r)
+'         Areg(r)=A
+'
+'Areg is a set of 6 pseudo variables which are used to hold a copy of the
+'first 6 of the 68000's registers. r can range from 0 to 6 and is the number 
+'of the register to be affected. 
+'
+'Dreg   (pass information to the 68000's data registers) 
+'
+'         D=Dreg(r)
+'         Dreg(r)=D
+'
+'Dreg is an array of 8 integers which are used to hold a copy of the 68000's 
+'data registers. r can range from 0 to 7 and is the number of the register 
+'D1 to D7 respectively.
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem *** load 4 bobs and grab another to use as the pointer 
+'
+Load "AMOSPro_Examples:Objects/bobs.abk" : Get Sprite Palette 
+Colour Back Colour(0) : Screen Open 0,320,100,4,Lowres : Cls 0
+Ink 3 : Box 0,0 To 15,15 : Ink 2 : Box 1,1 To 15,15 : Get Bob 5,0,0 To 15,15
+'
+Rem *** set out the zones for changing the magnification 
+'
+Screen Open 0,320,300,16,Lowres : Flash Off : Curs Off 
+Get Sprite Palette : Cls 0 : Hide : Reserve Zone 4
+Paste Bob 0,4,1 : Paste Bob 0,90,2 : Paste Bob 70,4,3 : Paste Bob 70,90,4
+Locate 1,23 : Print Border$(Zone$("1/2",1),4)
+Locate 6,23 : Print Border$(Zone$("x4 ",2),4)
+Locate 11,23 : Print Border$(Zone$("x8 ",3),4)
+Locate 16,23 : Print Border$(Zone$("x10",4),4)
+Ink 2 : Box 0,0 To 159,199 : Limit Mouse 128,43 To 270,230 : Paper 0 : Pen 14
+M=2 : Locate 21,20 : Print "Magnification x 4" : Bell 25
+Pen 7 : Locate 21,23 : Print "Right mouse button" : Locate 26,24 : Print "to quit"
+'
+Rem *** start the main loop
+'
+Do 
+   If Mouse Key=2 Then Edit 
+   Z=Mouse Zone
+   If Z>0 and Mouse Key=1
+      M=Z : On M Gosub 5,6,7,8 : Wait 20
+   End If 
+   Bob 1,X Screen(X Mouse),Y Screen(Y Mouse),5
+   If Mouse Key=1 and Mouse Zone=0
+      X=X Screen(X Mouse)+2 : Y=Y Screen(Y Mouse)+2
+      On M Gosub 1,2,3,4
+   End If 
+Loop 
+'
+Rem *** the 4 zoom routines
+'
+1 Cls 0,160,0 To 319,160 : Zoom 0,X,Y,X+100,Y+100 To 0,215,80,264,129 : Return 
+2 Zoom 0,X,Y,X+40,Y+40 To 0,160,0,319,159 : Return 
+3 Zoom 0,X,Y,X+32,Y+32 To 0,160,0,319,159 : Return 
+4 Zoom 0,X,Y,X+20,Y+20 To 0,160,0,319,159 : Return 
+'
+'
+5 Locate 35,20 : Print "x.5 " : Bell 5 : Return 
+6 Locate 35,20 : Print "x 4 " : Bell 25 : Return 
+7 Locate 35,20 : Print "x 8 " : Bell 45 : Return 
+8 Locate 35,20 : Print "x 10" : Bell 65 : Return 

@@ -413,7 +413,7 @@ Function "sam swapped", _voice
 {
     #notimplemented
 }
-End Function( 0 )
+End Function( { 0 } )
 
 // Music
 Instruction "music", _number

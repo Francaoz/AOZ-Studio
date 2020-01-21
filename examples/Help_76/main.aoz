@@ -1,0 +1,221 @@
+'**********************************
+'*    AMOS Professional HELP 76   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *             Play/Off  (line  12) 
+'*                                *             Set Wave  (line  37) 
+'*         Ronnie Simpson         *             Wave      (line  55) 
+'**********************************             Noise To  (line  66) 
+'                                               Del Wave  (line  76) 
+'                                               Sample    (line  87) 
+'                                               Set Envel (line 101) 
+'------------------------------------------- 
+'Play
+'------------------------------------------- 
+'play a note 
+'               Play pitch,delay 
+'
+'The play command plays a single note of the given pitch in the rang of 0-96.
+'The pitch coresponds to 7 octaves of the musical scale:-
+'
+'    1-C  2-C#  3-D  4-D#  5-E  6-F  7-F#  8-G  9-G#  10-A  11-A#  12-B  
+'
+'This series is repeated in steps of 12 up to top b at number 96.
+'The delay value sets the time between each note and the next basic command. 
+'
+'eg.            Play 37,0     (play middle c with no delay)
+'
+'An optional bitmap in the normal format may be added to play a note through 
+'just 1 or more channels.
+'
+'eg.           Play 9,37,0    (play middle c with no delay voices 0 and 3) 
+'
+'Play may be interupted at any time with the Play Off command
+'
+'              If FLAG=True Then Play Off : Goto FINISH
+'
+'------------------------------------------- 
+'Set Wave
+'------------------------------------------- 
+'define a waveform 
+'
+'The set wave command defines a waveform to be used by the play instruction. 
+'
+'              Set Wave number,shape$
+'
+'Possible wave numbers range from 2 upwards as 0 and 1 are reserved. 
+'The shape parameter defines the shape of the wave in a string containing
+'a list of 256 numbers each representing the various intensities along the 
+'wave, these values are in the range of -128 to +127, since negative numbers 
+'can not be held in a string a special internal format is used to hold these 
+'values and are easily calculated by adding 256 to the negative values.
+'
+'eg.    if you wish to store a value of -75, add 256 and enter 181 
+'
+'------------------------------------------- 
+'Wave
+'------------------------------------------- 
+'assign a new wave to voices 
+'
+'Before new waves can be used they must be assigned to the required voices,
+'the channels to be assigned are in the normal bitmap format.
+'
+'         Wave 4 To %1010  (assign wave number 4 to voices 1 and 3)
+'         Wave 3 To %1100  (assign wave number 3 to voices 2 and 3)
+'
+'------------------------------------------- 
+'Noise To
+'------------------------------------------- 
+'assign a white noise to a voice 
+'
+'The noise command is similar to the above Wave instruction but assigns
+'white noise (wave 0) to the given voice channels bitmap.
+'
+'         Noise To 15    (assign white noise to all voices)
+'
+'------------------------------------------- 
+'Del Wave
+'------------------------------------------- 
+'delete a wave 
+'
+'Del Wave deletes the given wave number and returns voices to the default
+'sine wave (wave 1), internal waves can not be deleted so possible values
+'range from 2 upwards. 
+'
+'         Del Wave 2 
+'
+'------------------------------------------- 
+'Sample
+'------------------------------------------- 
+'assign a sample to a voice
+'
+'This command allows samples from the bank to be used as the waveform for the
+'Play instruction, the voice channels to be assigned are in the normal bitmap
+'format. 
+'        Sample 4 To 6   (assign sample number 4 to voices 2 and 3)
+'        Sample 2 To 9   (assign sample number 2 to voices 0 and 3)
+'
+'Please note that not all samples will be able to be played over the full
+'range of the 7 octaves possible with the play command.
+'
+'------------------------------------------- 
+'Set Envel 
+'------------------------------------------- 
+'create a wave envelope
+'
+'        Set Envel wave,phase To duration,volume 
+'
+'Wave is the number of the wave to be affected.
+'Phase is a number in the range of 0 to 6 and coresponds to the phases which 
+'make up the attack,decay,sustain and release values of the envelope.
+'Duration is measured in 1/50ths. of a second and will determine the length
+'of time it takes for the volume to change.
+'Volume is a value in the range of 0-63 and is the target volume for the end 
+'of each phase, this is not an actual volume but is relative to that 
+'previously set with the volume command. 
+'
+'        Set Envel 1,0 To 10,40    ( attack 1  )     
+'        Set Envel 1,1 To 10,63    ( attack 2  )     
+'        Set Envel 1,2 To 5,50     ( decay 1   )         
+'        Set Envel 1,3 To 15,50    ( sustain 1 )   
+'        Set Envel 1,4 To 5,40     ( decay 2   )       
+'        Set Envel 1,5 To 15,40    ( sustain 2 )   
+'        Set Envel 1,6 To 60,0     ( release   )       
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Dim N(63),D(63)
+For N=1 To 63 : Read N(N) : Next 
+For D=1 To 63 : Read D(D) : Next 
+Load "AMOSPro_Examples:Samples/Instruments.abk",5
+'
+Rem *** open a screen and set out the zones
+'
+Screen Open 0,640,200,8,Hires : Curs Off : Flash Off : Cls 0 : Paper 0
+Palette $202,$CC0,$AA,$6A6,$402,$3,$F80,$8FA
+Pen 7 : Print "x" : Get Bob 1,0,0 To 15,15 : Cls 
+Reserve Zone 16
+Ink 7 : Box 0,0 To 639,199 : Draw 0,80 To 639,80 : Draw 0,118 To 228,118
+Draw To 228,150 : Draw To 452,150 : Draw To 452,118 : Draw To 639,118
+Ink 5 : Paint 1,81
+Pen 1 : Paper 4 : Locate 13,22 : Print Border$(Zone$("    PLAY     ",1),2)
+Locate 34,22 : Print Border$(Zone$("    STOP     ",2),2)
+Locate 54,22 : Print Border$(Zone$("    QUIT     ",16),2)
+Paper 5 : Pen 3 : Locate 3,18 : Print Border$(Zone$(" VOICES TO SINE WAVE 1 ",3),2)
+Locate 59,18 : Print Border$(Zone$(" VOICES TO NOISE  ",5),2)
+Pen 2 : Locate 3,2 : Print Border$(Zone$("   SYNTH BANJO    ",6),3)
+Locate 31,2 : Print Border$(Zone$("   BOUNCY BASS    ",7),3)
+Locate 59,2 : Print Border$(Zone$("   ROCK GUITAR    ",8),3)
+Locate 3,6 : Print Border$(Zone$("     OFF KEY      ",9),3)
+Locate 31,6 : Print Border$(Zone$("  ELECTRIC ORGAN  ",10),3)
+Locate 59,6 : Print Border$(Zone$("    PANFLUTES     ",11),3)
+Pen 6 : Paper 4 : Locate 3,12 : Print Border$(Zone$("  ENVELOPE 1  ",12),2)
+Locate 31,16 : Print Border$(Zone$(" VOICES TO SINE WAVE 2 ",4),2)
+Locate 23,12 : Print Border$(Zone$("  ENVELOPE 2  ",13),2)
+Locate 43,12 : Print Border$(Zone$("  ENVELOPE 3  ",14),2)
+Locate 63,12 : Print Border$(Zone$("  ENVELOPE 4  ",15),2)
+Ink 1,0 : Text 256,73,"Voices to samples"
+V=63 : B=15 : O=0 : Dir$="AMOSPro_Examples:samples/"
+Double Buffer : Bob 1,500,500,1 : Bob 2,800,500,1
+'
+Rem *** define a double sine wave for the second waveform
+'
+S$="" : Degree 
+For S=0 To 255
+   V=Int((Sin(S)/2+Sin(S*2+45)/4)*128)+127
+   S$=S$+Chr$(V)
+Next S
+Set Wave 2,S$
+'
+Rem *** the main loop
+'
+Do 
+   M=Mouse Zone
+   If M>0 and Mouse Key=1
+      On M Gosub 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
+   End If 
+Loop 
+'
+Rem *** number 1 plays the tune
+'
+1 For T=1 To 63
+   Exit If Mouse Key and Mouse Zone=2
+   Play %1010,N(T)+O,0 : Play %101,N(T),D(T)*2
+Next 
+2 Return 
+3 Y=500 : Bob 2,,Y, : Bob 1,204,136,1 : Wave 1 To 15 : O=-12 : Return 
+4 Y=88 : Bob 2,,Y, : Bob 1,428,120,1 : Wave 2 To 15 : O=-12 : Return 
+5 Y=500 : Bob 2,,Y, : Bob 1,613,136,1 : Wave 0 To 15 : O=0 : Return 
+6 Y=500 : Bob 2,,Y, : Bob 1,161,13,1 : Sample 1 To 15 : O=4 : Return 
+7 Y=500 : Bob 2,,Y, : Bob 1,385,13,1 : Sample 2 To 15 : O=-12 : Return 
+8 Y=500 : Bob 2,,Y, : Bob 1,609,13,1 : Sample 3 To 15 : O=0 : Return 
+9 Y=500 : Bob 2,,Y, : Bob 1,161,45,1 : Sample 4 To 15 : O=2 : Return 
+10 Y=500 : Bob 2,,Y, : Bob 1,385,45,1 : Sample 5 To 15 : O=-12 : Return 
+11 Y=500 : Bob 2,,Y, : Bob 1,609,45,1 : Sample 6 To 15 : O=12 : Return 
+'
+Rem *** 12 to 15 define 4 envelopes
+'
+12 Bob 2,132,Y,1
+Set Envel 2,0 To 5,63 : Set Envel 2,1 To 15,0
+Set Envel 2,2 To 10,63 : Set Envel 2,3 To 50,0 : Return 
+13 Bob 2,292,Y,1
+Set Envel 2,0 To 10,20 : Set Envel 2,1 To 10,40
+Set Envel 2,2 To 10,63 : Set Envel 2,3 To 50,0 : Return 
+14 Bob 2,452,Y,1
+Set Envel 2,0 To 15,63 : Set Envel 2,1 To 5,30
+Set Envel 2,2 To 5,63 : Set Envel 2,3 To 50,0 : Return 
+15 Bob 2,612,Y,1
+Set Envel 2,0 To 1,63 : Set Envel 2,1 To 15,33
+Set Envel 2,2 To 15,3 : Set Envel 2,3 To 50,63 : Return 
+16 Edit 
+'
+Rem *** note and delay data
+'
+Data 41,44,49,49,41,44,48,48,44,46,46,46,44
+Data 42,42,46,51,51,42,46,49,49,46,48,48,48
+Data 46,44,43,44,46,47,47,51,51,49,48,49,45
+Data 46,48,49,49,53,53,51,50,51,41,44,49,49
+Data 49,48,49,53,53,46,54,54,53,53,49
+Data 4,4,8,16,4,4,8,16,8,8,8,8,8,24,4,4,8,16,4,4,8,16,8,8,8,8,8
+Data 20,4,4,4,8,16,8,4,4,4,8,4,4,4,8,16,8,4,4,4,12,4,4,8,12,4,4,4
+Data 8,16,8,8,8,8,8,24

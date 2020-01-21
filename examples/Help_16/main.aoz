@@ -1,0 +1,136 @@
+'**********************************  
+'*    AMOS Professional HELP 16   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *           Inverse On/Off (line 10) 
+'*                                *           Shade On/Off   (line 22) 
+'*         Ronnie Simpson         *           Under On/Off   (line 33) 
+'**********************************           Writing        (line 42) 
+'
+'------------------------------------------- 
+'Inverse On
+'Inverse Off 
+'------------------------------------------- 
+'Switch on or off Text inverse mode
+'
+'The Inverse On instruction reverses the current pen and paper colours and 
+'any text subsequently placed in a screen or window will use the inverted
+'colours. (Think of it as an automatic highlight)
+'
+'This writing mode can be switched off with the Inverse Off instruction. 
+'
+'------------------------------------------- 
+'Shade On
+'Shade Off 
+'------------------------------------------- 
+'Switch on or off text shading 
+'
+'The Shade On instruction uses a mask pattern to the effect of reducing
+'the brightness of all subsequent text output. 
+'
+'Similarly Shade Off removes the mask and returns text output to normal. 
+'
+'------------------------------------------- 
+'Under On
+'Under Off 
+'------------------------------------------- 
+'Switch on or off text underlining mode
+'
+'Under On instructs AMOS to underline all following text output. 
+'
+'This can be reset with the Under Off instruction. 
+'------------------------------------------- 
+'Writing 
+'------------------------------------------- 
+'Set text writing mode 
+'
+'             +---->sellect 1 of 5 writing modes 
+'             | +----> sellect text parts to be printed
+'             | |
+'     Writing 0,0
+'             | |
+'             | +---->0=default (draw text foreground and background)    
+'             |       1=paper   (draw only background of text) 
+'             |       2=pen     (ignore paper colour and draw text with) 
+'             |                 (         a background of 0            )   
+'             |
+'             +---->0=default (overwrite all)
+'                   1=Or      (merge text using the logical Or)
+'                   2=Xor     (merge text using the logical Xor) 
+'                   3=And     (merge text using the logical And) 
+'                   4=ignore  (ignore all text printing operations)  
+'
+'The instruction may be used without the second parameter.  eg.  Writing 2   
+'Do not confuse with the similar graphic command Gr Writing. 
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+'
+Screen Open 0,320,200,16,LORES : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0
+'
+'
+Rem *** Set out information on screen
+'
+Pen 15 : Paper 0 : Set Pattern 16 : Set Paint 1 : Ink 12,11,2
+Bar 0,0 To 319,199 : Ink 0 : Set Pattern 0 : Bar 30,6 To 290,17
+Ink ,,10 : Bar 10,21 To 310,34
+Ink ,,1 : Bar 68,44 To 308,58 : Bar 13,64 To 66,190 : Ink ,,7
+For X=1 To 4 : Ink X+11 : Bar X*64+12,64 To X*64+51,190 : Next 
+Pen 3
+Locate 2,1 : Centre "press any mouse key to quit"
+Pen 15
+Locate 9,6 : Print "REPLACE"
+Locate 19,6 : Print "OR"
+Locate 26,6 : Print "XOR"
+Locate 34,6 : Print "AND"
+Locate 2,9 : Print "NORMAL"
+Locate 3,11 : Print "PAPER"
+Locate 5,13 : Print "PEN"
+Pen 0 : Paper 15
+Locate 2,16 : Print "NORMAL"
+Locate 3,18 : Print "PAPER"
+Locate 5,20 : Print "PEN"
+'
+'
+Rem *** show text drawing modes (normal and inverse) 
+'
+Pen 15 : Paper 0
+For A=0 To 3 : For B=0 To 2 : Writing A,B
+Locate 8*A+10,B*2+9 : Print "TEXT" : Next : Next 
+Inverse On 
+For A=0 To 3 : For B=0 To 2 : Writing A,B
+Locate 8*A+10,B*2+16 : Print "TEXT" : Next : Next 
+Pen 6 : Paper 0 : Writing 0,0
+'
+'
+Rem *** cycle through Inverse,Shade and Under options
+'
+Do 
+   Add G,1,1 To 8
+   Gosub(G)
+   COUNT=0
+   Repeat 
+      Inc COUNT
+      If Mouse Key Then Exit 2 : Rem *** Quit if mouse key is pressed 
+      Wait Vbl 
+   Until COUNT=150
+Loop 
+'
+'
+Edit 
+'
+'
+Rem *** the subroutines
+'
+1 Inverse Off : Shade Off : Under Off : Locate 0,3 : Centre "INVERSE OFF   SHADE OFF   UNDER OFF" : Return 
+2 Inverse On : Shade On : Under Off : Locate 0,3 : Centre "INVERSE ON    SHADE OFF   UNDER OFF" : Return 
+3 Inverse On : Shade On : Under On : Locate 0,3 : Centre "INVERSE ON    SHADE ON    UNDER ON " : Return 
+4 Inverse Off : Shade Off : Under On : Locate 0,3 : Centre "INVERSE OFF   SHADE OFF   UNDER ON " : Return 
+5 Inverse On : Shade Off : Under On : Locate 0,3 : Centre "INVERSE ON    SHADE OFF   UNDER ON " : Return 
+6 Inverse Off : Shade On : Under On : Locate 0,3 : Centre "INVERSE OFF   SHADE ON    UNDER ON " : Return 
+7 Inverse Off : Shade On : Under Off : Locate 0,3 : Centre "INVERSE OFF   SHADE ON   UNDER OFF " : Return 
+8 Inverse On : Shade Off : Under Off : Locate 0,3 : Centre "INVERSE ON   SHADE OFF   UNDER OFF " : Return 
+'
+'

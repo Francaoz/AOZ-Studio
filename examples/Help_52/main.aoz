@@ -1,0 +1,139 @@
+'**********************************
+'*    AMOS Professional HELP 52   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Print or ? (line  10)
+'*                                *           Using      (line  26)
+'*         Ronnie Simpson         *
+'**********************************
+'
+'------------------------------------------- 
+'Print or ?
+'------------------------------------------- 
+'List variables on screen
+'
+'eg.          Print A,1,C$,"print";" this";" to";" screen" 
+'
+'Items in the list must be separated by either a comma which will move the 
+'cursor to the next tab position or a semi-colon which moves the cursor to 
+'the next character position.
+'Each print statement normally ends with an automatic carriage return but
+'this can be supressed by adding an extra semi-colon after the last item 
+'on your list
+'
+'eg.     Print "Wond"; 
+'        Print "erful" 
+'------------------------------------------- 
+'Using 
+'------------------------------------------- 
+'detail print format 
+'
+'Print Using allows changes to be made to the way in which the variables 
+'will appear on the screen.
+'There are 7 different characters that can be used to change output:-
+'
+'   #    Each hash character represents 1 character from your variable 
+'        any others will be replaced by spaces.
+'
+'eg.     Print Using "###";12345           ( printed result: 345 ) 
+'
+'   +    Will add the appropriate sign to a number 
+'
+'eg.     Print Using "+##";99              ( printed result: +99 ) 
+'        Print Using "+##";-99             ( printed result: -99 ) 
+'
+'   -    Will add sign only to a negative number 
+'
+'eg.     Print Using "-##";99              ( printed result:  99 ) 
+'        Print Using "-##";-99             ( printed result: -99 ) 
+'
+'   .    Inserts the decimal point 
+'
+'eg.     Print Using "##.###";12.345       ( printed result: 12.345 )
+'        Print Using "##.###";1234.5       ( printed result: 34.500 )
+'
+'   .    Centre a number without using decimal point 
+'
+'eg.     Print Using "##;###";12.345       ( printed result: 12 345 )
+'        Print Using "##;###";1234.5       ( printed result: 34 500 )
+'
+'   ~    Every ~ will be replaced by a character from the string 
+'
+'eg.     Print Using "ABC~~~GHIJK";"DEF"   ( printed result: ABCDEFGHIJK ) 
+'
+'   ^    Print a number in exponential form
+'
+'eg.     Print Using "###.##^^^^^";335.23  ( printed result: 335.23E+000 ) 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up screen and reserve memory for array and zones
+'
+Screen Open 0,640,200,8,Hires
+Palette 0,$224,$112,$666,$777,$EEE,$F77,$FF0
+Reserve Zone 6
+Dim T$(4)
+Flash Off : Curs Off : Cls 2 : Paper 0
+Set Rainbow 0,2,24,"(2,-1,1)","","(2,1,1)"
+Rainbow 0,9,49,200
+'
+Rem *** set out the screen zones 
+'
+Pen 5 : Paper 1 : Locate 45,2 : Print Border$(Zone$(" FORMAT OUTPUT      ###.### ",1),2)
+Locate 45,6 : Print Border$(Zone$(" SHOW ALL SIGNS    +###.### ",2),2)
+Locate 45,10 : Print Border$(Zone$(" SHOW NEG. SIGNS   -###.### ",3),2)
+Locate 45,14 : Print Border$(Zone$(" NO DECIMAL POINT   ###;### ",4),2)
+Locate 45,18 : Print Border$(Zone$("           NORMAL           ",5),2)
+Pen 6 : Locate 45,22 : Print Border$(Zone$("            QUIT            ",6),2) : Paper 2
+'
+Rem *** init. variables
+'
+T$(1)="###.###"
+T$(2)="+###.###"
+T$(3)="-###.###"
+T$(4)="###;###"
+TYPE=5
+AGE=40
+HEIGHT#=73.875
+WEIGHT#=179.35
+SHOE=10
+SHIRT#=15.5
+BANK=-225
+Gosub NORMAL
+'
+Rem *** start the main loop
+Do 
+   Repeat 
+      M=Mouse Zone
+   Until M>0 and Mouse Key
+   For Y=3 To 21 Step 3
+      Locate 24,Y : Print "            "
+   Next 
+   If M=6 Then Edit 
+   If M=5 Then Gosub NORMAL
+   If M<5
+      TYPE=M
+      Gosub MARKUP
+   End If 
+Loop 
+'
+MARKUP:
+Locate 24,3 : Print Using T$(TYPE);AGE
+Locate 24,6 : Print Using T$(TYPE);HEIGHT#
+Locate 24,9 : Print Using T$(TYPE);WEIGHT#
+Locate 24,12 : Print Using T$(TYPE);SHOE
+Locate 24,15 : Print Using T$(TYPE);SHIRT#
+Locate 24,18 : Print Using T$(TYPE);BANK
+Locate 24,21 : Print Using T$(TYPE);Pi#
+Return 
+'
+NORMAL:
+Pen 7
+Locate 6,3 : Print "AGE  (years)" : Locate 24,3 : Print AGE
+Locate 6,6 : Print "HEIGHT  (inches)" : Locate 24,6 : Print HEIGHT#
+Locate 6,9 : Print "WEIGHT  (pounds)" : Locate 24,9 : Print WEIGHT#
+Locate 6,12 : Print "SHOE SIZE" : Locate 24,12 : Print SHOE
+Locate 6,15 : Print "COLLAR SIZE" : Locate 24,15 : Print SHIRT#
+Locate 6,18 : Print "BANK BALANCE" : Locate 24,18 : Print BANK
+Locate 6,21 : Print "Pi  (meat)" : Locate 24,21 : Print Pi#
+Return 

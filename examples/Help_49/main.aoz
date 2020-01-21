@@ -1,0 +1,182 @@
+'**********************************
+'*    AMOS Professional HELP 49   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *           Hide         (line 11) 
+'*                                *           Show         (line 11) 
+'*         Ronnie Simpson         *           Change Mouse (line 33) 
+'**********************************           X Mouse      (line 55) 
+'                                             Y Mouse      (line 55) 
+'                                             Mouse Screen (line 73) 
+'------------------------------------------- 
+'Hide        Show
+'Hide On     Show On 
+'------------------------------------------- 
+'remove or display mouse pointer 
+'
+'Internal counters keep a record of the number of times the Hide and Show
+'commands are used, the pointer will remain hidden as long as the Hide 
+'counter is higher than the Show counter.
+'
+'eg.    Hide : Wait 10 : Show                    (pointer is reactivated)
+'       Hide : Wait 10 : Hide : Wait 10 : Show   (pointer remains hidden)
+'
+'An alternative version of each of the commands is included allowing the 
+'internal counters to be ignored.
+'
+'eg.    Hide On  (always hides the pointer)
+'       Show On  (always activates the pointer)
+'
+'Please note that although the pointer image is made invisible with Hide or
+'Hide On all other mouse functions are still active. 
+'
+'------------------------------------------- 
+'Change Mouse
+'------------------------------------------- 
+'change mouse pointer image
+'
+'eg.        Change Mouse 2   (change image to crosshairs)
+'
+'  3 internal pointer shapes are included as standard:-
+'
+'                1) Arrow  (default) 
+'                2) Crosshairs 
+'                3) Clock
+'
+'If the value entered is greater than 3 then an image from the sprite bank 
+'will be used, this image should be 16 pixels wide and use no more than 2
+'bitplanes (4 colours) although there is no restrictions on the height.
+'A value of 3 must be added to your sprite image number, so therefore image
+'number 1 would be installed with a parameter value of 4.
+'
+'eg.        Change Mouse 3    (use internal clock image) 
+'           Change Mouse 6    (use image number 3 from sprite bank)  
+'
+'------------------------------------------- 
+'X Mouse 
+'Y Mouse 
+'------------------------------------------- 
+'mouse pointer coordinates 
+'
+'Used as functions X Mouse and Y Mouse return the hardware coordinates of the
+'mouse pointer.
+'
+'eg.         X=X Mouse 
+'            Y=Y Mouse 
+'
+'The command versions allow the mouse pointer to be positioned from within 
+'the program by simply assigning a hardware value:-  
+'
+'                  X Mouse=200 
+'                  Y Mouse=Y 
+'
+'------------------------------------------- 
+'Mouse Screen  
+'------------------------------------------- 
+'mouse pointer screen
+'
+'This functions is used to return the screen number under the mouse pointer. 
+'
+'eg.       S=Mouse Screen  
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** draw some designs for new mouse images 
+Auto View Off 
+Screen Open 1,320,100,4,Lowres : Flash Off : Curs Off : Cls 0
+Palette 0,$F,$FF0,$F
+'
+Rem *** big image
+Ink 3 : Polyline 0,7 To 7,0 To 14,7 To 0,7 : Paint 5,5
+Ink 2 : Box 4,7 To 10,62 : Ink 1 : Paint 7,40
+Get Bob 1,0,0 To 15,63 : Cls 0
+'
+Rem *** small image
+Ink 2 : Polyline 0,2 To 2,0 To 4,2
+Draw 2,0 To 2,7
+Get Bob 2,0,0 To 15,15
+'
+Rem *** annimated images 
+Cls 0 : Set Paint 1 : Ink 1,0,2
+X=7 : Y=7 : BC=3
+For N=7 To 1 Step -1 : Cls 0,0,0 To 20,20
+   Bar X-N,Y-N To X+N,Y+N
+   Get Bob BC,X-7,Y-7 To X+8,Y+8
+   Inc BC
+Next 
+For N=1 To 7 : Cls 0,0,0 To 20,20
+   Bar X-N,Y-N To X+N,Y+N
+   Get Bob BC,X-7,Y-7 To X+8,Y+8
+   Inc BC
+Next 
+Ink 3,0,2
+For N=7 To 1 Step -1 : Cls 0,0,0 To 20,20
+   Bar X-N,Y-N To X+N,Y+N
+   Get Bob BC,X-7,Y-7 To X+8,Y+8
+   Inc BC
+Next 
+For N=1 To 7 : Cls 0,0,0 To 20,20
+   Bar X-N,Y-N To X+N,Y+N
+   Get Bob BC,X-7,Y-7 To X+8,Y+8
+   Inc BC
+Next 
+Screen Close 1
+'
+Rem *** Set out the new screen     
+'  
+Screen Open 0,320,200,8,Lowres
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,,,,,,,,,,$F,$FF0,$F00
+Flash Off : Curs Off : Cls 0
+Gr Writing 0
+Ink 6 : Text 32,48,"HIDDEN         BIG         SMALL"
+Text 32,56,"MOUSE         MOUSE        MOUSE"
+Text 8,148,"COORDINATES    ANIMATED      NORMAL"
+Text 140,156,"MOUSE        MOUSE"
+Ink 5 : Text 24,166,"X="
+Ink 5 : Text 24,182,"Y="
+Ink 7
+Reserve Zone 6
+Box 0,0 To 319,199
+Draw 0,100 To 319,100
+Draw 106,0 To 106,199
+Draw 213,0 To 213,199
+Set Zone 1,0,0 To 106,100
+Set Zone 2,106,0 To 213,100
+Set Zone 3,213,0 To 319,100
+Set Zone 4,0,100 To 106,199
+Set Zone 5,106,100 To 213,199
+Set Zone 6,231,100 To 319,199
+Ink 2 : Text 50,10,"PRESS ANY MOUSE KEY TO QUIT"
+View 
+'
+'
+Rem *** Start main loop
+Pen 5 : Paper 0 : OM=0
+Do 
+   If Mouse Key Then Edit 
+   M=Mouse Zone
+   If OM<>M
+      OM=M
+      On M Gosub A,B,C,D,E,F
+   End If 
+Loop 
+'
+'
+A: Hide : Return 
+B: Change Mouse 4 : Show On : Return 
+C: Change Mouse 5 : Show On : Return 
+D: Change Mouse 1 : Show On 
+While Mouse Zone=4
+   X=X Screen(X Mouse)
+   Y=Y Screen(Y Mouse)
+   Locate 5,20 : Print X;"  "
+   Locate 5,22 : Print Y;"  "
+   If Mouse Key Then Edit 
+Wend 
+Return 
+E: While Mouse Zone=5
+   Add I,1,6 To 33
+   Change Mouse I
+   If Mouse Key Then Edit 
+Wend 
+F: Change Mouse 1 : Show On : Return 

@@ -1,0 +1,131 @@
+'**********************************  
+'*    AMOS Professional HELP 23   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Zone        (line 11) 
+'*                                *            Hzone       (line 35) 
+'*         Ronnie Simpson         *            Mouse Zone  (line 50) 
+'**********************************            Reset Zone  (line 60) 
+'
+'
+'------------------------------------------- 
+'Zone  
+'------------------------------------------- 
+'a function to return the zone under the given graphic coordinates 
+'
+'The two possible variations of this function are:-
+'
+'    T=Zone(20,30)  (return the zone number under the graphics)
+'                   (  coordinates at 20 across and 30 down.  )
+'
+'An optional screen number can also be used. 
+'
+'    T=Zone(1,20,30)  (return the zone number under the graphics coordinates)
+'                     (at 20 across and 30 down of screen 1.)
+'
+'If no screen zones are under the coordinates given then a value of  
+'0 (or False) is returned. 
+'If more than one zone is under the coordinates then only the first
+'number is returned. 
+'The X BOB() and Y BOB() functions can be used with Zone to check if a 
+'bob has entered a screen zone.
+'
+'eg.               Z=Zone(X Bob(1),Y Bob(1)) 
+'
+'------------------------------------------- 
+'Hzone 
+'------------------------------------------- 
+'a function to return the zone under the given hardware coordinates  
+'
+'Hzone is identical in operation to the Zone function except that
+'coordinates are now measured in hardware coordinates. 
+'
+'See above for details of how to use this function.  
+'
+'With Hzone you can use X Sprite() and Y Sprite() to check if a
+'hardware sprite has entered a screen zone.  
+'
+'eg.               Z=Zone(X Sprite(1),Y Sprite(1)) 
+'
+'------------------------------------------- 
+'Mouse Zone  
+'------------------------------------------- 
+'a function to return the zone under the mouse pointer hot spot
+'
+'eg.         M=Mouse Zone
+'
+'If no screen zones are under the mouse pointer then a value of  
+'0 (or False) is returned. 
+'
+'------------------------------------------- 
+'Reset Zone
+'------------------------------------------- 
+'erase 1 or all of the zone definitions
+'
+'eg         Reset Zone 3     (reset only zone number 3 definition)   
+'           Reset Zone       (reset all zone definitions)
+'
+'If a number is included after the instruction then only that zone will
+'be reset, otherwise all zones are affected. 
+'This instruction only erases the zone definitions and does not return 
+'any of the memory used to the program, to erase all zones and return  
+'memory then use Reserve Zone without any parameters.  
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6 : Gr Writing 1
+'
+'
+Rem *** reserve memory for screen zones
+'
+Reserve Zone 100
+Dim X(100),Y(100)
+'
+'
+Rem *** draw boxes and set up screen zones 
+For N=1 To 100
+   Ink Rnd(9)+1
+   X(N)=Rnd(600)
+   Y(N)=Rnd(160)+10
+   Set Zone N,X(N),Y(N) To X(N)+40,Y(N)+20
+   Box X(N),Y(N) To X(N)+40,Y(N)+20
+Next 
+'
+'
+Rem *** pick a random number and print instructions  
+'
+R=Rnd(99)+1
+Locate 0,0 : Centre "CLICK IN BOXES USING LEFT MOUSE KEY AND TRY TO FIND ZONE NUMBER"+Str$(R)
+Pen 12 : Locate 0,24 : Centre "RIGHT MOUSE KEY TO QUIT" : Pen 6
+'
+'
+Rem *** start main loop
+'
+GUESSES=0
+Repeat 
+   Do 
+      Rem *** get the mouse clicks 
+      M=Mouse Zone
+      K=Mouse Key
+      Exit If K=1 and M>0
+      Exit If K=2
+   Loop 
+   Rem *** reset chosen zone
+   If K=1
+      Ink 0
+      Box X(M),Y(M) To X(M)+40,Y(M)+20
+      Reset Zone M
+      Locate 2,24 : Print "THAT WAS ZONE NUMBER"+Str$(M)+"  ";
+      Inc GUESSES : Locate 60,24 : Print "GUESSES"+Str$(GUESSES);
+      Shoot : Wait 5
+   End If 
+Until M=R or K=2
+If M=R
+   Cls 
+   Locate 0,12 : Centre "WELL DONE YOU GOT IT IN"+Str$(GUESSES)+" GUESSES"
+   Wait 150
+End If 
+Edit 

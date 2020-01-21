@@ -1,0 +1,134 @@
+'**********************************
+'*    AMOS Professional HELP 60   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *                Log (line 12) 
+'*                                *                Exp (line 21) 
+'*         Ronnie Simpson         *                Ln  (line 30) 
+'**********************************                Sqr (line 39) 
+'                                                  Abs (line 48) 
+'                                                  Int (line 58) 
+'                                                  Sgn (line 68) 
+'------------------------------------------- 
+'Log 
+'------------------------------------------- 
+'logarithm function
+'
+'eg.        L#=Log(X)
+'
+'Log returns the logarithm of the variable or expression (in the base 10). 
+'
+'------------------------------------------- 
+'Exp 
+'------------------------------------------- 
+'exponential function
+'
+'eg.       E#=Exp(123*456) 
+'
+'Exp returns the eponential of the variable or expression in the brackets. 
+'
+'------------------------------------------- 
+'Ln
+'------------------------------------------- 
+'natural logarithm function
+'
+'eg.         L#=Ln(20) 
+'
+'Ln returns the natural logarithm of the variable or expression (neperian).  
+'
+'-------------------------------------------   
+'Sqr 
+'------------------------------------------- 
+'square root function
+'
+'eg.        S#=Sqr(49) 
+'
+'Sqr returns the square root of the variable or expression in the brackets.  
+'
+'------------------------------------------- 
+'Abs 
+'------------------------------------------- 
+'absolute value function 
+'
+'eg.       A=Abs(2) : B=Abs(-2)
+'
+'Abs returns the absolute value (positive) of the variable or
+'expression in the brackets, no account is taken of its sign.    
+'
+'------------------------------------------- 
+'Int 
+'------------------------------------------- 
+'convert to integer function 
+'
+'eg.       A=Int(X#) 
+'
+'Int converts the variable or expression in the brackets to an integer by  
+'rounding downward to the nearest whole number.
+'
+'------------------------------------------- 
+'Sgn 
+'------------------------------------------- 
+'return sign of a number 
+'
+'eg.       S=Sgn(X)
+'
+'Sgn returns a value representing the sign of a number.  
+'
+'There are three possible results:-
+'
+'           -1    will be returned if the number is negative 
+'            0    will be returned if the number equals zero 
+'            1    will be returned if the number is positive 
+'  
+'------------------------------------------- 
+'WORKING EXAMPLE   
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 1,640,400,4,Hires
+Screen Display 1,,50,,
+Curs Off : Hide : Cls 0
+Screen Open 0,640,200,4,Hires : Flash Off 
+Palette $3,$FF8,$F9F,$AFF,,,,,$4,$115,$226,$337
+Curs Off : Cls 0
+Dual Playfield 0,1
+Screen 0
+Pen 2 : Paper 0 : Locate 0,21 : Centre "Press any mouse key to quit"
+A#=0 : C=3 : Writing 0,2
+A#=A#+0.1 : Pen 3
+Locate 33,1 : Cline : Print "NUMBER =" : Pen 1
+Locate 25,4 : Cline : Print "Base 10 logarithm_______"
+Locate 25,6 : Cline : Print "Exponential form________"
+Locate 25,8 : Cline : Print "Natural Logarithm_______"
+Locate 25,10 : Cline : Print "Square root_____________"
+Locate 25,12 : Cline : Print "Absolute value__________"
+Locate 25,14 : Cline : Print "Converted to integer____"
+Locate 25,16 : Cline : Print "Numbers sign____________"
+Pen 2 : Locate 0,21 : Cline : Centre "Press any mouse key to quit"
+Channel 1 To Screen Offset 1
+Amal 1,"L: M0,75,150;M0,-75,150;JL"
+Amal On 
+Do 
+   SPLAT
+   A#=A#+0.1 : Pen 3
+   Locate 41,1 : Print A#;"    " : Pen 1
+   Locate 49,4 : Print Log(A#);"    "
+   Locate 49,6 : Print Exp(A#);"        "
+   Locate 49,8 : Print Ln(A#);"    "
+   Locate 49,10 : Print Sqr(A#);"    "
+   Locate 49,12 : Print Abs(A#);"    "
+   Locate 49,14 : Print Int(A#)
+   Locate 49,16 : Print Sgn(A#)
+Loop 
+Procedure SPLAT
+   Screen 1
+   R=Rnd(1)-1 : X1=Rnd(319)-320 : Y1=Rnd(99)-100
+   For N=1 To 9
+      Add C,1,1 To 3 : Ink C
+      Circle 320+X1,149+Y1,N : Circle 320+Abs(X1),149+Abs(Y1),N
+      Circle 320+Abs(X1),149+Y1,N : Circle 320+X1,149+Abs(Y1),N
+      Wait Vbl 
+      Add X1,Abs(R)
+   Next 
+   If Mouse Key Then Edit 
+   Screen 0
+End Proc

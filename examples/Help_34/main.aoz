@@ -1,0 +1,187 @@
+'**********************************  
+'*    AMOS Professional HELP 34   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Screen Open    (line 10)
+'*                                *            Screen Close   (line 37)
+'*         Ronnie Simpson         *            Screen Offset  (line 46)
+'**********************************            Laced          (line 62)
+'                                              Screen Display (line 80)
+'------------------------------------------- 
+'Screen Open 
+'------------------------------------------- 
+'create a screen 
+'  
+'                     +--->screen identification number
+'                     |  +--->width of screen  
+'                     |  |   +--->height of screen 
+'                     |  |   |   +--->maximum number of colours
+'                     |  |   |   |   +--->width of pixels  
+'                     |  |   |   |   | 
+'         Screen Open 1,320,200,16,Lowres
+'
+'Identification numbers range from 0 to 7, if a screen of the same number
+'already exists then it will be replaced by the new screen.
+'Width of screen is measured in pixels and can be wider than the viewing 
+'area. 
+'Similarly height of screen is measured in pixels and is not restricted
+'to the size of the display. 
+'Number of colours can be one of the following:- 
+'            2,4,8,16,32,64(EHB) or 4096(HAM). 
+'
+'The width of the pixels are set to either Hires or Lowres giving 640 or 320 
+'pixels wide for a full screen width.
+'Lowres and Hires are reserved variables with values of 0 and &8000
+'Setting screen to Hires reduces the maximum number of colours to 16.
+'
+'------------------------------------------- 
+'Screen Close
+'------------------------------------------- 
+'delete a screen 
+'
+'eg.       Screen Close 2
+'
+'Screen close frees the memory taken by the screen and must be redefined 
+'if you wish to open it again. 
+'------------------------------------------- 
+'Screen Offset 
+'------------------------------------------- 
+'scroll or move a screen 
+'
+'                      +--->screen identification number 
+'                      |  +--->offset from left hand to screen display 
+'                      |  |  +--->offset from top to screen display  
+'                      |  |  | 
+'        Screen Offset 1,20,30 
+'
+'Screen Offset is used mostly with screen sizes which are larger than the
+'display area to move the outside parts into the viewing area. 
+'The Offsets are measured in pixels from the top left of your screen to the
+'point at which you wish to be at the start of the display.
+'
+'------------------------------------------- 
+'Laced 
+'------------------------------------------- 
+'change to interlaced mode 
+'
+'Laced is a reserved variable with a value of 4 and is used in conjunction 
+'with Hires and Lowres when opening a screen.
+'
+'eg.        Screen Open 0,320,200,16,Laced+Lowres
+'
+'Interlaced screen have double the number of vertical lines, take twice as 
+'long to update and are not recomended for much more than diplaying artwork. 
+'
+'WARNING- as soon as one screen is opened with the interlace mode set then 
+'all other opened screens will change to this mode by doubling each vertical 
+'line. 
+'When this screen is closed the display will return to normal. 
+'
+'------------------------------------------- 
+'Screen Display
+'------------------------------------------- 
+'position a screen 
+'
+'
+'
+'                      +--->screen identification number 
+'                      |  +--->new X coordinate
+'                      |  |  +---> new Y coordinate
+'                      |  |  |  +--->screens displayed width 
+'                      |  |  |  |   +--->screens displayed height
+'                      |  |  |  |   |
+'       Screen Display 1,32,50,320,200 
+'
+'The new X coordinate can range between 0 and 448 and will be automatically
+'rounded to the nearest 16 pixel boundary. 
+'The new Y coordinate can range between 0 and 312. 
+'If the width is less than the origonal setting the only a part of your
+'screen will be displayed. 
+'Changing the height value will reduce the depth of screen.
+'Any of the parameters may be ommited as long as the commas are kept in the
+'correct place.
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** reserve some memory for the arrays 
+'
+Dim Y(3),DY(3)
+'
+'
+Rem *** open a screen for the info line
+'
+Screen Open 4,320,8,2,Lowres : Curs Off : Flash Off 
+Colour 1,$38B : Screen Display 4,,234,,
+'
+'
+Rem *** open a 16 colour lowres screen 
+'
+Screen Open 0,320,40,16,Lowres : Flash Off 
+Screen Display 0,,50,, : Y(0)=50
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Ink 1 : Box 0,0 To 319,39
+For C=0 To 15 : Ink C : Bar C*16+30,20 To C*16+42,32 : Next 
+Paper 0 : Pen 7 : Locate 0,1 : Centre "SCREEN 0,320,40,16,Lowres"
+Screen 4 : Cline : Centre "THIS IS THE DEFAULT SCREEN" : Wait 100
+'
+'
+Rem *** open a 16 colour Hires screen  
+'
+Screen Open 1,640,40,16,Hires : Flash Off 
+Screen Display 1,,96,, : Y(1)=96
+Get Palette 0
+Curs Off : Cls 0 : Ink 2 : Box 0,0 To 639,39
+For C=0 To 15 : Ink C : Bar C*32+60,20 To C*32+72,32 : Next 
+Paper 0 : Pen 6 : Locate 0,1 : Centre "SCREEN 1,640,40,16,Hires"
+Screen 4 : Cline : Centre "THIS IS A HIGH RES. SCREEN" : Wait 100
+'
+'
+Rem *** open a 64 colour EHB screen  
+'
+Screen Open 2,320,40,64,Lowres : Flash Off 
+Screen Display 2,,142,, : Y(2)=142
+Get Palette 0
+Curs Off : Cls 0 : Ink 3 : Box 0,0 To 319,39
+For C=1 To 63 : Ink C : Bar C*5-2,20 To C*5+1,32 : Next 
+Paper 0 : Pen 5 : Locate 0,1 : Centre "SCREEN 2,320,40,64,Lowres (EHB)"
+Screen 4 : Cline : Centre "THIS IS AN EXTRA HALF BRIGHT SCREEN" : Wait 100
+'
+'
+Rem *** open a HAM screen  
+'
+Screen 4 : Cline : Centre "THIS IS A HAM SCREEN"
+Screen Open 3,320,40,4096,Lowres : Flash Off 
+Screen Display 3,,188,, : Y(3)=188
+Curs Off : Cls 0 : Ink 14 : Box 0,0 To 319,39
+Paper 0 : Pen 4 : Locate 0,1 : Centre "SCREEN 3,320,40,4096,Lowres (HAM)"
+For Y=20 To 32 : For X=8 To 311
+      Ink(X*31)+(Y*31) : Plot X,Y
+Next : Next 
+'
+'
+Rem *** open a screen for the scrolling message
+'
+Screen Open 4,1023,8,2,Lowres : Curs Off : Flash Off : Cls 0
+Colour 1,$38B : Screen Display 4,,234,,
+Locate 40,0 : Print "**- PRESS ANY MOUSE KEY TO QUIT -**";
+'
+'
+Rem *** scroll them all
+'
+X=1 : DY(0)=1 : DY(1)=1 : DY(2)=1 : DY(3)=-1
+Do 
+   For N=0 To 3
+      If Mouse Key Then Exit 2
+      Screen Display N,,Y(N),,
+      Add Y(N),DY(N)
+      If Y(N)=50 or Y(N)=188
+         DY(N)=-DY(N)
+      End If 
+   Next 
+   Add X,2,0 To 659
+   Screen Offset 4,X,
+   Wait Vbl 
+Loop 
+'
+'
+Edit 

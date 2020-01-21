@@ -1,0 +1,132 @@
+'**********************************  
+'*    AMOS Professional HELP 32   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *             Window     (line 11) 
+'*                                *             Windon     (line 21) 
+'*         Ronnie Simpson         *             Wind Close (line 29) 
+'**********************************             Wind Move  (line 39) 
+'                                               Wind Size  (line 54)     
+'                                               Clw        (line 68) 
+'------------------------------------------- 
+'Window
+'------------------------------------------- 
+'change current window 
+'
+'eg.       Window 4   (make window 4 the current window) 
+'
+'The Window command directs all following text operations to the named 
+'window and if wind save is activated the the contents will be redrawn.
+'
+'------------------------------------------- 
+'Windon
+'------------------------------------------- 
+'return number of active window
+'
+'eg.     W=Windon
+'        Print "Window number=";Windon 
+'
+'------------------------------------------- 
+'Wind Close
+'------------------------------------------- 
+'close the current window
+'
+'eg.        Window 2      (make window 2 the current window) 
+'           Wind Close    (close active window)
+'
+'If Wind Save has been activated then the area underneath will be redrawn.   
+'
+'------------------------------------------- 
+'Wind Move 
+'------------------------------------------- 
+'move window to a new location 
+'
+'         Wind Open 2,0,0,25,15,1
+'         Wind Save  
+'         Wait Key 
+'         Wind Move 63,20(move to screen coordinates 63 across and 20 down)
+'
+'The X graphic will be rounded to the nearest 16 pixel boundary with no  
+'restrictions on the Y coordinate. 
+'Only if the Wind Save is active will the window be re-displayed at the  
+'new position. 
+'
+'------------------------------------------- 
+'Wind Size 
+'------------------------------------------- 
+'change the size of the current window 
+'
+'    Wind Size 20,10  (change window size to 20 characters wide by 10 high)
+'
+'Parameters are measured in numbers of characters. 
+'If the wind save is active the contents will be redrawn.
+'If the new size is smaller than the origonal then any areas that lie
+'outside will be lost. 
+'After this instruction the cursor will be placed at coordinates 0,0 of  
+'the current screen. 
+'
+'------------------------------------------- 
+'Clw 
+'------------------------------------------- 
+'clear current window
+'
+'Clw clears the active window to the current paper colour. 
+'
+'eg.           Window 2  (make window 2 the active window) 
+'              Paper 4   (set a new paper colour)
+'              Clw       (clear current window to paper colour)
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+'
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6
+Box 0,0 To 639,175 : Set Pattern 24 : Ink 6,3 : Paint 1,1
+Pen 14 : Locate 0,22 : Centre "PRESS LEFT MOUSE KEY MOVE THE WINDOW"
+Pen 13 : Locate 0,23 : Centre "PRESS RIGHT MOUSE KEY TO CHANGE THE SIZE"
+Pen 12 : Locate 0,24 : Centre "PRESS BOTH TO QUIT"
+P=1 : S=1
+Global P,S
+'
+'
+Rem *** save the contents of window 0 (the screen) and open another
+'
+Wind Save 
+Wind Open 1,159,80,30,10,4
+'
+'
+Rem *** the main loop
+'
+Do 
+   Exit If Mouse Key=3
+   If Mouse Key=1 Then ALTER_POSITION : Inc P
+   If Mouse Key=2 Then ALTER_SIZE : Inc S
+Loop 
+'
+'
+Wind Close 
+Edit 
+'
+'
+Procedure ALTER_POSITION
+   X=Rnd(320) : Y=Rnd(80)
+   Wind Move X,Y
+   Clw 
+   A$="MOVE NUMBER"+Str$(P)
+   Title Bottom A$
+   Locate 2,2 : Print "moved to";X;",";Y
+End Proc
+'
+'
+Procedure ALTER_SIZE
+   X=Rnd(20)+20 : Y=Rnd(5)+5
+   Wind Size X,Y
+   Clw 
+   A$="SIZE CHANGE"+Str$(S)
+   Title Top A$
+   Pen Rnd(14)+1
+   Locate 2,2 : Print "new size=";X;",";Y
+End Proc

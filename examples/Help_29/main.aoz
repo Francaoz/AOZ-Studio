@@ -1,0 +1,132 @@
+'**********************************  
+'*    AMOS Professional HELP 29   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *              Paste Bob (line 11) 
+'*                                *              Hrev      (line 20) 
+'*         Ronnie Simpson         *              Vrev      (line 20) 
+'**********************************              Rev       (line 20) 
+'                                                Hrev Block(line 62) 
+'                                                Vrev Block(line 62) 
+'------------------------------------------- 
+'Paste Bob 
+'------------------------------------------- 
+'Place a copy of a sprite bank image on the screen 
+'
+'eg.     Paste Bob 100,50,2  (paste image number 2 at given coordinates) 
+'
+'The coordinates are measured in pixels relative to the current screen 
+'
+'------------------------------------------- 
+'BOB FLIPPING
+'------------------------------------------- 
+'To save on the memory required by the sprite bank AMOS Professional allows
+'the images to be reversed both horizontally and vertically. 
+'Bob image HOT SPOTS are also reversed so it is best to set this near the  
+'centre of the axis around which the bob will be flipped.  
+'Since only one image is actually held in the bank it is unwise to have
+'more than one bob using the same reversed image as this would take up too 
+'much processor time with the continual flipping of the bob images.
+'
+'The bob images are reversed by setting bits 14 and 15 of the image
+'hot spot (sprite base+6) this may sound a little complicated but  
+'things are made easier by the following:- 
+'
+'To flip an image horizontally add $8000 to the image number value 
+'
+'eg.   Bob 1,100,50,$8000+3           or           Bob 1,100,50,$8003
+'        
+'          these would both flip bob image number 3 horizontally 
+'
+'
+'Alternativly to make it even easier still the function Hrev is provided 
+'
+'eg.      Bob 1,100,50,Hrev(4)     (reverse image number 4)
+'
+'To flip an image vertically add $4000 or use the Vrev function
+'
+'eg.   Bob 1,100,50,$4000+3  
+'      Bob 1,100,50,$4003  
+'      Bob 1,100,50,Vrev(3)
+'
+'All the above would reverse image number 3 vertically 
+'
+'To flip an image in both directions add $C000 or use the Rev function 
+'
+'eg.   Bob 1,100,50,$C000+4  
+'      Bob 1,100,50,$C004
+'      Bob 1,100,50,Rev(4) 
+'
+'All the above would reverse image number 4 in both directions 
+'
+'------------------------------------------- 
+'Hrev Block  Vrev Block
+'------------------------------------------- 
+'reverse a block 
+'
+'The flip routines for blocks are simpified to just two instructions:- 
+'
+'     Hrev Block X   (flips block number X horizontally) 
+'     Vrev Block X   (flips block number X vertically) 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** load some bobs and use the palette 
+'
+Screen Open 0,640,200,16,Hires
+Load "AMOSPro_Examples:OBJECTS/bobs.abk"
+Get Sprite Palette 
+Flash Off : Curs Off : Cls 0 : Hide : Paper 0
+'
+'
+Rem *** paste normal images  
+'
+Paste Bob 0,14,1
+Paste Bob 181,14,2
+Paste Bob 339,14,3
+Paste Bob 491,14,4
+'
+'
+Locate 0,24 : Centre "PRESS ANY MOUSE KEY TO FLIP HORIZONTALLY"
+Repeat : Until Mouse Key=0
+Repeat : Until Mouse Key
+'
+'
+Rem*** paste Hrev images 
+'
+Paste Bob 77,14,$8001
+Paste Bob 236,14,Hrev(2)
+Paste Bob 390,14,$8000+3
+Paste Bob 566,14,$8004
+'
+Locate 0,24 : Centre " PRESS ANY MOUSE KEY TO FLIP VERTICALLY "
+Repeat : Until Mouse Key=0
+Repeat : Until Mouse Key
+'
+'
+Rem*** paste Vrev images 
+'
+Paste Bob 0,100,$4001
+Paste Bob 181,100,Vrev(2)
+Paste Bob 339,100,$4000+3
+Paste Bob 491,100,$4004
+'
+'
+Locate 0,24 : Centre "PRESS ANY MOUSE KEY TO FLIP IN BOTH DIRECTIONS"
+Repeat : Until Mouse Key=0
+Repeat : Until Mouse Key
+'
+'
+Rem*** paste Rev images
+'  
+Paste Bob 77,100,$C001
+Paste Bob 237,100,Rev(2)
+Paste Bob 390,100,$C000+3
+Paste Bob 566,100,$C004
+'
+Locate 0,24 : Centre "         PRESS ANY MOUSE KEY TO QUIT          "
+Repeat : Until Mouse Key=0
+Repeat : Until Mouse Key
+'
+'
+Edit 

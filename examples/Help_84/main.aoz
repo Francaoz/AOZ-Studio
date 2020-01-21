@@ -1,0 +1,138 @@
+'**********************************
+'*    AMOS PROFESSIONAL HELP 84   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *         Arexx Open   (line 15) 
+'*                                *         Arexx Close  (line 26) 
+'*         Ronnie Simpson         *         Arexx Exist  (line 38)   
+'**********************************         Arexx Wait   (line 50) 
+'                                           Arexx        (line 64) 
+'                                           Arexx$       (line 72) 
+'                                           Arexx Answer (line 81) 
+'------------------------------------------- 
+'Arexx Open
+'------------------------------------------- 
+'open an arexx port
+'
+'Before this instruction can be used Arexx must be installed using the 
+'Rexxmast command either fron the CLI or from AMOS Professional with the 
+'Exec "Rexxmast" instruction.
+'
+'                 Arexx Open "NAME"
+'
+'The port name must be less than 32 characters long and should be in upper 
+'case. 
+'In order for everything to proceed without errors the Rexxslib.Library
+'should be in the Libs folder of the startup disc. 
+'  
+'------------------------------------------- 
+'Arexx Close 
+'------------------------------------------- 
+'close an arexx port 
+'
+'This instruction is used without parameters to close an arexx port. Care  
+'must be taken that the port is not closed while an arexx message is left
+'unanswered as this can cause a FATAL error with the resulting system crash. 
+'
+'------------------------------------------- 
+'Arexx Exist 
+'------------------------------------------- 
+'check port availability 
+'
+'                  E=Arexx Exist("NAME") 
+'
+'This function will return -1 (true) if the named port is available or 
+'0 (false)if it is not.
+'this function can also be used to check if the Arexx system has been
+'installed by using "AREXX" as the name parameter. 
+'
+'eg.               E=Arexx Exist("AREXX")  
+'
+'------------------------------------------- 
+'Arexx Wait
+'------------------------------------------- 
+'wait for an arexx message 
+'
+'This command is used without parameters and will halt an AMOS Professional
+'program until a message is returned  from an arexx program. 
+'
+'------------------------------------------- 
+'Arexx 
+'------------------------------------------- 
+'check for a message 
+'
+'there are 3 possible values that can be returned with this function:- 
+'
+'              0 - no messages.  
+'              1 - a message has been received that does not require an
+'                  immidiate response. 
+'              2 - a message which requires an immidiate responce has
+'                  been received.
+'
+'eg.          Repeat 
+'             Multi Wait 
+'             Until Arexx
+'
+'------------------------------------------- 
+'Arexx$
+'------------------------------------------- 
+'read contents of an arexx message 
+'
+'              A$=Arexx$(X)
+'
+'When a message has been received from an arexx program this instruction is
+'used to read the message, X can be be in the range of 0-15 and is the number
+'of the arexx message you wish to read.
+'
+'------------------------------------------- 
+'Arexx Answer
+'------------------------------------------- 
+'answer an arexx message 
+'
+'normally a message received from an arexx program requires an immidiate 
+'answer, this command sends back the response with the result set to the 
+'correct value.
+'
+'Typical values are:-  
+'                     0 - no error 
+'                     5 - warning  
+'                    10 - severe error 
+'                    20 - fatal error
+'
+'eg.             Arexx Answer 0
+'
+'If the calling program requires a string to be returned then this MUST
+'be included after the error message:- 
+'
+'eg.             Arexx Answer 0,A$ 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** How to open, and use an AREXX port in AMOS 
+'
+'
+If Arexx Exist("AREXX")=0
+   Exec "RexxMast"
+   If Arexx Exist("AREXX")=0
+      Print "AREXX not installed on this machine!"
+      Bell : Stop 
+   End If 
+End If 
+Arexx Open "AMOS"
+Do 
+
+   Arexx Wait 
+   Print "AREXX message: ";Arexx$(0)
+   Exit If Arexx$(0)="QUIT"
+
+   If Arexx=2
+      Input "AREXX wants an answer: ";A$
+   Else 
+      A$=""
+   End If 
+
+   Arexx Answer 0,A$
+
+Loop 
+Arexx Answer 0,"Bye bye!"
+Arexx Close 

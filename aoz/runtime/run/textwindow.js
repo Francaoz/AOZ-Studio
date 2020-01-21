@@ -573,7 +573,7 @@ TextWindow.prototype.setWriting = function( mode1, mode2 )
 	mode2 = typeof mode2 == 'undefined' ? 0 : mode2;
 	if ( mode1 < 0 || mode1 > 4 )
 		throw 'illegal_text_window_parameter';
-	if ( mode2 < 0 || mode > 2 )
+	if ( mode2 < 0 || mode2 > 2 )
 		throw 'illegal_text_window_parameter';
 
 	var modes1 = [ TextWindow.FLAG_REPLACE, TextWindow.FLAG_OR, TextWindow.FLAG_XOR, TextWindow.FLAG_AND, TextWindow.FLAG_IGNORE ];
@@ -970,7 +970,7 @@ TextWindow.prototype.centre = function( text )
 	this.cursorOff();
 	this.xCursor = Math.floor( this.lineWidth / 2 ) - Math.floor( l / 2 );
 	this.print( text, false, true );
-	this.xCursor += l;
+	this.xCursor += text.length;
 	this.cursorOn();
 };
 TextWindow.prototype.paper$ = function( value )

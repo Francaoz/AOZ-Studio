@@ -1,0 +1,155 @@
+'**********************************
+'*    AMOS Professional HELP 64   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Set Buffer  (line 12) 
+'*                                *            Free        (line 25) 
+'*         Ronnie Simpson         *            Fast Free   (line 38) 
+'**********************************            Chip Free   (line 49) 
+'                                              Screen Base (line 60) 
+'                                              Sprite Base (line 70) 
+'                                              Icon Base   (line 85) 
+'------------------------------------------- 
+'Set Buffer
+'------------------------------------------- 
+'set variable buffer size
+'
+'This must be the first instruction in your program and should only be used
+'when an `out of string space' error is generated as increasing the variable 
+'buffer wil only take valuable memory away from the system.
+'
+'eg.            Set Buffer 10   (increase buffer to 10k) 
+'
+'The default amount of memory assigned to the variable buffer is 8K. 
+'
+'------------------------------------------- 
+'Free
+'------------------------------------------- 
+'amount of free space in variable buffer 
+'
+'This function provokes a garbage collection and returns the maximum amount
+'of memory free in the variable buffer. If a large buffer is in use this may 
+'take a second or two, so a call to =Free at a point in your program when it 
+'will do least harm can save unexpected delays in your program execution.
+'
+'eg.      F=Free           
+'         Print Free 
+'
+'------------------------------------------- 
+'Fast Free 
+'------------------------------------------- 
+'amount of fast memory free
+'
+'This function returns the amount of fast memory still available to your 
+'program. Value returned will be in bytes. 
+'
+'eg.      F=Fast Free
+'         Print Fast Free
+'
+'------------------------------------------- 
+'Chip Free 
+'------------------------------------------- 
+'amount of chip memory free  
+'
+'This function returns the amount of chip memory still available to your   
+'program. Once again value returned will be in bytes.
+'
+'eg.      F=Chip Free
+'         Print Chip Free
+'
+'------------------------------------------- 
+'Screen Base 
+'------------------------------------------- 
+'get screen table
+'
+'               S=Screen Base
+'
+'This function returns the address of the internal table used to hold the
+'number and position of the AMOS Professional screens. 
+'
+'------------------------------------------- 
+'Sprite Base 
+'------------------------------------------- 
+'get sprite table
+'                             +--->sprite number 
+'               S=Sprite Base(1) 
+'
+'This function returns the address of the internal data list for the given 
+'sprite number. 0 will be returned if the sprite does not exist. If a
+'negative number is used as a parameter the value returned will be the 
+'address if the optional sprite mask.
+'
+'eg             S=Sprite Base(1) 
+'               M=Sprite Base(-1)
+'
+'------------------------------------------- 
+'Icon Base 
+'------------------------------------------- 
+'get icon table
+'                           +--->icon number 
+'               I=Icon Base(2) 
+'
+'This function is in the exact same format as the above Sprite Base function 
+'but returns the address of the given icon number (or mask if negative). 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem *** get dummy bob and icon 
+Get Bob 1,0,0 To 15,15
+Get Icon 1,0,0 To 15,15
+'
+Rem *** tidy up the screen 
+Auto View Off 
+Screen Open 1,640,200,8,Hires : Curs Off : Flash Off : Cls 0 : Hide 
+Palette 0,$FF0
+For N=1 To 400 : Ink Rnd(5)+2 : Plot Rnd(639),Rnd(199) : Next 
+Set Rainbow 0,0,256,"","","(16,1,2)" : Rainbow 0,1,40,256
+Paper 0 : Pen 1 : Centre "SYSTEM CHECK"
+Locate 17,3 : Print "Memory"
+'
+Rem *** get available memory 
+V=Free
+F=Fast Free
+C=Chip Free
+'
+Locate 17,5 : Print "Amount of free memory in variable buffer";V;" bytes"
+Locate 17,6 : Print "Amount of fast memory free for use";F;" bytes"
+Locate 17,7 : Print "Amount of chip memory free for use";C;" bytes"
+'
+Rem *** print data on drives 
+Locate 17,9 : Print "Drives in use"
+If Exist("DF0:")
+   Locate 17,10 : Print "DF0: ";Disc Info$("df0:")
+End If 
+If Exist("DF1:")
+   Locate 17,17 : Print "DF1: ";Disc Info$("df1:")
+End If 
+If Exist("DF2:")
+   Locate 17,12 : Print "DF2: ";Disc Info$("df2:")
+End If 
+If Exist("DH0:")
+   Locate 17,13 : Print "DH0: ";Disc Info$("dh0:")
+End If 
+If Exist("DH1:")
+   Locate 17,14 : Print "DH1: ";Disc Info$("dh1:")
+End If 
+'
+Rem *** get some AMOS pro. data
+Locate 17,16 : Print "AMOS Pofessional system"
+Locate 17,18 : Print "Screen base address";Screen Base
+Locate 17,19 : Print "Sprite base address (1) ";Sprite Base(1)
+Locate 17,20 : Print "Icon base address (1) ";Icon Base(1)
+Locate 17,23 : Centre "Press any mouse key to quit"
+View 
+Do 
+   Fade 4,,,$22,$CC,$44,$AA,$66,$88
+   For N=1 To 60
+      If Mouse Key Then Edit 
+      Wait Vbl 
+   Next 
+   Fade 4,,,$8,$6,$A,$4,$C,$2
+   For N=1 To 60
+      If Mouse Key Then Edit 
+      Wait Vbl 
+   Next 
+Loop 

@@ -1,0 +1,166 @@
+'**********************************
+'*    AMOS Professional HELP 68   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *              Joy    (line 11)
+'*                                *              Jleft  (line 33)
+'*         Ronnie Simpson         *              Jright (line 43)
+'**********************************              Jup    (line 53)
+'                                                Jdown  (line 63)
+'                                                Fire   (line 73)
+'------------------------------------------- 
+'Joy 
+'------------------------------------------- 
+'read joystick 
+'
+'This function returns a bit pattern of the current state of the joystick
+'in the given port number
+'            J1=Joy(1)    (left hand socket) 
+'            J2=Joy(0)    (right hand socket [normally for mouse] )
+'
+'            Bit number
+'               0--Up
+'               1--Down
+'               2--Left
+'               3--Right 
+'               4--Fire
+'
+'If the bit is set then the test proved positive.
+'
+'If the above seems a bit dificult then each function of the joystick can
+'be tested separatly these functions are listed below. 
+'
+'------------------------------------------- 
+'Jleft 
+'------------------------------------------- 
+'test if joystick is being held to the left
+'
+'Jleft tests the given joystick port for only the left movement, -1 (true) if
+'pulled to the left otherwise 0 (false) will be returned.
+'
+'eg.          If Jleft(1) Then Gosub LEFT
+'
+'------------------------------------------- 
+'Jright
+'------------------------------------------- 
+'test if joystick is being held to the right 
+'
+'Jright tests the given joystick port for only the right movement, -1 (true) 
+'if pulled to the right otherwise 0 (false) will be returned.
+'
+'eg.          If Jright(1) Then Gosub RIGHT
+'
+'------------------------------------------- 
+'Jup 
+'------------------------------------------- 
+'test if joystick is being held in the up position 
+'
+'Jup tests the given joystick port for only the up movement, -1 (true) if
+'pulled upwards otherwise 0 (false) will be returned.  
+'
+'eg.          If Jup(1) Then Gosub UP
+'
+'------------------------------------------- 
+'Jdown 
+'------------------------------------------- 
+'test if joystick is being held in the down position 
+'
+'Jdown tests the given joystick port for only the down movement, -1 (true) if
+'pulled downwards otherwise 0 (false) will be returned.
+'
+'eg.          If Jdown(1) Then Gosub D*WN
+'
+'------------------------------------------- 
+'Fire
+'------------------------------------------- 
+'test if joystick fire button is being pressed 
+'
+'Fire tests the given joystick port for only the fire button status, 
+'-1 (true) if pressed otherwise 0 (false) will be returned.
+'
+'eg.          If fire Then Gosub BANG
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Dim X(15),A$(2)
+Screen Hide 0
+Rem *** define a couple of amal routines 
+A$(1)="L: LX=X+1;IX>330JA;PPJL;A:LX=-10;PPJL" : A$(2)="L: LX=X-1;IX<-10JA;PPJL;A:LX=330;PPJL"
+'
+Load "AMOSPro_Examples:objects/Ronnio.abk"
+Curs Off : Flash Off : Get Sprite Palette : Cls 0 : Hide 
+Rem *** reverse and store 6 reversed images
+'
+For N=1 To 6
+   Bob 1,20,20,N : Wait Vbl : Get Bob N+6,12,0 To 28,21
+   Hot Spot N+6,$12 : Paste Bob 500,500,Hrev(N+6)
+Next : Bob Off 1 : Wait Vbl 
+'
+Rem *** set out the screen 
+'
+Set Paint 1 : Set Pattern 6
+Ink 7,5,1 : Bar 0,0 To 14,7 : Get Bob 13,0,0 To 15,8
+For N=1 To 12 : Hot Spot N,$12 : Next 
+Cls 0 : Ink 5 : Box 0,0 To 319,199 : Set Pattern 17
+Ink 11,12,2 : Bar 1,40 To 300,45 : Bar 20,85 To 318,90 : Bar 1,130 To 300,135 : Bar 20,175 To 318,180
+Paper 0 : Pen 9 : Locate 0,1 : Centre "Use a joystick in the left hand port"
+Locate 0,2 : Centre "and try to get Ronnio safely home." : Locate 0,24 : Print "HOME"; : Wait 50
+'
+Rem *** set start positions
+'
+X=150 : Y=50 : I=1 : D=0 : View 
+Global X,Y,I,D
+Double Buffer : Screen Show 
+For N=1 To 10 : Bob N,(Rnd(7)+1)*32+32,(Rnd(3)+1)*45-13,13 : Channel N To Bob N : Amal N,A$(Rnd(1)+1) : Next 
+'
+Rem *** start the main loop
+Amal On 
+Repeat 
+   J=Joy(1)
+   If Spritebob Col(8) Then Flash 0,"(990,2)(111,1)(909,2)(111,1)" : Boom : X=150 : Y=50 : Sprite 8,X,Y, : Wait 10 : Flash Off : Colour 0,0
+   If J=4 and X>140 Then Dec X : D=6 : Inc C : If C mod 3=0 Then Add I,1,1 To 6
+   If J=8 and X<436 Then Inc X : D=0 : Inc C : If C mod 3=0 Then Add I,1,1 To 6
+   If J=16 Then JUMP_UP
+   If J=20 Then D=6 : JUMP_LEFT
+   If J=24 Then D=0 : JUMP_RIGHT
+   If Point(X Screen(X Sprite(8)),Y Screen(Y Sprite(8)))<>2 Then Inc Y
+   Sprite 8,X,Y,I+D : Wait Vbl 
+Until Y>240
+For N=1 To 7 : JUMP_UP : Bell N*8 : Next 
+Edit 
+Procedure JUMP_UP
+   For N=1 To 16
+      Add I,1,1 To 6 : Dec Y
+      Sprite 8,X,Y,I+D
+      Wait Vbl 
+   Next 
+   For N=1 To 16
+      Add I,1,1 To 6 : Inc Y
+      Sprite 8,X,Y,I+D
+      Wait Vbl 
+   Next 
+End Proc
+Procedure JUMP_LEFT
+   For N=1 To 16
+      Add I,1,1 To 6 : Dec Y : If X>140 Then Dec X
+      Sprite 8,X,Y,I+D
+      Wait Vbl 
+   Next 
+   For N=1 To 16
+      Add I,1,1 To 6 : Inc Y : If X>140 Then Dec X
+      Sprite 8,X,Y,I+D
+      Wait Vbl 
+   Next 
+End Proc
+Procedure JUMP_RIGHT
+   For N=1 To 16
+      Add I,1,1 To 6 : Dec Y : If X<436 Then Inc X
+      Sprite 8,X,Y,I+D
+      Wait Vbl 
+   Next 
+   For N=1 To 16
+      Add I,1,1 To 6 : Inc Y : If X<436 Then Inc X
+      Sprite 8,X,Y,I+D
+      Wait Vbl 
+   Next 
+End Proc

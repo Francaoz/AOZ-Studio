@@ -1,0 +1,197 @@
+'**********************************
+'*    AMOS Professional HELP 45   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *              Dfree  (line 11)
+'*                                *              Mkdir  (line 20)
+'*         Ronnie Simpson         *              Kill   (line 33)
+'**********************************              Rename (line 47)
+'                                                Fsel$  (line 57)
+'                                                Assign (line 81)
+'------------------------------------------- 
+'Dfree 
+'------------------------------------------- 
+'return disc free space
+'
+'eg.      F=Dfree  
+'
+'Returns the amount of free space on the current disc measured in bytes. 
+'
+'------------------------------------------- 
+'Mkdir 
+'------------------------------------------- 
+'create a directory
+'
+'eg.      Mkdir "df0:TEST_FOLDER"
+'
+'Creates a new folder with the name given following the path.
+'
+'eg.      Mkdir "df0:Folder_1" 
+'         Mkdir "df0:Folder_1/Folder2" 
+'         Dir "df0:" 
+'
+'------------------------------------------- 
+'Kill
+'------------------------------------------- 
+'erase a file
+'
+'eg.     Kill "Test_file"
+'
+'Kill erases a file from the current directory of your disc. 
+'Alternativly a path$ may be may be included:- 
+'
+'         Kill "df0:folder_1/Folder_2/Test_file" 
+'
+'WARNING- Any data erased in this way is destroyed.
+'
+'------------------------------------------- 
+'Rename
+'------------------------------------------- 
+'rename an existing file 
+'
+'eg.      Rename "old_name" To "new_name"
+'
+'If the new name already exists then an error will be reported and the 
+'command aborted.
+'
+'------------------------------------------- 
+'Fsel$ 
+'------------------------------------------- 
+'select a file 
+'
+'the Fsel$ function opens the standard AMOS file selector which allows 
+'the user to click on, or type file to be loaded.
+'
+'
+'              +--->search pattern path
+'              |         +--->optional default file name 
+'              |         |                      +--->optional text lines 
+'              |         |               _______|________
+'              |         |              /                \ 
+'   F$=Fsel$("df0:","Test_file","First_Line_Text","Second_Line_text")
+'
+'Upon exiting the file selector F$ would be loaded with the path and name  
+'of the file to be loaded. 
+'
+'eg.      P$=Fsel$("df0:Sprites/*.Abk","","LOAD A SPRITE BANK")
+'
+'As you can see any of the optional parameters may be omitted as long as 
+'syntax is kept in order.
+'
+'------------------------------------------- 
+'Assign
+'------------------------------------------- 
+'create an Amiga Dos assign
+'
+'For this instruction to work a copy of the Dos Assign must be in the C
+'directory master disc.
+'
+'eg.        Assign "Disc_name:" To "Path_name/"
+'
+'No spaces are allowed in the Disc name and the semi-colon is also mandatory.
+'The path name must be a valid path or an error will result. 
+'A new Assign to the same disc name will simply replace the old one. 
+'Assigns will remain in memory even after you have quit AMOS Professional. 
+'If you wish to remove an assign from memory an empty string should be used
+'as the path name" 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up the screen 
+'
+Screen Open 0,640,200,8,Hires
+Flash Off : Curs Off : Cls 1 : Paper 1 : Pen 4
+Palette $0,$800,$F0,$F,$FF0,$F0F,$FF,$FAA
+'
+Reserve Zone 6
+Global F$
+'
+Rem ***  Print a warning and get input from user 
+'
+Locate ,2 : Centre "+---------+"
+Locate ,3 : Centre "| WARNING |"
+Locate ,4 : Centre "+---------+"
+Locate ,6 : Centre "This program allows the creation"
+Locate ,7 : Centre "and deleting of files and folders."
+Locate ,9 : Centre "Any files deleted will be LOST."
+Locate ,11 : Centre "PLEASE MAKE SURE ANY IMPORTANT DISCS ARE WRITE PROTECTED"
+Pen 6 : Locate ,22 : Centre "PRESS LEFT MOUSE KEY TO CONTINUE                 RIGHT MOUSE KEY TO QUIT"
+Pen 7 : Locate 2,15 : Centre "A COPY of a disc with a few files and some free disc space will come"
+Locate 2,16 : Centre "in handy if you wish to try out all the options within the program."
+Repeat : Until Mouse Key=0
+Repeat 
+   M=Mouse Key
+Until M>0
+If M=2 Then Edit 
+'
+Rem *** set out the screen zones 
+'
+Cls 1
+Locate 2,2 : Print Border$(Zone$(" PRINT FREE DISC SPACE ",1),2)
+Locate 2,6 : Print Border$(Zone$("    CREATE A FOLDER    ",2),2)
+Locate 2,10 : Print Border$(Zone$("     ERASE A FILE      ",3),2)
+Locate 2,18 : Print Border$(Zone$("     RENAME A FILE     ",4),2)
+Locate 2,14 : Print Border$(Zone$("    SELECT A FILE     ",5),2)
+Locate 2,22 : Print Border$(Zone$("         QUIT          ",6),2)
+Wind Open 1,232,8,48,23,1
+Curs Off 
+Border 1,3,4
+Title Top "OUTPUT WINDOW"
+Paper 0
+Clw : Dir$="DF0:" : F$="DF0:"
+'
+Rem *** start the main loop
+'
+Do 
+   Pen 6
+   Repeat : Until Mouse Key=0
+   Repeat 
+      M=Mouse Zone
+   Until Mouse Key and M>0
+   '
+   Rem *** quit or jump to a procedure
+   '
+   If M=6 Then Edit 
+   On M Proc MEMORY,CREATE,WIPE,NEWNAME,SELECT
+Loop 
+'
+Procedure MEMORY
+   Print : Print : Centre "FREE DISC SPACE"+Str$(Dfree)+" bytes"
+End Proc
+'
+Procedure CREATE
+   On Error Proc OOPS
+   Pen 5 : Print : Print "CURRENT PATH=" : Print F$
+   Pen 7 : Print : Print "PLEASE ENTER NAME OF NEW DIRECTORY"
+   Print : Input A$
+   Mkdir A$
+End Proc
+'
+Procedure WIPE
+   On Error Proc OOPS
+   A$=Fsel$("","","SELECT the file to be erased","WARNING all data will be lost")
+   Kill A$
+End Proc
+'
+Procedure NEWNAME
+   On Error Proc OOPS
+   Pen 5 : Print : Print "CURRENT PATH=" : Print F$
+   Pen 7 : Print : Print "PLEASE ENTER NEW NAME OF FILE"
+   Print : Input A$
+   Rename F$ To A$
+End Proc
+'
+Procedure SELECT
+   F$=Fsel$("","","SELECT A file","")
+   If F$>""
+      Pen 2 : Print : Print "FILE SELECTED"
+      Pen 5 : Print : Print F$
+   End If 
+End Proc
+'
+Procedure OOPS
+   Pen 5 : Print : Print 
+   Print "OOPS!  YOU'VE MADE A MISTAKE"
+   Print "error number-"+Str$(Errn)
+   Resume Next 
+End Proc

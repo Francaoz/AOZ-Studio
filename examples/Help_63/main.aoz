@@ -1,0 +1,114 @@
+'**********************************
+'*    AMOS Professional HELP 63   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Input       (line 11) 
+'*                                *            Line Input  (line 32) 
+'*         Ronnie Simpson         *            Request On  (line 42) 
+'**********************************            Request Off (line 58) 
+'                                              Request Wb  (line 68) 
+'
+'------------------------------------------- 
+'Input 
+'------------------------------------------- 
+'get user input separated by commas
+'
+'The Input instruction will stop the program, display a question mark and
+'wait until the user enters the required information.
+'
+'           Input A,B,C$ 
+'           Input "What is your name ";NAME$ 
+'           Input D,E; 
+'
+'Variables in the list must be separated by commas and if the optional prompt
+'string is included then a semi-colon should be used to separate this from 
+'the variable list.
+'An optional semi-colon can also be placed after the variable list to keep 
+'the text cursor from being affected by the Input command and retaining its
+'original position after data has been entered.
+'Each value entered by the user must be of the same type requested by the
+'Input variable and should be separated commas.
+'
+'------------------------------------------- 
+'Line Input
+'------------------------------------------- 
+'get user input separated by return keypress 
+'
+'Line Input is exactly the same as Input except that the user must press the 
+'return key between each value.
+'
+'eg.        Line Input "Enter any 2 values";VA,VB
+'
+'------------------------------------------- 
+'Request On
+'------------------------------------------- 
+'AMOS Professional requester routine 
+'
+'This command instructs AMOS professional to use it's own built in requester 
+'routine, if this has not been loaded (by deleting from the config. file) the
+'normal workbench requesters will be used. These can be accessed by pressing 
+'Amiga+A  to return to workbench, making the selection and pressing Amiga+A  
+'once again. 
+'
+'Request On is the default condition and would only have to be issued to 
+'cancel the effect of Request Off or Request Wb. 
+'
+'eg.         Request On
+'
+'------------------------------------------- 
+'Request Off 
+'------------------------------------------- 
+'automatic cancel selection
+'
+'When Request Off is in operation the requester is not displayed and AMOS
+'Professional will automatically sellect cancel. (use for error trapping)
+'
+'eg.         Request Off 
+'
+'------------------------------------------- 
+'Request Wb
+'------------------------------------------- 
+'use workbench requester routine 
+'
+'This instruction informs Amos Professional to use the workbench requester 
+'routine, after the selection has been made control will be automatically
+'returned to your program. 
+'
+'Important: it will only have effect if the workbench is opened! 
+'
+'eg.         Request Wb
+'
+'------------------------------------------- 
+'WORKING EXAMPLE   
+'------------------------------------------- 
+Rem *** tidy up the screen and set up the palette  
+Screen Open 0,640,200,16,Hires : Hide 
+Palette $0,$FF0,$F77,$FF,$111,$222,$333,$444,$555,$666,$777,$888,$999,$AAA,$BBB,$CCC
+Paper 0
+Shift Down 2,4,15,1
+'
+On Error Goto IGNORE
+Do 
+   Curs Off : Cls 0 : Curs On 
+   For X=0 To 79 : Add C,1,4 To 15
+      Pen C : Locate X,4 : Print "<"
+      Pen 20-C : Locate X,17 : Print ">"
+   Next 
+   Pen 1 : Locate ,6 : Centre "Requester routines"
+   Pen 2 : Locate 18,8 : Print "1-See an example of a workbench requester"
+   Locate 18,10 : Print "2-See an example of an AMOS Professional requester"
+   Locate 18,12 : Print "3-See an example of how to quit a program"
+   Pen 1 : Locate 27,14 : Input "Please enter your choice ";A
+   On A Gosub 1,2,3
+Loop 
+1 Request Wb : Show : Load "Just select cancel:" : Hide : Return 
+2 Request On : Curs Off : Show : Load "Just select cancel:" : Curs On : Hide : Return 
+3 Curs Off 
+For X=1 To 80
+   For Y=6 To 14 Step 4
+      Locate 0,Y : Hscroll 1
+      Locate 0,Y+2 : Hscroll 3
+   Next 
+Next 
+Edit 
+IGNORE:
+Resume Next 

@@ -1,0 +1,148 @@
+'**********************************
+'*    AMOS Professional HELP 75   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Music      (line 11)
+'*                                *            Music Stop (line 26)
+'*         Ronnie Simpson         *            Music Off  (line 36)
+'**********************************            Tempo      (line 46)
+'                                              Mvolume    (line 57)
+'                                              Voice      (line 67)
+'------------------------------------------- 
+'Music 
+'------------------------------------------- 
+'play a piece of music 
+'                  
+'Each piece of music in a bank is assigned a number, the Music command 
+'followed by this index number will start this piece of music playing. 
+'Up to 3 pieces of music can be started at any one time with each command
+'freezing the playing of the previous music, when the current piece has
+'finished the others will be restarted from the point at which they were 
+'stopped. Music playing will also be suspended for the duration of any 
+'sound effects that are used.
+'
+'eg.                      Music 1
+'
+'------------------------------------------- 
+'Music Stop
+'------------------------------------------- 
+'stop music
+'                  
+'Music stop will stop the current piece of music being played, if another
+'is active then it will be re-started. 
+'
+'eg.                      Music Stop 
+'
+'------------------------------------------- 
+'Music Off 
+'------------------------------------------- 
+'turn off all music
+'                  
+'Music Off deactivates all music completely and another Music command would
+'be required to play them again. 
+'
+'eg.                      Music Off
+'
+'------------------------------------------- 
+'Tempo 
+'------------------------------------------- 
+'set music speed 
+'                  
+'Tempo is used to change the speed of the current piece of music being 
+'played, values can range from 1 (very slow) to 100 (very very fast) although
+'most instruments will struggle at values greater than 50. 
+'
+'eg.                      Tempo 20 
+'
+'------------------------------------------- 
+'Mvolume 
+'------------------------------------------- 
+'set music volume
+'                  
+'This command changes the volume being played and values can range from
+'0 (silent) to 63 (maximum volume).  
+'
+'eg.                      Mvolume 40 
+'
+'------------------------------------------- 
+'Voice 
+'------------------------------------------- 
+'set voice channels
+'                  
+'The voice instruction uses a bitmap value to activate 1 or more of the 4
+'voices in the normal AMOS Professional bitmap format, If a bit is set then
+'the voice will be activated. (see Sam Play for details of the settings) 
+'
+'                         Voice 9
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Load "AMOSPro_Examples:Music/Music.abk"
+Screen Open 0,320,200,8,Lowres : Curs Off : Flash Off : Cls 0 : Paper 0
+Palette $120,$AA0,$AA,$474,$10,$30,$F80
+Reserve Zone 14
+Pen 1 : Paper 4 : Locate 21,10 : Print Border$(Zone$(" START MUSIC ",1),2)
+Locate 21,14 : Print Border$(Zone$(" STOP MUSIC  ",2),2)
+Locate 21,18 : Print Border$(Zone$(" LOAD A BANK ",3),2)
+Locate 21,22 : Print Border$(Zone$("    QUIT     ",4),2)
+Pen 2 : Locate 4,18 : Print Border$(Zone$("Volume - ",5),3)
+Locate 4,14 : Print Border$(Zone$("Volume + ",6),3)
+Paper 3 : Pen 5 : Locate 3,3 : Print Border$(Zone$("ON ",7),3)
+Locate 13,3 : Print Border$(Zone$("ON ",8),3)
+Locate 23,3 : Print Border$(Zone$("ON ",9),3)
+Locate 33,3 : Print Border$(Zone$("ON ",10),3)
+Paper 5 : Pen 3 : Locate 2,6 : Print Border$(Zone$(" OFF ",11),3)
+Locate 12,6 : Print Border$(Zone$(" OFF ",12),3)
+Locate 22,6 : Print Border$(Zone$(" OFF ",13),3)
+Locate 32,6 : Print Border$(Zone$(" OFF ",14),3)
+Pen 6 : Paper 0 : Locate 1,1 : Print "Voice 1   Voice 2   Voice 3   Voice 4"
+V=63 : Pen 6 : Locate 10,16 : Print V : B=15 : Dir$="AMOSPro_Examples:Music/"
+Do 
+   M=Mouse Zone
+   If M>0 and Mouse Key=1
+      Pen 2 : Paper 0
+      On M Gosub 1,2,3,4,5,6,7,8,9,10,11,12,13,14
+   End If 
+Loop 
+1 Music 1 : Return 
+2 Music Off : Return 
+3 F$=Fsel$("*.abk","","Load a music bank")
+If F$>"" Then Load F$
+Return 
+4 Music Off : Edit 
+5 If V>0 Then Dec V : Mvolume V : Pen 6 : Paper 0 : Locate 10,16 : Print V;" " : Wait 2
+Return 
+6 If V<63 Then Inc V : Mvolume V : Pen 6 : Paper 0 : Locate 10,16 : Print V;" " : Wait 2
+Return 
+7 Bset 0,B : Voice B
+Paper 3 : Pen 5 : Locate 3,3 : Print Border$("ON ",3)
+Paper 5 : Pen 3 : Locate 2,6 : Print Border$(" OFF ",3)
+Return 
+11 Bclr 0,B : Voice B
+Paper 5 : Pen 3 : Locate 3,3 : Print Border$("ON ",3)
+Paper 3 : Pen 5 : Locate 2,6 : Print Border$(" OFF ",3)
+Return 
+8 Bset 1,B : Voice B
+Paper 3 : Pen 5 : Locate 13,3 : Print Border$("ON ",3)
+Paper 5 : Pen 3 : Locate 12,6 : Print Border$(" OFF ",3)
+Return 
+12 Bclr 1,B : Voice B
+Paper 5 : Pen 3 : Locate 13,3 : Print Border$("ON ",3)
+Paper 3 : Pen 5 : Locate 12,6 : Print Border$(" OFF ",3)
+Return 
+9 Bset 2,B : Voice B
+Paper 3 : Pen 5 : Locate 23,3 : Print Border$("ON ",3)
+Paper 5 : Pen 3 : Locate 22,6 : Print Border$(" OFF ",3)
+Return 
+13 Bclr 2,B : Voice B
+Paper 5 : Pen 3 : Locate 23,3 : Print Border$("ON ",3)
+Paper 3 : Pen 5 : Locate 22,6 : Print Border$(" OFF ",3)
+Return 
+10 Bset 3,B : Voice B
+Paper 3 : Pen 5 : Locate 33,3 : Print Border$("ON ",3)
+Paper 5 : Pen 3 : Locate 32,6 : Print Border$(" OFF ",3)
+Return 
+14 Bclr 3,B : Voice B
+Paper 5 : Pen 3 : Locate 33,3 : Print Border$("ON ",3)
+Paper 3 : Pen 5 : Locate 32,6 : Print Border$(" OFF ",3)
+Return 

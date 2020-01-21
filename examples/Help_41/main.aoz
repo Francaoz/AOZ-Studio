@@ -1,0 +1,153 @@
+'**********************************
+'*    AMOS Professional HELP 41   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *               Spack  (line 10) 
+'*                                *               Pack   (line 34) 
+'*         Ronnie Simpson         *               Unpack (line 47) 
+'**********************************
+'
+'------------------------------------------- 
+'Spack 
+'------------------------------------------- 
+'compress a screen to a bank 
+'
+'There a 2 possible formats:-
+'
+'1)  Spack 1 to 7     (compact screen number 1 to bank 7)
+'
+'    All screen information is packed including:- mode,size offset and 
+'    display position. 
+'    If the bank number does not exist then it will be automatically 
+'    created otherwise contents will be over-written.
+'    The bank created will be saved along with you program.
+'
+'          +--->source screen number 
+'          |    +--->destination bank number 
+'          |    |      +--->coordinates of rectangle 
+'          |    |    __|__ 
+'          |    |   /     \
+'2)  Spack 1 To 7,10,20,30,40   (pack a rectangular area to a bank)
+'
+'The X coordinates will be rounded to the nearest 8 pixel boundary.
+'
+'------------------------------------------- 
+'Pack
+'------------------------------------------- 
+'pack a screen to a bank 
+'
+'Pack is indentical to the above Spack command with the exception that no
+'screen information is packed with your data, therefore it can only be 
+'unpacked back to an existing screen.  
+'One advantage of this is that your graphics may be unpacked to a different
+'part of the screen from which they were saved.
+'This instruction is only suited to be unpacked back to a double buffered
+'screen. 
+'
+'------------------------------------------- 
+'Unpack
+'------------------------------------------- 
+'unpack a screen 
+'--------------------------------------------------------------------- 
+'There are three formats of this command.
+'
+'   1)         +--->source bank number 
+'              |    +--->destination screen number 
+'              |    |
+'       Unpack 7 to 1
+'
+'Used for unpacking a screen previously saved with Spack.
+'If the screen already exists all graphics will be overwritten otherwise 
+'a new screen will be automatically opened.
+'
+'--------------------------------------------------------------------- 
+'
+'   2)   Unpack 7   (unpack bank 7 to current screen)
+'
+'Used for unpacking a screen previously saved with Pack back to its origonal 
+'position. 
+'The picture will be unpacked to the current screen which must be in the 
+'same format as the saved picture. 
+'
+'--------------------------------------------------------------------- 
+'
+'               +--->source bank number
+'               |   +--->coordinates of top left corner
+'               |  / \ 
+'               | /   \
+'   3)   Unpack 6,100,20 
+'
+'Used for unpacking a screen previously saved with Pack to the coordinates 
+'given.
+'The image size must be able to fit into the destination screen or an
+'error will result.
+'The picture will be unpacked to the current screen which must be in the 
+'same format as the saved picture. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** load a picture 
+'
+Hide 
+Load Iff "AMOSPro_Examples:IFF/LOGO.iff",1
+Wait Vbl 
+'
+'
+Rem *** pack full screen to bank 6 
+'
+Spack 1 To 6
+'
+'
+Rem *** draw a rectangle 
+'
+Ink 32
+For X=104 To 250 : Plot X,13 : Plot X,60 : Wait Vbl : Next 
+For Y=13 To 60 : Plot 104,Y : Plot 250,Y : Wait Vbl : Next 
+'
+'
+Rem pack small rectangle to bank 7 
+'
+Pack 1 To 7,104,13,250,60
+'
+'
+Rem *** wipe screen
+'
+Ink 0
+For X=0 To 319 : Draw 0,199 To X,0 : Next 
+For Y=1 To 199 : Draw 0,199 To 319,Y : Next 
+'
+'
+Rem *** close origonal screen
+'
+Screen Close 0 : Wait Vbl 
+'
+'
+Rem *** start main loop
+'
+Do 
+   Double Buffer 
+   Y=0
+   Rem *** unpack small section of screen in a wave 
+   For N=1 To 3
+      For X=0 To 110 Step 10
+         If Mouse Key Then Edit 
+         Add Y,2 : Unpack 7,X,Y
+      Next 
+      For X=110 To 0 Step -10
+         If Mouse Key Then Edit 
+         Add Y,2 : Unpack 7,X,Y
+      Next 
+   Next 
+   '
+   Rem *** fade out 
+   Fade 4 : Wait 60 : Cls 0
+   Colour 1,$FF0 : Pen 1 : Paper 0 : Locate 0,12 : Centre "PRESS ANY MOUSE KEY TO QUIT"
+   For DELAY=1 To 80 : If Mouse Key Then Edit 
+   Wait Vbl : Next 
+   '
+   Rem *** unpack full screen 
+   Unpack 6 To 1
+   '
+   For DELAY=1 To 80 : If Mouse Key Then Edit 
+   Wait Vbl : Next 
+Loop 

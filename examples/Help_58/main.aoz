@@ -1,0 +1,109 @@
+'**********************************
+'*    AMOS Professional HELP 58   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *              Degree (line 18)
+'*                                *              Radian (line 27)
+'*         Ronnie Simpson         *              Pi#    (line 35)
+'**********************************              Sin    (line 47)
+'                                                Cos    (line 58)
+'                                                Tan    (line 68)
+'------------------------------------------- 
+'GENERAL 
+'------------------------------------------- 
+'When using the following functions Amos Professional uses the Mathtrans.
+'Library which will be loaded automatically the first time it is required, 
+'please make sure that this is present in the Libs folder of the current 
+'volume. 
+'------------------------------------------- 
+'Degree
+'------------------------------------------- 
+'use degrees 
+'
+'As a default all angles are measured in Radians, placing a Degree 
+'instruction at the start of your programs will allow all future angles
+'to be measured in degrees.
+'
+'------------------------------------------- 
+'Radian
+'------------------------------------------- 
+'use radians 
+'
+'The Radian instruction cancels the effect of the Degree instruction and 
+'returns measurement of angles to Radians. 
+'
+'------------------------------------------- 
+'Pi# 
+'------------------------------------------- 
+'return the constant 
+'
+'Pi is the ratio of the circumference of a circle to its diameter and is 
+'used by the trig functions to calculate angles. 
+'
+'eg.         Print Pi# (returns the constant 3.14159)
+'
+'Please note that the # character is part of the instruction.
+'
+'-------------------------------------------   
+'Sin 
+'------------------------------------------- 
+'trig sine function
+'
+'Sin calculates the sine of an angle, please note that Sin always returns
+'a floating point number.
+'
+'            S#=Sin(22)  
+'            Print S#
+'
+'------------------------------------------- 
+'Cos 
+'------------------------------------------- 
+'trig cosine function
+'
+'Cos calculates the cosine of an angle 
+'
+'eg.           Degree  
+'              C#=Cos(60)
+'              Print C#
+'------------------------------------------- 
+'Tan 
+'------------------------------------------- 
+'trig tangent function 
+'
+'Tan calculates the tangent of an angle  
+'
+'eg.          Degree 
+'             T#=Tan(22) 
+'             Print T# 
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+'
+Rem *** tidy up screen 
+'
+Screen Open 0,320,200,32,Lowres : Flash Off : Curs Off : Hide 
+Palette $300,$303,$505,$707,$909,$B0B,$D0D,$F0F,$F00,$330,$550,$770,$990,$BB0,$DD0,$FF0,$3,$33,$55,$77,$99,$BB,$DD,$FF,$FFF,$333,$353,$373,$393,$3B3,$3D3,$3F3
+Cls 0 : Ink 16,,24
+Set Paint 1 : Bar 20,10 To 300,190
+Pen 8 : Paper 0 : Centre "Press any mouse key to quit"
+Degree 
+C=1 : F=1 : D=51
+Do 
+   Dec D
+   Add C,F : If C=1 or C=7 Then F=-F
+   For X=22 To 299
+      Z=X/2*2
+      If Mouse Key Then Exit 2
+      Ink C
+      S#=Sin(X)
+      Plot X,S#*D+138
+      Ink C+8
+      Plot X,C#*D+138
+      C#=Cos(X)
+      Ink C+16
+      Plot Z,S#*D+62
+      Ink C+24
+      Plot Z,C#*D+62
+   Next 
+   If D=-50 Then Wait 200 : Edit 
+Loop 
+Edit 

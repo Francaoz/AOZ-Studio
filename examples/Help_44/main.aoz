@@ -1,0 +1,220 @@
+'**********************************
+'*    AMOS Professional HELP 44   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Dir$       (line  14) 
+'*                                *            Dir        (line  28) 
+'*         Ronnie Simpson         *            Parent     (line  68) 
+'**********************************            Set Dir    (line  80) 
+'                                              Exist      (line  96) 
+'                                              Dir First$ (line 107) 
+'                                              Dir Next$  (line 107) 
+'                                              Disc Info$ (line 124) 
+'                                              Run        (line 138) 
+'------------------------------------------- 
+'Dir$
+'------------------------------------------- 
+'change or read current directory
+'
+'eg.       dir$="DF0:Sprites/"    (set starting point of disc access)
+'
+'Drive names, volume names and logical devices are terminated with a colon.
+'directories, drawers or folders are terminated with a /.  
+'Dir$ can also be used as a function to read or  
+'print the current directory:- 
+'
+'eg.       Print Dir$
+'
+'------------------------------------------- 
+'Dir 
+'------------------------------------------- 
+'list directory
+'
+'Dir used without any parameters list all the files from the current 
+'disc, any folders will be listed preceeded by a *.
+'Pressing the space-bar halts the listing, it will be resumed at a 
+'second press. 
+'A path name can be added enclosed in quotation marks, drive names, volume 
+'names and logical devices should be terminated with a colon.
+'
+'eg.     Dir "df0:"        Dir "AMOS:"         Dir "fonts:"
+'
+'Directories (drawers or folders) should be terminated with a /. 
+'
+'        Dir "df0:Sprites/"              Dir "amos:music/" 
+'
+'Fliters may also be used to restrict your listing 
+'
+'1) "*"   list only files which match up to the asterisk 
+'         eg.    Dir "A*"     (list all files begining with A) 
+'                Dir "AM*"    (list all files begining with AM)
+'
+'2) "."   match the extension
+'         eg.    Dir "*.*"       (list all files with any extension)   
+'                Dir "*.AMOS"    (list all AMOS programs)  
+'
+'3) "?"   Match with any single character
+'         eg.    Dir "PRO??"     (list all 5 letter file names)  
+'                                (     begining with PRO      )
+'
+'The above example would print out files such as:- 
+'                PROG1 
+'                PROG2 
+'But would ignore files such as:-
+'                PROG10
+'                PROGRAM 
+'This is because the "?" requires an exact number of letters to be matched.
+'
+'------------------------------------------- 
+'Parent
+'------------------------------------------- 
+'move path up one directory
+'
+'eg.          Dir$="AMOS_Pro_Examples:Help_Files/40-49/" 
+'             Parent   
+'             Print Dir$ 
+'
+'Parent moves the current directory one place towards the root directory, in 
+'the above example to "AMOS_Pro_Examples:Help_Files/"
+'
+'------------------------------------------- 
+'Set Dir 
+'------------------------------------------- 
+'set style of directory list 
+'
+'eg.       Set Dir 8        (only display the first 8 characters)
+'
+'This instruction does not change the names of the files but only the way
+'in which they are listed. 
+'A filter may also be added to exclude certain files from your listing.
+'
+'eg.         Set Dir 6,"*.info/*.abk"
+'
+'Any number of filters may be combined as long as they are separated by
+'a "/", as a default all .info files are suppressed. 
+'
+'------------------------------------------- 
+'Exist 
+'------------------------------------------- 
+'check if a file exists
+'
+'=Exist will check the current directory for the given filename and will 
+'return -1 (true) if the file exists or 0 (false) if it does not.
+'
+'eg.        Print Exist("DF1:")     (has a second drive been added?) 
+'           If Exist("df0:high_scores") Then Load.........etc. 
+'
+'------------------------------------------- 
+'Dir First$   Dir Next$
+'------------------------------------------- 
+'report on files 
+'
+'The Dir First$ function returns a string containing the name and length of
+'the first file which satisfies the current path, in doing so the entire 
+'directory is loaded into memory and a report on the next file can be read 
+'with the Dir Next$, when all possible files have been read then an empty
+'string will be returned.
+'
+'                 F$=Dir First$("df0:")  
+'                 Repeat   
+'                 Print F$ 
+'                 F$=Dir Next$ 
+'                 Until F$=""  
+'
+'------------------------------------------- 
+'Disc info$
+'------------------------------------------- 
+'return information on a disc
+'
+'The Disc Info$ function returns information on a disc in the format of- the 
+'disc name - followed by a colon - followed by the free space on the disc. 
+'The following short program would extract the information into 2 variables:-
+'
+'                     A$=Disc Info$("df0:")
+'                     C=Instr(A$,":")
+'                     N$=Left$(A$,C) : F=Val(Right$(A$,Len(A$)-C)) 
+'                     Print "Disc name=";N$;" Free space=";F 
+'
+'------------------------------------------- 
+'Run 
+'------------------------------------------- 
+'run an amos program 
+'
+'The Run instructions allows an Amos program to be run from within another,
+'the existing program will be erased from memory but any opened screens will 
+'still be intact, this allows massive programs to be split into smaller
+'sections which can be chained to each other when required.
+'
+'eg.             If A=1 Then Run "df0:sub game 1"
+'                If A=2 Then Run "df0:sub game 2"
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up the screen 
+'
+Screen Open 0,640,200,8,Hires
+Flash Off : Curs Off : Cls 0 : Paper 0
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70
+Reserve Zone 5
+Global OLD_DIR$
+Pen 6
+Locate 2,2 : Print Border$(Zone$(" CHANGE Dir$ ",1),2)
+Locate 2,7 : Print Border$(Zone$("  List Dir   ",2),2)
+Locate 2,12 : Print Border$(Zone$("   PARENT    ",3),2)
+Locate 2,17 : Print Border$(Zone$("   Set Dir   ",4),2)
+Locate 2,22 : Print Border$(Zone$("    QUIT     ",5),2)
+Wind Open 1,128,8,62,23,1
+Curs Off 
+Border 1,3,4
+Title Top "OUTPUT WINDOW"
+Paper 0
+Clw 
+On Error Proc OOPS
+Do 
+   Pen 6
+   Cdown : Print "Dir$="+Dir$
+   OLD_DIR$=Dir$
+   Repeat : Until Mouse Key=0
+   Repeat 
+      M=Mouse Zone
+   Until Mouse Key and M>0
+   If M=5 Then Edit 
+   On M Proc CHANGEDIR,LISTDIR,MOVEUP,ALTERDIR
+Loop 
+'
+'
+Procedure CHANGEDIR
+   On Error Proc OOPS
+   Pen 5
+   Cdown : Clear Key 
+   Print "PLEASE ENTER NEW PATH"
+   Input A$
+   Dir$=A$ : OLD_DIR$=Dir$
+End Proc
+'
+Procedure LISTDIR
+   Pen 4
+   Dir 
+End Proc
+'
+Procedure MOVEUP
+   Parent 
+End Proc
+'
+Procedure ALTERDIR
+   On Error Proc OOPS
+   Pen 2
+   Cdown : Clear Key 
+   Print "HOW MANY CHARACTERS DO YOU WISH DISPLAYED"
+   Input A
+   Cdown 
+   Print "TYPE IN ANY FILTERS ( EACH SEPARATED BY A / )"
+   Input A$
+   Set Dir A,A$
+End Proc
+Procedure OOPS
+   Pen 1 : Cdown : Cdown 
+   Print "OOPS!  YOU'VE MADE A MISTAKE"
+   Dir$=OLD_DIR$
+   Resume Next 
+End Proc

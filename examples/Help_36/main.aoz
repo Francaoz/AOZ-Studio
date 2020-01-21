@@ -1,0 +1,133 @@
+'**********************************  
+'*    AMOS Professional HELP 36   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Screen Clone  (line 10) 
+'*                                *            Screen Height (line 27) 
+'*         Ronnie Simpson         *            Screen Width  (line 27) 
+'**********************************            Screen Colour (line 38) 
+'                                              Scin          (line 50) 
+'------------------------------------------- 
+'Screen Clone
+'------------------------------------------- 
+'clone a screen  
+'
+'eg.   Screen Clone 2
+'
+'The above example would assign screen 2 as clone of the current screen. 
+'
+'The clone screen uses the same amount of memory as the origonal screen. 
+'colour flash sequences are NOT copied.
+'When a screen is cloned it is positioned at the same place as the 
+'origonal, this can be alterd by use of the Screen Offset and Screen 
+'Display instructions. 
+'The screen clone can NOT be made the current screen so no graphic or
+'text operations can be addressed to it. 
+'
+'------------------------------------------- 
+'Screen Height 
+'Screen Width
+'------------------------------------------- 
+'return the screen sizes 
+'
+'eg.       H=Screen Height(2)   (return height of screen number 2) 
+'          W=Screen Width       (return width of current screen) 
+'
+'The screen number parameter is optional and if ommited the size from the
+'current screen will be returned.
+'------------------------------------------- 
+'Screen Colour 
+'------------------------------------------- 
+'return number of colours
+'
+'eg.         S=Screen Colour 
+'            Print Screen Colour 
+'
+'There is no optional screen number parameter with this instruction the
+'value returned will be the maximum number of colours allowed in the 
+'current screen. 
+'
+'------------------------------------------- 
+'Scin
+'------------------------------------------- 
+'return screen number under a given position 
+'
+'eg.     S=Scin(200,150) 
+'        M=Scin(X Mouse,Y Mouse) 
+'
+'Coordinates are measured in the hardware format and if no screen is present 
+'at the given position then a negative value will be returned. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** reserve some memory for the arrays 
+'
+Dim X(5),Y(5),DX(5),DY(5),B$(4)
+'
+'
+Rem *** open the screen to be cloned 
+'
+Screen Open 0,640,32,8,Lowres : Flash Off : Curs Off 
+Palette 0,$F,$F0,$F00,$FF,$FF0,$F0F,$F70 : Cls 0 : Pen 2 : Paper 0
+Set Paint 1 : Ink 0,2,2 : Bar 16,0 To 335,31 : Pen 5
+'
+'
+Rem *** set up some variables
+'
+Y(0)=45 : X(0)=0 : DY(0)=1 : DX(0)=6
+B$(0)=" RIGHT MOUSE KEY TO STOP THE PROGRAM"
+B$(2)="   THIS IS A DEMO OF SCREEN CLONES"
+B$(3)="THE MAXIMUM NUMBER OF SCREENS IS EIGHT"
+'
+'
+Rem *** make 5 other clones of screen 0 and position them
+'
+For N=2 To 6
+   Screen Clone(N-1)
+   Screen Display N-1,,N*33+12,,
+   Y(N-1)=N*33+12 : X(N-1)=0 : DX(N-1)=7-N : DY(N-1)=N-1
+Next 
+'
+'
+Rem *** short demo of =Scin
+Locate 5,1 : Print "THIS IS ONE SCREEN PLUS FIVE CLONES"
+Pen 1 : Locate 9,2 : Print "click in any with the mouse "
+Repeat 
+   N=Scin(X Mouse,Y Mouse)
+Until Mouse Key
+Clw 
+Pen 6 : Locate 7,1 : Print "YOU CLICKED IN SCREEN NUMBER";N
+Pen 7 : Locate 9,2 : Print "any mouse key to continue"
+Repeat : Until Mouse Key=0
+Repeat : Until Mouse Key
+Clw 
+'
+'
+Rem *** 1 input = 6 output to screen 
+'
+Pen 2 : Locate 10,1 : Print "PLEASE ENTER YOUR NAME"
+Pen 1 : Locate 14,2 : Input A$
+B$(1)="             HELLO "+A$
+B$(4)="   HOPE YOU ENJOYED THE DEMO "+A$
+'
+'
+Rem *** set up the screens for scrolling 
+'
+For N=1 To 480
+   Pen Rnd(6)+1 : Print A$;
+Next 
+Pen 0 : Hide 
+Do 
+   Exit If Mouse Key=2
+   Inc B : If B=100 Then B=0 : Add S,1,0 To 4 : Paper Rnd(6)+1 : Clw : Locate 3,1 : Print B$(S)
+   For N=0 To 4
+      Add X(N),DX(N) : If X(N)>300 or X(N)<1 Then DX(N)=-DX(N)
+      Add Y(N),DY(N) : If Y(N)>200 or Y(N)<20 Then DY(N)=-DY(N)
+      Screen Display N,,Y(N),,
+      Screen Offset N,X(N),
+   Next 
+   Wait Vbl 
+Loop 
+'
+'
+Edit 

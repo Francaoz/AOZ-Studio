@@ -31,7 +31,7 @@ function Banks( aoz )
 	this.utilities = aoz.utilities;
 	this.manifest = aoz.manifest;
 	this.banks = [];
-	this.quickBanks = [];
+	this.quickBanks = {};
 	this.numberOfSoundsToPreload = typeof this.aoz.manifest.sounds.numberOfSoundsToPreload == 'undefined' ? 4 : this.aoz.manifest.sounds.numberOfSoundsToPreload; 
 	this.soundPoolSize = this.aoz.manifest.sounds.soundPoolSize;
 
@@ -81,7 +81,7 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 			this.banks[ number ][ contextName ] = new DataBank( this.aoz, undefined, length, { domain: type, type: type } );
 			break;
 	}
-	this.quickBanks[ contextName ] = [];
+	this.quickBanks[ contextName ] = {};
 	return this.banks[ number ][ contextName ];
 };
 Banks.prototype.getBank = function( bankIndex, contextName, bankType )
@@ -93,7 +93,7 @@ Banks.prototype.getBank = function( bankIndex, contextName, bankType )
 			throw 'illegal_function_call';
 		if ( bankType == 'images' || bankType == 'icons' || bankType == 'musics' || bankType == 'samples' || bankType == 'amal' )
 		{
-			if ( this.quickBanks[ contextName ][ bankType ] )
+			if ( this.quickBanks[ contextName ] && this.quickBanks[ contextName ][ bankType ] )
 				return this.quickBanks[ contextName ][ bankType ];
 			for ( var b = 0; b < this.banks.length; b++ )
 			{
@@ -373,7 +373,7 @@ ImageBank.prototype.add = function( index, tags )
 		collisionMaskAlphaThreshold: this.collisionAlphaThreshold,
 		getCanvas: this.getImageCanvas
 	}
-	this.context.setElement( this.domain, image, i, true );
+	this.context.setElement( this.domain, image, index, true );
 	this.setTags( image, tags );
 	return image;
 };

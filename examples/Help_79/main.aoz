@@ -1,0 +1,165 @@
+'**********************************
+'*    AMOS PROFESSIONAL HELP 79   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Get Fonts   (line  14)
+'*                                *            Font$       (line  33)
+'*         Ronnie Simpson         *            Set Font    (line  49)
+'**********************************            Set Text    (line  62)
+'                                              Text        (line  79)
+'                                              Text Style  (line  93)
+'                                              Text Length (line 102)
+'                                              Text Base   (line 115)
+'
+'------------------------------------------- 
+'Get Fonts 
+'Get Disc Fonts
+'Get Rom Fonts 
+'------------------------------------------- 
+'create a list of fonts
+'
+'A list of available fonts is required before attempting to change from the
+'standard 8 point topaz, in order to create this list one of the following 
+'Get font instructions must be used:-
+'
+'        Get Fonts       (create a list of all available fonts)
+'        Get Disc Fonts  (create a list of fonts from disc only) 
+'        Get Rom Fonts   (create a list of fonts from the internal Rom)
+'
+'The Get Fonts instructions require the boot disc to have the standard 
+'Libs folder complete with its contents and the fonts you require should be
+'moved to the Fonts folder on the same disc. 
+'
+'------------------------------------------- 
+'Font$ 
+'------------------------------------------- 
+'return details of the fonts list
+'
+'This function allows you to examine the list of fonts created with one of 
+'the Get Font instructions. The string returned will detail the name,height
+'and type of the given font number in the format of:-
+'
+'               characters   1-29  Font name 
+'               characters  30-33  Font height   (point size)
+'               characters  34-37  Font type     (disc or Rom font)
+'
+'eg.            Get Fonts
+'               Print Font$(2) 
+'
+'------------------------------------------- 
+'Set Font
+'------------------------------------------- 
+'choose a new font 
+'
+'Set font will load the given font number and erase old ones no longer in use
+'from memory, one of the Get Font instructions must be called to create the
+'font list before this command is issued.
+'
+'eg.               Get Fonts 
+'                  Set Font 5 : Text 100,100,"AMOS"
+'                  Set Font 4 : Text 50,120,"Professional" 
+'
+'------------------------------------------- 
+'Set Text
+'------------------------------------------- 
+'set text style
+'
+'There are 3 types of styles that can be chosen or combined by setting a bit 
+'pattern in the normal format giving a total of 8 different text styles:-
+'
+'              Bit 0 set = underlined    (decimal +1)
+'              Bit 1 set = bold          (decimal +2)
+'              Bit 2 set = italic        (decimal +4)
+'
+'eg.           Get Fonts : Set Font 2
+'              For S=0 To 7 : Set Text S 
+'              Text 60,S*20+20,"AMOS Professional" 
+'              Next  
+'
+'------------------------------------------- 
+'Text
+'------------------------------------------- 
+'print graphic text
+'
+'eg.        Text 100,52,T$   (print T$ at the graphic coordinates) 
+'
+'Since this is a graphic operation, text colour is set with Ink rather 
+'than the normal Pen and Paper instructions. 
+'Cursor control functions such as Cup$ etc. will not be interpreted correctly
+'when imbedded in a string used with the Text instruction. 
+'There is also no automatic line feed if your text overruns the screen 
+'boundary. 
+'
+'------------------------------------------- 
+'Text Style
+'------------------------------------------- 
+'return current text style 
+'
+'This function will return the current text style in use 
+'
+'eg.             S=Text Style
+'
+'------------------------------------------- 
+'Text Length 
+'------------------------------------------- 
+'return the length of a graphic text string
+'
+'This function will return the width in pixels of the given string using the 
+'the sizes from the current font. (very handy if you wish to centre a piece  
+'of text on the screen)
+'
+'eg.      T$="Print me in the centre"  
+'         L=Text Length(T$)  
+'         Text 160-L/2,100,T$ : Rem 160=half the width of a lowres screen  
+'
+'------------------------------------------- 
+'Text Base 
+'------------------------------------------- 
+'return current text base
+'
+'This function will return the number of pixels from the top of a character
+'and the point at which it will be printed using the current font. (think of 
+'it as a text hot spot)
+'
+'eg.             B=Text Base 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$300,$30,$3,$330,$303,$33,$320,$FFF,$F00,$F0,$F,$FF0,$F0F,$FF,$F70
+Curs Off : Cls 0 : Ink 3,0
+'
+Rem *** turn on outline and Jam1 drawing mode
+'
+Set Paint 1 : Gr Writing 0
+'
+'
+Rem *** Get all available fonts  
+'
+Get Fonts 
+'
+Rem *** show all the fonts in all the styles 
+'
+Do 
+   For S=0 To 7
+      Set Text S
+      For F=0 To 7
+         If Mouse Key Then Exit 3
+         Set Font F
+         L=Text Length("AMOS Professional")
+         B=Text Base
+         I=Rnd(6)+1
+         Ink I,,Rnd(15)
+         X=Rnd(350)+5 : Y=Rnd(175)
+         Bar X,Y To X+L+8,Y+B+8
+         Ink I+8,I
+         Text X+4,Y+B+4,"AMOS Professional"
+         Wait 10
+      Next 
+      Wait 10
+   Next 
+Loop 
+'
+Edit 

@@ -1,0 +1,128 @@
+'**********************************
+'*    AMOS Professional HELP 53   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Wait       (line 11)
+'*                                *            Timer      (line 21)
+'*         Ronnie Simpson         *            Multi Wait (line 39)
+'**********************************            Not        (line 47)
+'                                              True       (line 59)
+'                                              False      (line 75)
+'------------------------------------------- 
+'Wait
+'------------------------------------------- 
+'wait in 1/50ths of a second 
+'
+'eg.          Wait 100     (wait 2 seconds)
+'
+'Wait stops basic execution for the number of 50ths seconds given in the 
+'parameter, parts of program using interupts continue to work as normal. 
+'
+'------------------------------------------- 
+'Timer 
+'------------------------------------------- 
+'counter 
+'
+'Timer can be both set and read from within the program, it is automatically 
+'incremented each 1/50th. of a second from when the computer is switched on. 
+'
+'eg.            Timer=0
+'               Rem *** timer counts automatically   
+'               T=Timer : Print T
+'               Wait 500 
+'               Print Timer
+'
+'Timer is also often used to set the seed of the random number generator:- 
+'
+'eg.            Randomize Timer
+'
+'------------------------------------------- 
+'Multi Wait
+'------------------------------------------- 
+'multi-task Wait Vbl 
+'
+'Multi Wait is used without parameters to stop the program for 1 Vbl to  
+'allow any other tasks running some of the processor time. 
+'
+'------------------------------------------- 
+'Not 
+'------------------------------------------- 
+'logical not 
+'
+'The logical not function returns a value with each bit of the tested number 
+'changed. ie. if %11001100 is tested then a value of %00110011 would be
+'returned.   
+'
+'eg.             A=%11001100 
+'                Print Bin$( Not A,8)      (printed result: %00110011) 
+'
+'------------------------------------------- 
+'True
+'------------------------------------------- 
+'locical true
+'
+'A function which returns a value of -1   (the logical true)   
+'
+'eg.              Repeat 
+'                 A=Rnd(10)
+'                 If A>5=True Then Print "TRUE" Else Print "FALSE" 
+'                 M=Mouse Key : If M>0 Then M=True 
+'                 Until M=true 
+'
+'When two items are tested (like if A>5) True is automatically set to -1 if
+'the test is true otherwise it will be zero. 
+'
+'------------------------------------------- 
+'False 
+'------------------------------------------- 
+'Logical false 
+'
+'A function which returns a value of 0   (the logical false)   
+'
+'False is used by all contitional statements such as Repeat...Until to 
+'represent false.
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up the screen and print titles
+'
+Flash Off : Palette 0,$FF0,$F0F,$FF,$F70,$7F,$7F,$ABC,$F55
+Curs Off : Cls 0 : Paper 0 : Pen 1 : Cdown : Hide 
+Centre "+------------+" : Cdown 
+Centre "| SPEED TEST |" : Cdown 
+Centre "+------------+" : Cdown : Cdown : Cdown 
+Pen 2 : Centre "GET READY TO PRESS THE 10 FOLLOWING" : Cdown 
+Centre "KEYS AS FAST AS YOU CAN" : Wait 200
+'
+Rem *** start the main loop
+'
+Do 
+   For COUNT=1 To 10
+      R=65+Rnd(25) : A$=Upper$(Chr$(R))
+      Pen 8 : Locate 0,10 : Centre "ATTEMPT NUMBER"+Str$(COUNT) : Wait 80
+      Pen 3 : Locate 0,12 : Centre "ON YOUR MARKS" : Wait 60
+      Pen 4 : Locate 0,12 : Centre "   GET SET   " : Wait 60
+      Pen 1 : Locate 0,12 : Centre "     GO!     "
+      Pen 3 : Timer=0 : Locate 0,14 : Centre A$
+      Repeat 
+         B$=Inkey$
+      Until Upper$(B$)=A$
+      A=Timer
+      Pen 6 : Locate 0,16 : Centre "You took"+Str$(A)+" 50ths. of a second"
+      FINAL=FINAL+A : Wait 90 : Cls 0,0,90 To 319,199
+   Next 
+   SECS=0
+   Pen 6 : Locate 0,16 : Centre "TOTAL TIME TAKEN TO FIND 10 LETTERS"
+   While FINAL>50
+      Add FINAL,-50 : Inc SECS
+   Wend 
+   Pen 5 : Locate 0,18 : Centre Str$(SECS)+" SECONDS +"+Str$(FINAL)+" 50ths. OF A SECOND"
+   Pen 4 : Locate 0,22 : Centre "LEFT MOUSE KEY FOR ANOTHER GO"
+   Pen 3 : Locate 0,23 : Centre "RIGHT MOUSE KEY TO QUIT"
+   Do 
+      Rem *** conditional tests (true and false) 
+      If Mouse Key=2 Then Edit 
+      Exit If Mouse Key=1
+   Loop 
+   Cls 0,0,70 To 319,199
+Loop 

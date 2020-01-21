@@ -1,0 +1,167 @@
+'**********************************  
+'*    AMOS Professional HELP 33   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *             Hslider    (line 10) 
+'*                                *             Vslider    (line 34) 
+'*         Ronnie Simpson         *             Set Slider (line 44) 
+'**********************************
+'
+'------------------------------------------- 
+'Hslider 
+'------------------------------------------- 
+'create a horizontal slider
+'
+'                     +--->screen coordinates forming rectangle
+'                    / \        +--->total number of units 
+'                   /   \       |  +--->position of slider 
+'                __/     \__    |  |  +--->size of slider unit       
+'               |           |   |  |  |
+'      Hslider 10,10 To 110,20,100,20,5
+'
+'Coordinates are measured relative to the current screen in the normal format
+'of top left to bottom right.
+'
+'Total number of units is the number of items or individual units that the 
+'slider is to be divided into. 
+'
+'Position of slider is the number of units along the bar that the slider is  
+'situated measured in the units as defined in the last parameter.
+'
+'Size of each unit is calculated by taking the length of the bar and 
+'dividing it by the number of units. 
+'
+'------------------------------------------- 
+'Vslider 
+'------------------------------------------- 
+'create a vertical slider
+'
+'eg.       Vslider 10,10 to 20,100,100,20,5
+'
+'The syntax and operation is exactly the same as Hslider (above) except
+'that the slider is drawn vertically.
+'
+'------------------------------------------- 
+'Set Slider
+'------------------------------------------- 
+'set slider colours and fill patterns
+'
+'                     +--->ink, paper and outline colours of box 
+'                     |   +--->pattern fill number of box
+'                     |   |   +--->ink, paper and outline colours of slider  
+'                     |   |   |   +--->pattern fill number of slider 
+'                    /|\  |  /|\  |
+'        Set Slider 1,0,3,5,3,0,1,6
+'
+'   Pattern fill numbers are selected in the same way as the 
+'   graphics 'Set Pattern' instruction:- 
+'
+'        Positive values select one of the built in designs. 
+'        Negative values select an image from the sprite bank. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+'
+Rem *** reserve some memory for the arrays needed later
+Dim X(32),Y(32)
+'
+'
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0
+Reserve Zone 2
+Ink 12 : Box 0,0 To 639,190
+Pen 10 : Locate 0,24 : Centre "CONTROL SLIDERS WITH LEFT MOUSE KEY           RIGHT MOUSE KEY TO QUIT"
+'
+'
+Rem *** place two sliders on the screenand surround with a screen zone 
+'
+Hslider 4,2 To 635,10,635,1,16
+Set Zone 1,4,2 To 635,10
+Vslider 4,12 To 20,188,188,1,8
+Set Zone 2,4,12 To 20,188
+'
+'
+Rem *** lable the sliders
+'
+Pen 14 : Locate 23,2 : Print "- <-------PATTERN SELECTION-------> +"
+A$="+ COLOUR SELECTION -"
+For P=1 To Len(A$)
+   Locate 3,P+2 : Print Mid$(A$,P,1);
+   Ink 12 : Box 40,25 To 639,190
+Next 
+'
+'
+Rem *** draw the colour selections 
+'
+Set Paint 1 : Set Pattern 0
+For C=1 To 15
+   Ink C-1,,15
+   Bar C*40+10,30 To C*40+30,40
+Next 
+'
+'
+Rem *** draw the pattern selections
+'
+Ink 13,11,0
+For N=1 To 8
+   Set Pattern N
+   X(N)=N*70 : Y(N)=60
+   Bar X(N),Y(N) To X(N)+50,Y(N)+25
+Next 
+For N=1 To 8
+   Set Pattern N+8
+   X(N+8)=N*70 : Y(N+8)=90
+   Bar X(N+8),Y(N+8) To X(N+8)+50,Y(N+8)+25
+Next 
+For N=1 To 8
+   Set Pattern N+16
+   X(N+16)=N*70 : Y(N+16)=120
+   Bar X(N+16),Y(N+16) To X(N+16)+50,Y(N+16)+25
+Next 
+For N=1 To 8
+   Set Pattern N+24
+   X(N+24)=N*70 : Y(N+24)=150
+   Bar X(N+24),Y(N+24) To X(N+24)+50,Y(N+24)+25
+Next 
+'
+'
+C=1 : P=1
+'
+Rem *** the main loop
+'
+Do 
+   Rem *** check horizontal slider and change pattern if left key is pressed  
+   If Mouse Zone=1 and Mouse Key=1
+      Limit Mouse X Hard(4),Y Hard(2) To X Hard(635),Y Hard(10)
+      Ink 14 : Box X(P),Y(P) To X(P)+50,Y(P)+25
+      X=X Screen(X Mouse)-3
+      P=X/20+1
+      Ink 1 : Box X(P),Y(P) To X(P)+50,Y(P)+25
+      SLIDE[X,Y,P,C]
+   End If 
+   Limit Mouse 
+   Rem *** check vertical slider and change pattern if left key is pressed
+   If Mouse Zone=2 and Mouse Key=1
+      Limit Mouse X Hard(4),Y Hard(12) To X Hard(20),Y Hard(188)
+      Ink 0 : Draw C*40+8,42 To C*40+32,42
+      Y=Y Screen(Y Mouse)-9
+      C=Y/12+1
+      Ink 4 : Draw C*40+8,42 To C*40+32,42
+      SLIDE[X,Y,P,C]
+   End If 
+   Rem *** quit if right mouse key is pressed 
+   Exit If Mouse Key=2
+Loop 
+'
+'
+Edit 
+'
+'
+Procedure SLIDE[X,Y,P,C]
+   Set Slider ,C-1,8,P,,3,6,
+   Hslider 4,2 To 635,10,635,X,16
+   Vslider 4,12 To 20,188,188,Y,8
+End Proc

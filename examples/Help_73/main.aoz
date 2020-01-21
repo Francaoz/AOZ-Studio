@@ -1,0 +1,143 @@
+'**********************************
+'*    AMOS Professional HELP 73   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *             Boom     (line 11) 
+'*                                *             Shoot    (line 20) 
+'*         Ronnie Simpson         *             Bell     (line 29) 
+'**********************************             Volume   (line 39) 
+'                                               Say      (line 56) 
+'                                               Set Talk (line 78) 
+'------------------------------------------- 
+'Boom
+'------------------------------------------- 
+'explosion 
+'
+'Boom plays an in-built stereo sample like an explosion.(iterupt driven) 
+'
+'               Boom : Print "You lose"
+'
+'------------------------------------------- 
+'Shoot 
+'------------------------------------------- 
+'gun firing
+'
+'Shoot plays an in-built stereo sample like a gunshot. (iterupt driven)
+'
+'            For N=1 To 10 : Shoot : Wait 5 : Next 
+'
+'------------------------------------------- 
+'Bell
+'------------------------------------------- 
+'simple bell sound 
+'
+'Bell plays a pure note of the given pitch (1[deep] to 96[high]), a wait 
+'instruction may have to be added to allow the ring to finish. 
+'
+'            For P=1 To 96 : Bell P : Wait P/16+1 : Next 
+'
+'------------------------------------------- 
+'Volume
+'------------------------------------------- 
+'change sound volume 
+'
+'Volume sets the volume of all future sound effects and music, the intensity 
+'values range from 0 (silent) to 63 (maximum). 
+'The default is to set the volume of all 4 voices to the same value:-
+'
+'           Volume 50  
+'
+'With the addition of a voice number parameter each individual sound channel 
+'can be set with its own volume. (music will be unaffected)
+'
+'           Volume %1010,30  (set channels 2 and 4 to volume 30) 
+'           Volume %1,63     (set channel 1 to maximum volume) 
+'
+'------------------------------------------- 
+'Say 
+'------------------------------------------- 
+'computer speak
+'
+'This instruction requires the narrator device which will be loaded from disc
+'the first time that Say is used.  
+'The text to be spoken should be entered using normal English with the 
+'appropriate punctuation marks.
+'
+'          Say "Amos Professional can talk"
+'
+'As a default basic will normally be halted until the phrase being spoken is 
+'complete but an optional mode parameter may be added to allow the program to
+'continue running although things will be slowed down a good bit, this is  
+'acheived by adding the mode parameter as 1. 
+'
+'          Do  
+'          Input "Enter something for the computer to say ";S$ 
+'          Say S$,1
+'          Loop  
+'
+'------------------------------------------- 
+'Set Talk
+'------------------------------------------- 
+'Say effects 
+'
+'          Set Talk sex,mode,pitch,rate
+'
+'Set Talk allows you to alter the type of voice used with the Say command. 
+'
+'The settings of the various parameters are as follows:- 
+'
+'      sex       1-female     0-male        (not very effective) 
+'      mode      1-robot      0-human       (a little more effective)
+'      pitch     65 (low)  to 320 (high)    (much more effective)  
+'      rate      40 (slow) to 400 (fast)    (effective)
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Say " "
+Screen Open 0,320,200,8,Lowres : Curs Off : Flash Off : Cls 0 : Paper 0
+Palette $102,$A8F,$F8A
+Reserve Zone 12
+Pen 1 : Locate 24,14 : Print Border$(Zone$(" BOOM ",1),1)
+Pen 1 : Locate 24,17 : Print Border$(Zone$(" SHOOT ",2),1)
+Pen 1 : Locate 24,20 : Print Border$(Zone$(" QUIT ",9),1)
+Locate 6,10 : Print Border$(Zone$(" BELL ",3),1)
+Locate 3,15 : Print Border$(Zone$(" DOWN ",4),1)
+Locate 11,15 : Print Border$(Zone$(" UP ",5),1)
+Locate 3,20 : Print Border$(Zone$(" DOWN ",6),1)
+Locate 11,20 : Print Border$(Zone$(" UP ",7),1)
+Locate 24,11 : Print Border$(Zone$(" SAY ",8),1)
+B=50 : V=63
+Pen 2 : Locate 4,13 : Print "Volume 63"
+Locate 2,18 : Print "Bell pitch 50"
+Set Talk 1,1,200,130
+Wait 10
+Say "Hallo.,,,,,,,,,welcumm to thee wunderfull wurld uf AMUS profesinul komputing"
+Wait 40
+Say "Pleeze make your choise, by clikking in the boxis, with the LEFT mouse buttun"
+Do 
+   M=Mouse Zone
+   If M>0 and Mouse Key=1
+      Pen 2 : Paper 0
+      On M Gosub 1,2,3,4,5,6,7,8,9
+   End If 
+Loop 
+1 Boom : Flash 0,"(ff0,3)(f80,2)(102,3)" : Wait 20 : Flash Off : Colour 0,$102 : Return 
+2 Shoot : Colour 0,$AAA : Wait 2 : Colour 0,$102 : Wait 4 : Return 
+3 Bell B : For C=96 To B Step -2 : Colour 0,96-C : Wait Vbl : Next : Colour 0,$102 : Return 
+4 If V>0 Then Dec V : Locate 10,13 : Print V;" " : Volume V : Wait 4
+Return 
+5 If V<63 Then Inc V : Locate 10,13 : Print V;" " : Volume V : Wait 4
+Return 
+6 If B>1 Then Dec B : Locate 12,18 : Print B;" " : Wait 4
+Return 
+7 If B<96 Then Inc B : Locate 12,18 : Print B;" " : Wait 4
+Return 
+8
+Ink 3,4,4 : Pen 5 : Paper 3 : Set Paint 1 : Bar 0,0 To 319,70
+Locate 7,1 : Print "What do you want to say"
+Locate 1,2 : Input A$
+Set Talk 0,0,180,140
+Say A$
+Curs Off : Cls 0,0,0 To 320,71
+Return 
+9 Edit 

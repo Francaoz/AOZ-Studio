@@ -1,0 +1,181 @@
+'**********************************  
+'*    AMOS Professional HELP 26   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Bob           (line 11) 
+'*                                *            No Mask       (line 33) 
+'*         Ronnie Simpson         *            Double Buffer (line 48) 
+'**********************************            Update        (line 70) 
+'                                              Update On/Off (line 70) 
+'
+'------------------------------------------- 
+'Bob 
+'------------------------------------------- 
+'place a blitter object on the screen
+'
+'        +---->bob identification number 
+'        |  +---->X position relative to current screen  
+'        |  |  +---->Y position relative to current screen 
+'        |  |  |  +---->sprite bank image number 
+'        |  |  |  |
+'    Bob 1,100,50,4
+'
+'By default bob numbers are from 0-63 but this can be changed by the 
+'configuration program to any number within memory restrictions. 
+'A bobs position is related to its hot spot this con be changed with the 
+'Hot Spot instruction. 
+'Bobs use the same image numbers as the sprites and any number of bobs can 
+'share the same image. 
+'Any number of the parameters can be omitted as long as the commas are kept
+'in the correct place. 
+'By default a bobs background is automatically saved and replaced each time
+'it is moved.
+'------------------------------------------- 
+'NO MASK 
+'------------------------------------------- 
+'remove blitter mask 
+'
+'Normally bobs are drawn on the screen with the background colour
+'transparent but the No Mask instruction removes this and cause the bob
+'to be overlaid over the existing graphics complete with its background  
+'
+'  WARNING!  This mask is used by the collision detection routines so do not 
+'            use this command on any bob which may have to be tested 
+'            in this way.
+'
+'eg.      No Mask     (with no parameters this removes all blitter masks)
+'         No Mask 2   (remove blitter mask from only one bob)  
+'------------------------------------------- 
+'DOUBLE BUFFER 
+'------------------------------------------- 
+'create a logical and physical screen
+'
+'eg.          Screen Open 1,320,200,16,Lowres
+'             Double Buffer  
+'
+'When you use more than 3 or 4 bobs on the screen at the same time then
+'an annoying flicker will be noticed, this is caused by the screen being 
+'updated before all your bobs have had time to be fully drawn. AMOS caters 
+'for this by allowing the use of a double buffered screen. 
+'Once a call has been made to double buffer a screen then all graphics 
+'including bob updates are now performed on a 'hidden' or logical screen 
+'and only when the drawing operations are complete are the logical and 
+'physical screens swapped. 
+'This is cycled automatically by the system without any further user control.  
+'Double buffering will operate equally well in any of the Amiga's graphic
+'modes but please bear in mind that it also doubles the memory required by 
+'each screen which is double buffered, and because each graphic operation
+'is performed twice then your program will run slightly slower.
+'
+'------------------- 
+'UPDATES 
+'------------------- 
+'Normally whenever an object is animated or moved it is updated at the next  
+'vertical blank. This automatic updating can be halted with the Update Off 
+'command, when the updates are not active sprite and bob commands will not 
+'be seen to be effective although all animations and movements will be 
+'working OK it is just that they are not being displayed on the screen.
+'You can now force the redrawing operation at any time with the Update 
+'instruction.
+'
+'eg.         Update Off
+'            Do  
+'            Rem **** move all the sprites and bobs
+'            Update : waitvbl
+'            Loop
+'
+'The normal automatic system may be turned back on at any time with a single 
+'call to Update On.
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Dim X(4),Y(4),DY(4),DX(4)
+Load "BOBS.abk"
+'
+Rem *** tidy up screen 
+'
+Screen Open 0,320,200,16,Lowres
+Flash Off : Hide : Curs Off : Get Sprite Palette : Cls 0 : Paper 0 : Pen 15
+'
+'
+Rem *** centre title on top line 
+'
+Home : Centre "AMOS Professional BOBS"
+'
+'
+Rem *** set variables and print instructions 
+'
+Pen 11 : FLAG=False
+Locate 0,23 : Centre "press left mouse key to"
+Cdown : Centre "engage double buffering"
+For N=1 To 4
+   X(N)=80*N-78 : Y(N)=115 : DY(N)=-1
+   Bob N,X(N),Y(N),N
+Next 
+'
+'
+Rem *** start first loop 
+'
+Repeat 
+   Rem *** move bobs
+   For N=1 To 4
+      Add Y(N),DY(N)*N
+      If Y(N)<4 or Y(N)>115 Then DY(N)=-DY(N)
+      Bob N,,Y(N),N
+   Next 
+   Wait Vbl 
+   Rem *** switch on double buffering 
+   If Mouse Key=1 and FLAG=False
+      Bob Off : Wait Vbl : Double Buffer 
+      Locate 0,23 : Centre "double buffering engaged press"
+      Cdown : Centre "right mouse key to continue"
+      Rem *** restart bobs 
+      For N=1 To 4
+         X(N)=80*N-78 : Y(N)=115 : DY(N)=-1
+         Bob N,X(N),Y(N),N
+      Next 
+      FLAG=True
+   End If 
+Until FLAG and Mouse Key=2
+'
+'
+Pen 10 : FLAG=False : Cls 3,20,20 To 300,180 : Ink 14 : Box 20,20 To 300,180
+Locate 0,23 : Cline : Centre "press left mouse key to"
+Cdown : Cline : Centre "remove blitter mask"
+'
+'
+Rem *** introduce a horizontal movement  
+'
+For N=1 To 4
+   DY(N)=-2
+   DX(N)=-4
+   If Rnd(1)=0
+      DX(N)=-DX(N)
+   End If 
+Next 
+'
+'
+Rem *** start second loop  
+'
+Repeat 
+   Rem *** move bobs
+   For N=0 To 4
+      Add X(N),DX(N) : If X(N)>248 or X(N)<0 Then DX(N)=-DX(N)
+      Add Y(N),DY(N) : If Y(N)>115 or Y(N)<0 Then DY(N)=-DY(N)
+      Bob N,X(N),Y(N),N
+   Next 
+   Wait Vbl 
+   Rem *** remove two of the blitter masks
+   If Mouse Key=1 and FLAG=False
+      Bob Off : Wait Vbl : No Mask 2 : No Mask 3
+      Locate 0,23 : Centre "mask removed on bobs 2 and 3"
+      Cdown : Centre "right mouse key to quit"
+      Rem *** restart bobs 
+      For N=1 To 4
+         X(N)=80*N-78 : Y(N)=115 : DY(N)=-1
+         Bob N,X(N),Y(N),N
+      Next 
+      FLAG=True
+   End If 
+Until FLAG and Mouse Key=2
+Edit 

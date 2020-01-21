@@ -1,0 +1,96 @@
+'**********************************  
+'*    AMOS Professional HELP 15   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *               Pen    (line 10) 
+'*                                *               Pen$   (line 22) 
+'*         Ronnie Simpson         *               Paper  (line 30) 
+'**********************************               Paper$ (line 41) 
+'
+'------------------------------------------- 
+'Pen 
+'------------------------------------------- 
+'Set colour of text foreground 
+'
+'eg.    Pen 1     Pen C     Pen C+3  
+'
+'The pen value can range from 0 to the maximum allowed for the screen. 
+'The default pen colour is 2. (white in default palette)   
+'Does not affect the value set for the graphics operations. (Ink 2)  
+'
+'------------------------------------------- 
+'Pen$
+'------------------------------------------- 
+'Set colour of text foreground from within a string
+'
+'eg.   C$=Pen$(5)     C$=Pen$(2)+"PEN COLOUR 2"       Print Pen$(2)+"Text" 
+'
+'The new colour assigned by this instruction becomes the current pen colour. 
+'
+'------------------------------------------- 
+'Paper 
+'------------------------------------------- 
+'Set colour of text background 
+'
+'eg.    Paper 0     Paper C     Paper P-3  
+'
+'The paper value can range from 0 to the maximum allowed for the screen. 
+'The default paper colour is 1. (orange in default palette)    
+'Does not affect the value set for the graphics operations. (Ink 2,1)  
+'
+'------------------------------------------- 
+'Paper$
+'------------------------------------------- 
+'Set colour of text background from within a string
+'
+'eg.  C$=Paper$(5)    C$=Paper$(2)+"PEN COLOUR 2"     Print Paper$(2)+"Text"   
+'
+'The new colour assigned by this instruction becomes the current paper colour. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** Tidy up screen and set a new palette 
+'
+Flash Off : Hide 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Home : Paper 0
+'
+'
+Rem *** Print the combination of colours using Pen$(X) & Paper$(Y)   
+'
+Pen 15 : Home : Print "PEN$-----------------" : B$="  PAPER$|||||||||||"
+For Y=1 To Len(B$) : Locate 0,Y : Print Mid$(B$,Y,1) : Next 
+For X=0 To 9
+   For Y=0 To 9
+      F$=Pen$(X) : B$=Paper$(Y)
+      Locate X*2+1,Y*2+1 : Print F$+B$+Str$(X)
+   Next Y
+Next X
+'
+'
+Rem *** Print the combination of colours using Pen & Paper instructions  
+'
+Pen 15 : Paper 0
+Locate 26,1 : Print "PEN     PAPER"
+For Y=0 To 15
+   Pen Y : Paper 0
+   Locate 24,Y+2 : Print "COLOUR"+Str$(Y)
+   Paper Y
+   Locate 34,Y+2 : Print "     "
+   Paper 0
+Next 
+'
+'
+Rem *** Flashy ending
+'
+B$="PRESS ANY MOUSE KEY TO QUIT"
+X=0 : C=0
+Do 
+   Add X,1,1 To 27 : Add C,1,1 To 15
+   Locate X+5,22 : Pen C : Print Mid$(B$,X,1)
+   Exit If Mouse Key
+   Wait Vbl       // Added for AOZ
+Loop 
+'
+'
+Edit 

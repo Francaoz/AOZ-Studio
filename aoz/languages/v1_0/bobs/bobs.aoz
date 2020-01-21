@@ -33,19 +33,6 @@
 {
 }
 
-Instruction "ins bob", _number
-{
-	#errors
-	this.aoz.banks.insertImage(%_number);
-}
-End Instruction
-Instruction "ins bob", _theStart To _theEnd
-{
-	#errors #errors
-	this.aoz.banks.insertImageRange(%_theStart,%_theEnd);
-}
-End Instruction
-
 Instruction "bob", _number, _image
 {
 	#errors
@@ -119,7 +106,7 @@ Instruction "limit bob", _x1, _y1 To _x2, _y2
 Instruction "limit bob", _number, _x1, _y1 To _x2, _y2
 {
 	#errors
-	this.aoz.currentScreen.limitBob(#number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)});
+	this.aoz.currentScreen.limitBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)});
 }
 End Instruction
 Instruction "limit bob", _x1, _y1, _width, _height
@@ -128,10 +115,10 @@ Instruction "limit bob", _x1, _y1, _width, _height
 	this.aoz.currentScreen.limitBob(undefined,{x:%_x1,y:%_y1,width:%_width,height:%_height});
 }
 End Instruction
-Instruction "limit bob", number, _x1, _y1, _width, _height
+Instruction "limit bob", _number, _x1, _y1, _width, _height
 {
 	#errors
-	this.aoz.currentScreen.limitBob(#number,{x:%_x1,y:%_y1,width:%_width,height:%_height});
+	this.aoz.currentScreen.limitBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height});
 }
 End Instruction
 
@@ -177,7 +164,19 @@ Instruction "bob skew", _number, _x, _y
 End Instruction
 
 
-Instruction "get bob", number, _x1, _y1 To _x2, _y2, _tags
+Instruction "ins bob", _number
+{
+	#errors
+	this.aoz.banks.insertImage(%_number);
+}
+End Instruction
+Instruction "ins bob", _theStart To _theEnd
+{
+	#errors #errors
+	this.aoz.banks.insertImageRange(%_theStart,%_theEnd);
+}
+End Instruction
+Instruction "get bob", _number, _x1, _y1 To _x2, _y2, _tags
 {
 	#errors
 	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
@@ -201,7 +200,6 @@ Instruction "get bob", _screenNumber, _number, _x1, _y1, _width, _height, _tags
 	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
 }
 End Instruction
-
 Instruction "del bob", _number
 {
 	#errors
@@ -214,6 +212,56 @@ Instruction "del bob", _number1 To _number2
 	this.aoz.banks.deleteImageRange(%_number1,%_number2);
 }
 End Instruction
+
+Instruction "ins sprite", _number
+{
+	#errors
+	this.aoz.banks.insertImage(%_number);
+}
+End Instruction
+Instruction "ins sprite", _theStart To _theEnd
+{
+	#errors #errors
+	this.aoz.banks.insertImageRange(%_theStart,%_theEnd);
+}
+End Instruction
+Instruction "get sprite", _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get sprite", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get sprite", _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get sprite", _screenNumber, _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "del sprite", _number
+{
+	#errors
+	this.aoz.banks.deleteImage(%_number);
+}
+End Instruction
+Instruction "del sprite", _number1 To _number2
+{
+	#errors
+	this.aoz.banks.deleteImageRange(%_number1,%_number2);
+}
+End Instruction
+
 
 Instruction "put bob", _number
 {

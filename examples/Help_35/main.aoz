@@ -1,0 +1,175 @@
+'**********************************  
+'*    AMOS Professional HELP 35   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Load Iff      (line 12) 
+'*                                *            Save Iff      (line 28) 
+'*         Ronnie Simpson         *            Auto View On  (line 51) 
+'**********************************            Auto View Off (line 51) 
+'                                              View          (line 51) 
+'                                              Mask Iff      (line 78) 
+'                                              Picture       (line 96) 
+'------------------------------------------- 
+'Load Iff
+'------------------------------------------- 
+'load a screen from disc 
+'
+'                                +--->name of IFF screen to be loaded  
+'                                |       +--->optional screen number 
+'                                |       | 
+'        Load Iff "AP_HELP:IFF/LOGO.iff",1 
+'
+'If the screen number stated does not exist then a new screen will be opened 
+'automatically.
+'If the optional screen number is ommited then the picture will be loaded  
+'into the current screen.
+'An existing screen will be completely overwritten.
+'
+'------------------------------------------- 
+'Save Iff
+'------------------------------------------- 
+'save a screen as an IFF file
+'
+'                                +--->name of IFF screen to be saved 
+'                                |       +--->optional save mode 
+'                                |       | 
+'        Save Iff "AP_HELP:IFF/LOGO.iff",1 
+'
+'Thre are two possible save modes:-
+'
+'  A value of zero saves the picture as it stands in standard IFF format 
+'
+'  A value of one saves the picture in the compressed format, this is the
+'  default setting wich will be used if the parameter is ommited.
+'
+'The settings for Screen Display, Screen Offset and Screen Hide/Show are 
+'saved along with your picture, this data will be ignored by art packages    
+'such as D/Paint etc.
+'
+'It is not possible to save Double Buffered or Dual Playfield screens with 
+'this instruction. 
+'------------------------------------------- 
+'Auto View On
+'Auto View Off 
+'View
+'------------------------------------------- 
+'switch automatic viewing mode 
+'
+'Auto View Off switches of the automatic displaying of a new screen and
+'allows graphic operations etc. to be completed before viewing takes place.
+'
+'Auto View On returns the system to the immidiate updating and displaying
+'of screens. 
+'
+'When Auto View Off is in operation a single call to View will show any
+'changes to the current screen at the next vertical blank without switching
+'on the automatic updating.
+'
+'eg        Screen Open 1,320,200,16,Lowres 
+'          Auto View Off 
+'          Do  
+'            Add S,1,0 To 1 : Screen S : Screen To Front S : Cls 0 
+'            For N=1 To 1000 
+'              Ink Rnd(15) : Plot Rnd(319),Rnd(199)
+'            Next  
+'            View  
+'          Loop  
+'
+'------------------------------------------- 
+'Mask Iff
+'------------------------------------------- 
+'mask iff picture data 
+'
+'               Mask Iff %100  
+'
+'The mask instruction is followed by a bitmap containing the details of the
+'Iff mask, The 2 most frequently used settings are:- 
+'
+'               %100    (palette only) 
+'               %10000  (bitmap only)  
+'
+'The instruction can also be used with the =Picture function (see below) to
+'set the exact mask details of an Iff image. 
+'
+'eg.            Mask Iff Picture 
+'
+'------------------------------------------- 
+'Picture 
+'------------------------------------------- 
+'return mask details 
+'
+'This function returns the format of the mask used by an Iff image.
+'
+'eg.             I=Picture 
+'                Mask Iff I
+'                Load Iff "Name" 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Screen Open 0,320,200,32,Lowres
+Flash Off : Curs Off : Cls 0 : Hide 
+'
+'
+Rem *** switch off auto viewing
+'
+Auto View Off 
+'
+'
+Rem *** load a picture to a new screen 
+'
+Load Iff "AMOSPro_Examples:IFF/LOGO.iff",1
+Screen Hide 1
+'
+'
+Rem *** bring blank screen to front and get palette from picture 
+'
+Screen To Front 0 : Screen 0 : Get Palette 1
+'
+'
+Rem *** switch on auto viewing 
+'
+Auto View On 
+'
+'
+Rem *** do a fancy flood copy
+'
+For Y=0 To 199
+   Screen Copy 1,20,Y,299,Y+1 To 0,20,199
+   For D=199 To Y Step -1
+      Screen Copy 0,20,199,299,200 To 0,20,D
+   Next 
+Next 
+Wait 150
+'
+Rem *** scroll screen into position and flip the picture 
+'
+Screen Show 1
+Screen Hide 0
+Screen Display 1,,260,,
+Screen To Front 1
+For Y=260 To 50 Step -4
+   Wait Vbl 
+   Screen Display 1,,Y,,
+Next Y
+Screen Copy 1 To 0
+Pen 1 : Paper 0
+Locate O,24 : Centre "PRESS ANY MOUSE KEY TO QUIT"
+Do 
+   For Y=200 To 0 Step -1
+      If Mouse Key Then Exit 2
+      Screen Copy 0,20,Y,299,Y+1 To 1,20,199-Y
+      Wait Vbl 
+   Next 
+   For Y=0 To 200
+      If Mouse Key Then Exit 2
+      Screen Copy 0,20,Y,299,Y+1 To 1,20,Y
+      Wait Vbl 
+   Next 
+   For DELAY=1 To 200
+      If Mouse Key Then Exit 2
+      Wait Vbl 
+   Next 
+Loop 
+'
+'
+Edit 

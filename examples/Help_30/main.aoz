@@ -1,0 +1,146 @@
+'**********************************  
+'*    AMOS Professional HELP 30   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *        Priority Off         (line 30)
+'*                                *        Priority On          (line 30)
+'*         Ronnie Simpson         *        Priority Reverse Off (line 18)
+'**********************************        Priority Reverse On  (line 18)
+'
+'
+'------------------------------------------- 
+'GENERAL 
+'------------------------------------------- 
+'As a default bobs have the same priority as their identification number 
+'this means that a bob with a high number will be displayed in front of
+'those with a lower identification number. 
+'
+'------------------------------------------- 
+'Priority Reverse On 
+'Priority Reverse Off
+'------------------------------------------- 
+'reverse priority
+'
+'The Priority reverse On instruction reverses the entire priority system.    
+'This means that bobs with low number will now be displayed in front of bobs 
+'with the higher numbers.
+'
+'Priority Reverse Off returns the system to the default. 
+'
+'------------------------------------------- 
+'Priority On 
+'Priority Off
+'------------------------------------------- 
+'change bobs priority mode 
+'
+'In addition to the standard priority system described above it is possible
+'to assign your bobs with a priority determined by their Y coordinate on the 
+'screen
+'
+'Priority On switches to this new mode and assigns bobs with the highest 
+'Y coordinate to be drawn in front off those with a lower Y value. 
+'
+'Priority Off returns to the normal priority mode of using the bobs
+'identification number.
+'
+'------------------------------------------- 
+'NOTE
+'------------------------------------------- 
+'It is possible to combine any of the above commands to produce the exact
+'priority required by your program   
+'
+'eg.       Priority On 
+'          Priority Reverse On 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** reserve some memory for arrays required later
+'
+Dim X(4),Y(4),DY(4)
+'
+'
+Rem *** set out the screen and screen zones
+'
+Auto View Off 
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6
+Reserve Zone 4
+Pen 12 : Locate 1,21 : Print Border$(Zone$(" PRIORITY ON ",1),3)
+Pen 14 : Locate 16,21 : Print Border$(Zone$(" PRIORITY OFF ",2),3)
+Pen 12 : Locate 34,21 : Print Border$(Zone$(" PRIORITY REVERSE ON ",3),3)
+Pen 14 : Locate 57,21 : Print Border$(Zone$(" PRIORITY REVERSE OFF ",4),3)
+Pen 7 : Locate 0,23 : Centre "click in the boxes with the left mouse key to change priorities"
+Pen 2 : Locate 0,24 : Centre "RIGHT MOUSE KEY TO QUIT"
+'
+'
+Rem *** grab four bobs from the screen 
+'
+Set Paint 1 : Pen 6
+For N=1 To 4
+   Ink N+10,,6 : Paper N+10
+   Bar 0,0 To 95,23
+   Locate 2,1 : Print "OBJECT"+Str$(N)
+   Get Bob N,0,0 To 96,24
+   Y(N)=N*20 : X(N)=N*8+240
+Next 
+Boom
+'
+'
+Rem *** tidy up screen and double buffer 
+'
+Cls 0,0,0 To 96,24 : Paper 0
+Double Buffer 
+View 
+'
+'
+Rem *** set the Y movements for the bobs 
+'
+DY(1)=2 : DY(2)=1 : DY(3)=-1 : DY(4)=-2
+'
+'
+Rem *** start the main loop
+'
+Do 
+   M=Mouse Zone
+   Rem *** move the bobs
+   For N=1 To 4
+      Add Y(N),DY(N)
+      If Y(N)<3 or Y(N)>97 Then DY(N)=-DY(N)
+      Bob N,X(N),Y(N),N
+   Next 
+   View
+   Wait Vbl 
+   Exit If Mouse Key=2
+   Rem *** jump to the procedure to change the priorities 
+   If M and Mouse Key=1 Then Proc CHANGE[M]
+Loop 
+'
+'
+Edit 
+'
+'
+Procedure CHANGE[P]
+   On P Gosub 1,2,3,4
+   Pop Proc
+   1
+   Priority On 
+   Pen 14 : Locate 1,21 : Print Border$(" PRIORITY ON ",4)
+   Pen 12 : Locate 16,21 : Print Border$(" PRIORITY OFF ",4)
+   Return 
+   2
+   Priority Off 
+   Pen 12 : Locate 1,21 : Print Border$(" PRIORITY ON ",4)
+   Pen 14 : Locate 16,21 : Print Border$(" PRIORITY OFF ",4)
+   Return 
+   3
+   Priority Reverse On 
+   Pen 14 : Locate 34,21 : Print Border$(" PRIORITY REVERSE ON ",4)
+   Pen 12 : Locate 57,21 : Print Border$(" PRIORITY REVERSE OFF ",4)
+   Return 
+   4
+   Priority Reverse Off 
+   Pen 12 : Locate 34,21 : Print Border$(" PRIORITY REVERSE ON ",4)
+   Pen 14 : Locate 57,21 : Print Border$(" PRIORITY REVERSE OFF ",4)
+   Return 
+End Proc

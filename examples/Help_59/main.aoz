@@ -1,0 +1,98 @@
+'**********************************
+'*    AMOS Professional HELP 59   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *              Acos (line 17)
+'*                                *              Atan (line 28)
+'*         Ronnie Simpson         *              Hsin (line 39)
+'**********************************              Hcos (line 49)
+'                                                Htan (line 59)
+'------------------------------------------- 
+'GENERAL 
+'------------------------------------------- 
+'When using the following functions Amos Professional uses the Mathtrans.
+'Library which will be loaded automatically the first time it is required, 
+'please make sure that this is present in the Libs folder of the current 
+'volume. 
+'------------------------------------------- 
+'Acos
+'------------------------------------------- 
+'Trig arc cosine 
+'
+'Acos takes a number between -1 and +1 and calculates the angle at which 
+'would be needed to generate this angle with Cos.
+'
+'            S#=Cos(22)  
+'            Print Acos(S#)
+'
+'------------------------------------------- 
+'Atan
+'------------------------------------------- 
+'Trig arc tangent
+'
+'Atan returns the arc tangent of a number. 
+'
+'            Degree  
+'            T#=Tan(22)  
+'            Print T#,Atan(T#)  ( printed result:0.4040261   22 )
+'
+'------------------------------------------- 
+'Hsin
+'------------------------------------------- 
+'Trig hyperbolic sine
+'
+'Hsin calculates the hyperbolic sine of the given angle. 
+'
+'            H#=Hsin(45)   
+'            Print H#
+'
+'-------------------------------------------   
+'Hcos
+'------------------------------------------- 
+'Trig hyperbolic cosine
+'
+'Hcos calculates the hyperbolic cosine of the given angle. 
+'
+'            H#=Hcos(45)   
+'            Print H#
+'
+'------------------------------------------- 
+'Htan
+'------------------------------------------- 
+'Trig hyperbolic tangent 
+'
+'Htan calculates the hyperbolic tangent of the given angle.  
+'
+'            H#=Htan(45)   
+'            Print H#
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 0,320,200,32,Lowres : Flash Off : Curs Off : Hide 
+Palette $300,$303,$505,$707,$909,$B0B,$D0D,$F0F,$F00,$330,$550,$770,$990,$BB0,$DD0,$FF0,$3,$33,$55,$77,$99,$BB,$DD,$FF,$FFF,$333,$353,$373,$393,$3B3,$3D3,$3F3
+Cls 0 : Ink 16,,24
+Set Paint 1 : Bar 20,10 To 300,190
+Clip 21,11 To 299,189
+Pen 8 : Paper 0 : Centre "Press any mouse key to quit"
+Degree 
+C=1 : F=1 : D=100
+'
+Rem *** start the main loop
+'
+Do 
+   Dec D
+   Add C,F : If C=1 or C=15 Then F=-F
+   For X=22 To 298 Step 4
+      If Mouse Key Then Exit 2
+      S#=Hsin(X)
+      Ink C
+      Draw X/2+40,140 To X,(S#)+D-19
+      C#=Hcos(X)
+      Ink 31-C
+      Draw X/2+43,140 To X,(C#)+D-20
+   Next 
+   If D=-50 Then Wait 200 : Edit 
+Loop 
+Edit 

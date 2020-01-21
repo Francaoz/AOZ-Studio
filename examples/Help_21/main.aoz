@@ -1,0 +1,161 @@
+'**********************************  
+'*    AMOS Professional HELP 21   *               SUBJECTS COVERED 
+'*                                *
+'*     (c) Europress Software     *            Reserve Zone (line 11)
+'*                                *            Set Zone     (line 22)
+'*         Ronnie Simpson         *            Zone$        (line 34)
+'**********************************            Border$      (line 51)
+'
+'
+'------------------------------------------- 
+'Reserve Zone  
+'------------------------------------------- 
+'reserve memory for screen zones 
+'
+'eg.    Reserve Zone 20  (allocate enough memory for 20 screen zones)
+'
+'There is no limit to the number of zones you can reserve. 
+'To erase zones and return memory to program use Reserve Zone without any
+'parameters. 
+'
+'------------------------------------------- 
+'Set Zone
+'------------------------------------------- 
+'define a screen zone rectangle
+'
+'eg.       Set Zone 1,10,20 To 30,40 
+'
+'The above example would define zone number 1 at graphics coordinates with 
+'with the topleft corner at 10 pixels across by 20 down and the botom right  
+'at 30 across by 40 down.
+'Remember to use the above Reserve Zone before using this instruction. 
+'
+'------------------------------------------- 
+'Zone$ 
+'------------------------------------------- 
+'surround text with a screen zone
+'
+'Works in a similar way to the above set zone instruction by defining a
+'screen zone around a piece of text
+'
+'eg.     Reserve Zone 2                      (reserve moemory for 2 zones) 
+'        Locate 10,5 
+'        Print Zone$("SCREEN ZONE ONE",1)    (define zone number 1)
+'        Locate 10,8 
+'        Print Zone$("SCREEN ZONE TWO",2)    (define zone number 2)
+'
+'Once set up zones can be easily checked for collisions between the  
+'mouse pointer or bobs etc.
+'
+'------------------------------------------- 
+'Border$ 
+'------------------------------------------- 
+'draw a border around text 
+'
+'This instruction draws one of the 16 built-in border designs around a 
+'piece of text.
+'
+'eg.      Print Border$("SURROUNDED",5)
+'
+'The above example surrounds the text with border style number 5.
+'Text printed in this way will start at the current cursor position before 
+'the border is drawn, so try to ensure that there enough space around your 
+'text to avoid strange shapes on screen.   
+'
+'Used in conjunction with the Zone$ function this provides a easy way of 
+'producing fancy buttons or dialogue boxes.
+'
+'eg.       Reserve Zone 1
+'          Locate 5,6
+'          Print Border$(Zone$("ZONE ONE - BORDER 3",1),3) 
+'
+'------------------------------------------- 
+'WORKING EXAMPLES
+'------------------------------------------- 
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6
+'
+'
+Rem *** place text and instructions on screen  
+'
+Home : Centre "AMOS Professional SCREEN ZONES"
+Ink 3,4,4 : Set Paint 1 : Bar 150,12 To 500,26
+Pen 4 : Paper 3 : Locate 24,2 : Print "SCREEN ZONE UNDER MOUSE POINTER 0"
+Paper 0
+Ink 9 : Bar 370,39 To 450,48 : Locate 27,5 : Print "FOREGROUND COLOUR="
+Ink 0 : Bar 370,55 To 450,63 : Locate 27,7 : Print "BACKGROUND COLOUR="
+Pen 13 : Locate 5,18 : Print "<-PRESS LEFT MOUSE KEY IN BOXES TO SELLECT FOREGROUND COLOUR"
+Pen 14 : Locate 5,20 : Print "<-PRESS RIGHT MOUSE KEY IN BOXES TO SELLECT BACKGROUND COLOUR"
+Pen 12 : Locate 34,15 : Print "CLICK IN BOXES TO SELLECT BORDER->"
+Pen 15 : Locate 56,23 : Print "CLICK TO END->";
+'
+'
+Rem *** reserve memory for screen zones
+'
+Reserve Zone 33
+'
+'
+Rem *** 15 screen zones for selecting colours  
+'
+For Y=-0 To 15
+   Ink Y
+   Bar 4,Y*12 To 36,Y*12+10
+   Set Zone Y+1,4,Y*12 To 36,Y*12+10
+Next 
+'
+'
+Rem 16 screen zones for selecting border types 
+'
+Paper 0
+For Y=1 To 15
+   Ink 3 : Pen 4
+   Locate 70,Y+3
+   Print Zone$("Border"+Str$(Y),Y+16)
+   Box 550,Y*8+23 To 639,Y*8+31
+Next 
+'
+'
+Rem *** quit button
+'
+Pen 6 : Paper 7
+Locate 72,22
+Print Border$(Zone$("QUIT",33),2)
+'
+'
+Rem *** set up some variables and show first border
+'
+A$="BORDER NUMBER"
+F=9 : B=0 : N=1
+PLACE[F,B,N]
+'
+'
+Rem *** the main loop
+'
+Do 
+   M=Mouse Zone
+   Exit If Mouse Key and M=33
+   If Mouse Key=2 and M>0 and M<17 Then B=M-1 : PLACE[F,B,N]
+   If Mouse Key=1 and M>0 and M<17 Then F=M-1 : PLACE[F,B,N]
+   If Mouse Key and M>16 and M<33 Then N=M-16 : PLACE[F,B,N]
+   Pen 4 : Paper 3 : Locate 55,2 : Print Str$(M)+" "
+   Wait Vbl
+Loop 
+'
+'
+Edit 
+'
+'
+Rem *** procedure for changing settings
+'
+Procedure PLACE[F,B,N]
+   A$="BORDER NUMBER"
+   B$=Str$(N) : If Len(B$)=2 Then B$=" "+B$
+   Ink F : Bar 370,39 To 450,48
+   Ink B : Bar 370,55 To 450,63
+   Pen F : Paper B
+   Locate 30,11
+   Print Border$(A$+B$,N)
+End Proc

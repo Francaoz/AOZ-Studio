@@ -385,7 +385,7 @@ Instruction "bar", _x1, _y1, _width, _height
 End Instruction
 
 
-Instruction "box", _x1, _y1 To _x2,_ y2
+Instruction "box", _x1, _y1 To _x2, _y2
 {
 	#errors
 	this.aoz.currentScreen.box({x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)});
@@ -846,9 +846,10 @@ End Instruction
 
 Instruction "shift off"
 {
-	#not implemented
+	#notimplemented
 }
 End Instruction
+
 Instruction "shift up", _delay, _first, _last, _flag
 {
 	#notimplemmented

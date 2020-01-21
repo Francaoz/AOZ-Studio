@@ -1,0 +1,139 @@
+'**********************************
+'*    AMOS Professional HELP 71   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            Open Random (line 19) 
+'*                                *            Field       (line 30) 
+'*         Ronnie Simpson         *            Put         (line 41) 
+'**********************************            Get         (line 62) 
+'                                              As          (line 30) 
+'
+'------------------------------------------- 
+'Random access files 
+'------------------------------------------- 
+'Unlike sequential files this type of file allows information to be accessed 
+'in any order. Files are composed of units each with a separate number, these
+'are split into fields with each field containing 1 piece of imformation, so 
+'therefore the size of the storage required must be specified in advance to
+'set aside room for the information. 
+'------------------------------------------- 
+'Open Random 
+'------------------------------------------- 
+'open a channel to a random file 
+'
+'                        +--->channel number 
+'            Open Random 1,"name$" 
+'
+'This instruction opens a random channel for input and output and should 
+'always be followed by the Field command.
+'
+'------------------------------------------- 
+'Field 
+'------------------------------------------- 
+'define a record structure 
+'                    +--->length 
+'                    |      +--->field name
+'           Field 1,10 As FIRST$,10 As SECOND$....etc. 
+'
+'This command definews the length and names of the field(s), the maximum 
+'size of the record is 65535 bytes.
+'
+'------------------------------------------- 
+'Put 
+'------------------------------------------- 
+'output to an opened file
+'
+'                +--->channel number 
+'                | +--->record number
+'            Put 1,2 
+'
+'Put transfers a record from memoey to the given record number:- 
+'
+'             Open Random 1,"File_1" 
+'             Field 1,30 As NAME$
+'             For COUNT=1 To 3 
+'             Input "Enter a name ";NAME$
+'             Put 1,COUNT
+'             Next   
+'             Close 1  
+'
+'PLEASE NOTE-- records must be input in order of first to last.
+'
+'------------------------------------------- 
+'Get 
+'------------------------------------------- 
+'input from a random file
+'
+'                +--->channel number 
+'                | +--->record number
+'            Get 1,2 
+'
+'Get reads the record from a random file at the given record position, if an 
+'attempt is made to read a record which does not exist then an error will be 
+'generated.
+'
+'            Open Random 1,"File_1"
+'            Field 1,30 As NAME$ 
+'            For COUNT=3 To 1 Step -1
+'            Get 1,COUNT 
+'            Print NAME$ : Wait 10 
+'            Next  
+'            Close 1 
+'
+'------------------------------------------- 
+'EXAMPLE 
+'------------------------------------------- 
+Rem *** open screen and print warning
+'
+Screen Open 0,640,200,16,Hires : Curs Off : Cls 0 : Paper 0 : Hide 
+Palette $30,$F8F,$99F,$6F6,$AA0,$B0,$F94,$49F
+Pen 4 : Locate 0,4 : Centre Border$("  W A R N I N G  ",4)
+Pen 1 : Locate 0,10 : Centre "This program will create a file on the disc in df0."
+Pen 2 : Locate 0,12 : Centre "This disc should be write enabled."
+Pen 5 : Locate 0,20 : Centre "Press LEFT mouse key to continue         RIGHT mouse key to quit"
+Repeat 
+   M=Mouse Key
+   If M=2 Then Edit 
+Until M=1
+Cls 0 : 
+'
+Rem *** set directory and create file
+'
+Dir$="df0:"
+Open Random 1,"files"
+Field 1,28 As NAME$
+NAME$=Dir First$("")
+COUNT=1
+Put 1,COUNT
+Do 
+   Inc COUNT
+   NAME$=Dir Next$
+   Exit If NAME$=""
+   Put 1,COUNT
+Loop 
+Close 1
+'
+On Error Proc OOPS
+Resume Label TAG
+Pen 5 : Locate 0,0 : Centre "Files and folders on drive df0"
+Pen 7 : Locate 0,2 : Centre "Number of records available"+Str$(COUNT-1)
+Pen 6 : Locate 0,24 : Centre "Enter 0 as the record number to quit"
+'
+Rem *** read file contents 
+'
+Open Random 1,"files"
+Field 1,28 As NAME$
+COUNT=1
+Do 
+   TAG:
+   Pen 1 : Locate 12,22 : Cline : Input "Input a record number ";COUNT
+   Exit If COUNT=0
+   Get 1,COUNT
+   Pen 7 : Locate 12,COUNT+3 : Print NAME$
+Loop 
+Edit 
+'
+Procedure OOPS
+   Pen 3 : Locate 12,22 : Cline : Print "This record number does not exist"
+   Wait 150
+   Resume Label 
+End Proc

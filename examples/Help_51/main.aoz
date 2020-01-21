@@ -1,0 +1,143 @@
+'**********************************
+'*    AMOS Professional HELP 51   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *          Printer Open   (line  15) 
+'*                                *          Printer Close  (line  27) 
+'*         Ronnie Simpson         *          Printer Send   (line  38) 
+'**********************************          Printer Dump   (line  53) 
+'                                            Printer Out    (line  73) 
+'                                            Printer Abort  (line  87) 
+'                                            Printer Check  (line  98) 
+'                                            Printer Online (line 108) 
+'                                            Printer Error  (line 122) 
+'                                            Printer Base   (line 133) 
+'------------------------------------------- 
+'Printer Open
+'------------------------------------------- 
+'open printer device 
+'
+'This instruction is used without parameters and will open the printer 
+'device for use with the settings from Preferences.  
+'Please note that when multi-tasking only one program can have access to 
+'the printer driver. 
+'
+'eg.                   Printer Open
+'
+'------------------------------------------- 
+'Printer Close 
+'------------------------------------------- 
+'close printer device
+'
+'This instruction closes the printer port but does not release the memory
+'taken by the printer driver unless the system becomes short of memory.
+'
+'eg.                   Printer Close 
+'
+'
+'------------------------------------------- 
+'Printer Send
+'------------------------------------------- 
+'send text to the printer
+'
+'This instruction will send the given text string directly to the printer
+'port in a multi-tasking manner and will not wait for the string to be 
+'printed but will return to the next instruction.
+'
+'eg.          Printer Send "This will be output to the printer"          
+'
+'The printer must be `ready' or a requester will issue a warning.
+'The string to be printed may include embedded printer commands, see the   
+'list in chapter 10.3 of the users guide for more details. 
+'
+'------------------------------------------- 
+'Printer Dump
+'------------------------------------------- 
+'print an AMOS Professional screen 
+'
+'There are 3 possible formats of this instruction:-
+'
+'  1) Printer Dump                         (dump entire screen)  
+'  2) Printer Dump x1,y1 to x2,y2          (dump a rectangular area)   
+'  3) Printer Dump x1,y1 to x2,y2,ax,ay,s  (change aspect ratio) 
+'
+'Option 1 will dump the entire screen (text and graphics) using the settings 
+'from the preferences. 
+'Option 2 will dump only the area enclosed within the given rectangle with 
+'x1,y1being the top left and x2,y2 the bottom right. 
+'Option 3 allows the original aspect ratio of the rectangle to be altered  
+'with ax and ay being size (in printer pixels) of the final output. The s
+'parameter is a special setting which controls how the image will be drawn 
+'by the printer. (see section 10.3 in the user guide for a full list)  
+'
+'------------------------------------------- 
+'Printer Out 
+'------------------------------------------- 
+'print data from an address
+'
+'                  Printer Out address,length
+'
+'This command will print the number of characters contained in the length
+'parameter starting from the given address.
+'The data is not processed in any way therfore any embedded commands will be   
+'ignored.
+'
+'eg.  Printer Out Start(7),Length(7)     (print contents of bank number 7) 
+'
+'------------------------------------------- 
+'Printer Abort 
+'------------------------------------------- 
+'stop a printer operation
+'
+'This command is used without parameters and will halt any further data
+'being sent to the printer, obviously the printer will only stop when its
+'buffer is empty.
+'
+'eg.               Printer Abort 
+'
+'------------------------------------------- 
+'Printer Check 
+'------------------------------------------- 
+'check status of printer 
+'
+'This function will return -1 (true) if the printer is inactive and available  
+'for use or 0 (false) if it is still in use. 
+'
+'eg.              Repeat : Until Printer Check 
+'
+'------------------------------------------- 
+'Printer Online
+'------------------------------------------- 
+'check if printer is ready 
+'
+'This function is a simple method of checking if a printer is connected and
+'in a ready stade for receiving data, -1 (true) will be returned if the  
+'printer is on-line otherwise it will return 0 (false).
+'
+'Please note that this function will only work for a printer connected to the  
+'parallel port.
+'
+'eg.               If Printer Online Then Proc DUMP
+'
+'------------------------------------------- 
+'Printer Error 
+'------------------------------------------- 
+'check for a printer error 
+'
+'This function is used to check for errors during a printer operation, a 
+'value of 0 (true) means all is well but any other value will indicate an
+'error.
+'
+'                  P=Printer Error   
+'
+'------------------------------------------- 
+'Printer Base
+'------------------------------------------- 
+'get the printer base address
+'
+'The Printer Base function is for experts only and should not be fooled  
+'around with indiscriminately or a crash will result.
+'The function returns the address of the I/O structure used to control the 
+'printer.
+'
+'eg.               A=Printer Base
+'

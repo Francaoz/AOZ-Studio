@@ -1,0 +1,80 @@
+'**********************************
+'*    AMOS Professional HELP 61   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *            
+'*                                *            
+'*         Ronnie Simpson         *            Def Fn     (line 38)
+'**********************************            Fn         (line 57)
+'
+'------------------------------------------- 
+'Def Fn
+'------------------------------------------- 
+'define a function 
+'
+'Def Fn allows the creation of user defined functions to be used by your 
+'program perhaps for example to save typing in an often used calculation.
+'
+'                           +--->list of parameters  
+'                           |        +---> calculation to be performed   
+'                          / \      / \      
+'           Def Fn JOIN(A$,B$,C$)=A$+B$+C$ 
+'
+'The list of variables used in the parameters will be considered local to
+'the function and will be substituted by the variables used when the function
+'is called. (variables must be true to type) 
+'The operation performed can be any set of instructions but the definition is
+'limited to a single line of basic.
+'
+'-------------------------------------------   
+'Fn  
+'------------------------------------------- 
+'call a user defined function
+'
+'Fn calls the named function as defined by Def Fn, it is essential that the  
+'function is defined before it is called. (unlike procedures for example)
+'
+'eg     Def Fn L(A,B)=Max(A,B) 
+'           :       :  
+'       M= Fn L(X,Y) 
+'       Print M  
+'
+'------------------------------------------- 
+'WORKING EXAMPLE   
+'------------------------------------------- 
+'
+'
+'
+'
+Rem *** tidy up screen and print instructions
+'
+Dim A$(5),B$(5),C$(5)
+Screen Open 0,640,200,8,Hires : Flash Off 
+Palette $3,$F88,$8F8,$88F,$FF8,$F8F,$8FF,$F80 : Curs Off : Cls 0
+Ink 1 : Box 0,0 To 639,199
+Paper 0 : Pen 2 : Locate 1,1 : Centre "Exercise time"
+Pen 7 : Locate 0,23 : Centre "Hold both to quit"
+'
+Rem *** define string arrays 
+'
+A$(1)="  o " : B$(1)=" /O\" : C$(1)=" / \"
+A$(2)="__o__" : B$(2)="  O " : C$(2)=" { }"
+A$(3)="  o  " : B$(3)=" /O\" : C$(3)=" / \"
+A$(4)=" \o/" : B$(4)="  O " : C$(4)=" / \"
+A$(5)=" \o/" : B$(5)="  O" : C$(5)=" < >"
+'
+Rem *** set variables and start main loop
+'
+X=1 : Y=12 : I=0 : Pen 3
+Do 
+   For IMAGE=1 To 5
+      For Y=3 To 13 Step 5
+         For X=4 To 70 Step 6
+            If Mouse Key=3 Then Edit 
+            Locate X,Y : Print A$(IMAGE)
+            Locate X,Y+1 : Print B$(IMAGE)
+            Locate X,Y+2 : Print C$(IMAGE)
+         Next 
+      Next 
+   Next 
+Loop 
+'

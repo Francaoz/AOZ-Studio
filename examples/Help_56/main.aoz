@@ -1,0 +1,166 @@
+'**********************************
+'*    AMOS Professional HELP 56   *              SUBJECTS COVERED
+'*                                *
+'*     (c) Europress Software     *              Hex$   (line 11)
+'*                                *              Bin$   (line 29)
+'*         Ronnie Simpson         *              Varptr (line 40)
+'**********************************              Copy   (line 51)
+'                                                Fill   (line 70)
+'                                                Hunt   (line 89)
+'------------------------------------------- 
+'Hex$
+'------------------------------------------- 
+'convert a number to hex notation
+'
+'                     +--->number or variable to be converted
+'                     |  +--->optional number of characters
+'            A$=Hex$(100,3)
+'
+'Hex$ will convert any number or variable to hexadecimal notation, if the
+'optional number of characters parameter is included then the string produced
+'will contain that number of characters with zeros being added to pad out any
+'spaces. 
+'
+'eg.         Print Hex$(12345)      (printed answer: $3039     ) 
+'            Print Hex$(12345,8)    (printed answer: $00003039 ) 
+'            Print Hex$(Colour(1))  (printed answer: $A40      ) 
+'
+'------------------------------------------- 
+'Bin$
+'------------------------------------------- 
+'convert a number to binary
+'
+'Bin$ is similar in syntax to the above Hex$ but converts a number to
+'binary notation 
+'
+'eg.         Print Bin$(12)         (printed answer: $1100     ) 
+'            Print Bin$(12,8)       (printed answer: $00001100 ) 
+'
+'------------------------------------------- 
+'Varptr
+'------------------------------------------- 
+'get start address of a variable 
+'
+'eg          X=Varptr(A) 
+'            Y=Varptr(A$)
+'
+'Varptr will return the start address of the 4 bytes containing the variable.
+'In the case of strings this will be the first character in the string.
+'
+'------------------------------------------- 
+'Copy
+'------------------------------------------- 
+'copy a block of memory
+'
+'                 +--->start address of memory block to be copied
+'                 | +--->end address of memory block 
+'                 | |    +--->destination address  
+'            Copy S,F To D 
+'
+'Copy will rapidly place a copy of the memory between the start and end
+'addresses starting at the address given as the destination. 
+'
+'eg.         A=1000 : B=2000 
+'            Copy Varptr(A),Varptr(A)+4 To Varptr(B) 
+'            Print A,B 
+'
+'     ( printed result: 1000    1000 ) 
+'
+'------------------------------------------- 
+'Fill
+'------------------------------------------- 
+'fill a memory block with a 4 byte pattern 
+'
+'                 +--->start address of memory block to be filled
+'                 |    +--->end address of memory block
+'                 |    | +--->4 byte (long word) pattern 
+'            Fill S To F,L 
+'
+'Once again please note that the addresses MUST be even. 
+'
+'eg         A$="THIS IS THE AREA TO BE FILLED..."  
+'           B$="FILL" : S=Varptr(A$) 
+'           Fill S To S+32,Leek(Varptr(B$))  
+'           Print A$ 
+'
+'   ( printed result: FILLFILLFILLFILLFILLFILLFILLFILL ) 
+'
+'------------------------------------------- 
+'Hunt
+'------------------------------------------- 
+'search memory for a string
+'
+'                 +--->start address of search 
+'                 |    +--->end address of serch 
+'                 |    | +--->string to be searched for
+'          A=Hunt(S To F,P$) 
+'
+'If the search is successful the A would return the start address in memory
+'of the first instance of the string otherwise a value of 0 is returned. 
+'
+'------------------------------------------- 
+'WORKING EXAMPLE 
+'------------------------------------------- 
+'
+Rem *** tidy up screen 
+'
+Screen Open 0,640,200,16,Hires : Flash Off 
+Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
+Curs Off : Cls 0 : Paper 0 : Pen 6
+Dim A$(10)
+Reserve Zone 10
+A$(1)="   76   "
+A$(2)=" YELLOW "
+A$(3)="   12   "
+A$(4)="   10   "
+A$(5)="  RED   "
+A$(6)="   2    "
+A$(7)=" GREEN  "
+A$(8)="  2001  "
+A$(9)="   3    "
+A$(10)="   64   "
+Pen 1
+Locate 0,1 : Centre Border$("THE AMOS Professional TOP 10 QUIZ",4)
+Pen 2
+Locate 21,4 : Print "1 ";Bin$(76);" TROMBONES"
+Locate 21,6 : Print "2 THE (Colour $FF0) ROSE OF TEXAS"
+Locate 21,8 : Print "3 THE ";Hex$(12,3);" DAYS OF CHRISTMAS"
+Locate 21,10 : Print "4 ";Bin$(10);" GREEN BOTTLES"
+Locate 21,12 : Print "5 LITTLE (Colour $F00) ROOSTER"
+Locate 21,14 : Print "6 BICYCLE BUILT FOR ";Bin$(2,8)
+Locate 21,16 : Print "7 (Colour $F0) (Colour $F0) GRASS OF HOME"
+Locate 21,18 : Print "8 THEME FROM ";Hex$(2001,3);" A SPACE ODDESY"
+Locate 21,20 : Print "9 ";Bin$(3,8);" STEPS TO HEAVEN"
+Locate 20,22 : Print "10 WHEN I'M ";Hex$(64,8)
+Pen 5
+Locate 5,21 : Print Border$(Zone$(A$(1),1),1)
+Locate 66,9 : Print Border$(Zone$(A$(2),2),1)
+Locate 5,13 : Print Border$(Zone$(A$(3),3),1)
+Locate 66,17 : Print Border$(Zone$(A$(4),4),1)
+Locate 5,5 : Print Border$(Zone$(A$(5),5),1)
+Locate 66,5 : Print Border$(Zone$(A$(6),6),1)
+Locate 5,9 : Print Border$(Zone$(A$(7),7),1)
+Locate 66,13 : Print Border$(Zone$(A$(8),8),1)
+Locate 5,17 : Print Border$(Zone$(A$(9),9),1)
+Locate 66,21 : Print Border$(Zone$(A$(10),10),1)
+Pen 6
+For N=1 To 10
+   Locate 0,24 : Cline : Centre "CLICK IN BOX WHICH WILL COMPLETE TITLE OF NUMBER"+Str$(N)
+   Repeat 
+      M=Mouse Zone
+   Until Mouse Key and M>0
+   If M=N Then Bell 80 : Locate 0,24 : Cline : Centre "CORRECT!" : Wait 100 : Else Boom : Exit 
+Next 
+If N<10
+   Locate 0,24 : Cline : Centre "HARD LUCK TRY AGAIN"
+   Wait 150 : Edit 
+End If 
+Locate 0,12 : Cline 
+Writing 2,2
+For N=1 To 40
+   Pen Rnd(7) : Locate 0,12 : Centre "WELL DONE"
+   R=Rnd(3)
+   Fill Phybase(R)+2000 To Phybase(R)+15040,Rnd(1)-1
+   Wait 4
+Next 
+Edit 
