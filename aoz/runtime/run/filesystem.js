@@ -120,19 +120,31 @@ Filesystem.prototype.getFile = function( path, checkFile )
 	path = this.utilities.replaceStringInText( path, '\\', '/' );
 
 	var parent, drive;
-	var column = path.indexOf( ':' );
-	if ( column >= 0 )
+	while( true )
 	{
-		drive = path.substring( 0, column );
-		path = path.substring( column + 1 );
-		var temp;
-		if ( ( temp = this.utilities.getProperty( this.assigns, drive, this.noCase ) ) )
-			drive = temp;
-	}
-	else
-	{
-		drive = 'application';
-	}
+		var column = path.indexOf( ':' );
+		if ( column >= 0 )
+		{
+			drive = path.substring( 0, column );
+			path = path.substring( column + 1 );
+			var temp;
+			if ( ( temp = this.utilities.getProperty( this.assigns, drive, this.noCase ) ) )
+				drive = temp;
+		}
+		else
+		{
+			if ( path.indexOf( '/' ) == 0 )
+			{
+				drive = 'application';
+			}
+			else
+			{
+				path = this.currentPath + path;
+				continue;
+			}
+		}
+		break;
+	};
 	if ( drive.toLowerCase() == 'http' )
 	{
 		return { isURL: true, URL:path };
@@ -186,7 +198,9 @@ Filesystem.prototype.openOut = function( port, path, callback, extra )
 	{
 		path: path,
 		file: '',
-		type: 'out',
+		in: false,
+		out: true,
+		random: false,
 		pof: 0,
 		modified: true
 	};
@@ -210,7 +224,9 @@ Filesystem.prototype.openIn = function( port, path, callback, extra )
 			{
 				path: path,
 				file: data,
-				type: 'in',
+				in: true,
+				out: false,
+				random: false,
 				pof: 0,
 				modified: false
 			};
@@ -242,7 +258,9 @@ Filesystem.prototype.append = function( port, path, callback, extra )
 				{
 					path: path,
 					file: data,
-					type: 'out',
+					in: false,
+					out: true,
+					random: false,
 					pof: data.length,
 					modified: false
 				};
@@ -260,7 +278,9 @@ Filesystem.prototype.append = function( port, path, callback, extra )
 		{
 			path: path,
 			file: '',
-			type: 'out',
+			in: false,
+			out: true,
+			random: false,
 			pof: 0,
 			modified: true
 		};
@@ -274,7 +294,7 @@ Filesystem.prototype.print = function( port, text, newLine )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type != 'out' )
+	if ( !file.out )
 		throw 'file_type_mismatch';
 	if ( newLine )
 		text += this.nextLine;
@@ -289,7 +309,7 @@ Filesystem.prototype.input = function( port, variables, commas )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type != 'in' )
+	if ( !file.in )
 		throw 'file_type_mismatch';
 	for ( var v = 0; v < variables.length; v++ )
 	{
@@ -341,7 +361,7 @@ Filesystem.prototype.lof = function( port )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type == 'random' )
+	if ( file.random )
 		throw 'file_type_mismatch';
 	return file.file.length;
 };
@@ -352,7 +372,7 @@ Filesystem.prototype.setPof = function( port, position )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type != 'out' )
+	if ( file.random )
 		throw 'file_type_mismatch';
 	if ( position < 0 || position > file.file.length )
 		throw 'illegal_function_call';
@@ -364,7 +384,7 @@ Filesystem.prototype.getPof = function( port )
 		throw 'illegal_function_call';
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
-	if ( file.type == 'random' )
+	if ( file.random )
 		throw 'file_type_mismatch';
 	return this.openFiles[ port ].pof;
 };
@@ -500,7 +520,7 @@ Filesystem.prototype.field = function( port, variables, fields )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type != 'random' )
+	if ( !file.random )
 		throw 'file_type_mismatch';
 	file.variables = variables;
 	file.fields = fields;
@@ -515,7 +535,7 @@ Filesystem.prototype.put = function( port, field )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type != 'random' )
+	if ( !file.random )
 		throw 'file_type_mismatch';
 	if ( typeof file.fieldsLength == 'undefined' )
 		throw 'illegal_function_call';
@@ -556,7 +576,7 @@ Filesystem.prototype.get = function( port, field )
 	if ( !this.openFiles[ port ] )
 		throw 'file_not_opened';
 	var file = this.openFiles[ port ];
-	if ( file.type != 'random' )
+	if ( !file.random )
 		throw 'file_type_mismatch';
 	if ( typeof file.fieldsLength == 'undefined' )
 		throw 'illegal_function_call';
@@ -787,7 +807,7 @@ Filesystem.prototype.dir = function( path )
 				{
 					if ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( filename, this.filterOut ) ) )
 					{
-						var line = this.getFileDescription( files.files[ f ], filename );
+						var line = this.getFileDescription( files.files[ f ] );
 						this.aoz.currentScreen.currentTextWindow.print( line, true );
 					}
 				}
@@ -795,17 +815,21 @@ Filesystem.prototype.dir = function( path )
 		}
 	}
 };
-Filesystem.prototype.getFileDescription = function( file, name )
+Filesystem.prototype.getFileDescription = function( file )
 {
 	var line = '';
+	var name = file.name;
+	/*
 	var filename = name.substring( 0, Math.min( this.filenameWidth, name.length ) );
 	while( filename.length < this.filenameWidth )
 		filename += ' ';
 	if ( typeof file.length != 'undefined' )
 		line = '  ' + filename + file.length;
 	else
-		line = '* ' + filename;
+		line = '* ' + filename;	
 	return line;
+	*/
+	return name;
 };
 Filesystem.prototype.filter = function( name, filter )
 {
@@ -867,9 +891,8 @@ Filesystem.prototype.dirFirst$ = function( path )
 		{
 			if ( this.filter( filename, files.filter ) )
 			{
-				if ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( filename, this.filterOut ) ) )
+				if ( filename != '__size__' && ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( filename, this.filterOut ) ) ) )
 				{
-					files.files[ filename ].name = filename;
 					this.fileList.push( files.files[ filename ] );
 				}
 			}
@@ -884,7 +907,7 @@ Filesystem.prototype.dirNext$ = function()
 	if ( this.fileListPosition < this.fileList.length )
 	{
 		var file = this.fileList[ this.fileListPosition++ ];
-		return this.getFileDescription( file, file.name );
+		return this.getFileDescription( file );
 	}
 	return '';
 };

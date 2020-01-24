@@ -1710,6 +1710,7 @@ AOZ.prototype.input = function( args )
 		this.currentScreen.currentTextWindow.print( args.text );
 	else
 		this.currentScreen.currentTextWindow.print( '?' );
+	this.currentScreen.currentTextWindow.print( ' ' );
 	this.inputXCursor = this.currentScreen.currentTextWindow.xCursor;
 	this.currentScreen.currentTextWindow.anchorYCursor();
 };

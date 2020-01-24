@@ -26,8 +26,9 @@
  * @author FL
  * @date first pushed on 27/10/2019
  */
-#include_file:"ilbm.js-master/iff.js"
-#include_file:"ilbm.js-master/jdataview.js"
+#include_javascript:"ilbm.js-master/iff.js"
+#include_javascript:"ilbm.js-master/jdataview.js"
+#warning_off:"instruction_not_implemented"
 
 {
     // Base initilizations
@@ -836,6 +837,7 @@
 Instruction "load image", _file$, _number, _tags
 {
 	#waiting
+	#add_to_filesystem:"%_file$"
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadImage",waitFunction:"load_wait",args:[%_file$,%_number,false,%_tags]};
 }
 End Instruction
@@ -843,6 +845,7 @@ End Instruction
 Instruction "load iff", _file$, _number, _tags
 {
 	#waiting
+	#add_to_filesystem:"%_file$"
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadImage",waitFunction:"load_wait",args:[%_file$,%_number,false,%_tags]};
 }
 End Instruction
@@ -850,6 +853,7 @@ End Instruction
 Instruction "load", _file$, _bank_number, _tags
 {
 	#waiting
+	#add_to_filesystem:"%_file$"
 	var extension = this.aoz.utilities.getFilenameExtension( %_file$ );
 	var functionName = 'load' + extension.toUpperCase();
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:functionName,waitFunction:"load_wait",args:[%_file$,%_bank_number,%_tags]};
@@ -860,6 +864,7 @@ End Instruction
 Instruction "track load", _file$, _address, _tags
 {
 	#notimplemented
+	#add_to_filesystem:"%_file$"
 	//#waiting
 	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadTrack",waitFunction:"load_wait",args:[%_file$,%address,%_tags]};
 }
@@ -867,6 +872,7 @@ End Instruction
 Instruction "med load", _file$, _address, _tags
 {
 	#notimplemented
+	#add_to_filesystem:"%_file$"
 	//#waiting
 	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadMed",waitFunction:"load_wait",args:[%_file$,%address,%_tags]};
 }
@@ -875,6 +881,7 @@ End Instruction
 Instruction "bload", _file$, _address, _tags
 {
 	#waiting
+	#add_to_filesystem:"%_file$"
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"bLoad,waitFunction":"load_wait",args:[%_file$,%address,%_tags]};
 }
 End Instruction
@@ -887,6 +894,7 @@ End Instruction
 Instruction "pload", _file$, _number1 To _number2
 {
 	#notimplemented
+	#add_to_filesystem:"%_file$"
 	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"saveBinary", waitFunction:"load_wait",args:[%_file$,%_tags]};
 }
 End Instruction
@@ -910,18 +918,21 @@ End Instruction
 Instruction "open random", _number, _string$
 {
 	#waiting
+	#add_to_filesystem:"%_string$"
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openRandom", waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "open in", _number, _string$
 {
 	#waiting
+	#add_to_filesystem:"%_string$"
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openIn",waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "open out", _number, _string$
 {
 	#waiting
+	#add_to_filesystem:"%_string$"
 	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openOut",waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
@@ -1002,21 +1013,17 @@ Function "fsel$", _param1$, _param2$, _param3$, _param4$
 End Function( {''} ) 
 
 Function "dir first$", _param1$
-{
-	#notimplemented
+{	
 }
-End Function( {'this.aoz.filesystem.dirFirst$(%_param1$)'} ) 
+End Function( {this.aoz.filesystem.dirFirst$(%_param1$)} ) 
 Function "dir next$"
 {
-	#notimplemented
 }
-End Function( {'this.aoz.filesystem.dirNext$()'} ) 
-
+End Function( {this.aoz.filesystem.dirNext$()} ) 
 Function "exist", _param1$
 {
-	#notimplemented
 }
-End Function( {'this.aoz.filesystem.exist(%_param1$)'} ) 
+End Function( {this.aoz.filesystem.exist(%_param1$)} ) 
 
 Instruction "ldir/w", _param$
 {

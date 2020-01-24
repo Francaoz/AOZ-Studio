@@ -26,8 +26,9 @@
  * @author FL
  * @date first pushed on 27/10/2019
  */
-#include_file:"howler.js-master/dist/howler.js"
-#include_file:"howler.js-master/dist/howler.spatial.min.js"
+#include_javascript:"howler.js-master/dist/howler.js"
+#include_javascript:"howler.js-master/dist/howler.spatial.min.js"
+#warning_off:"instruction_not_implemented"
 
 //
 // Initialization

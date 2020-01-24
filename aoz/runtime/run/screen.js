@@ -157,7 +157,7 @@ function Screen( aoz, renderer, contextName, definition )
 			&& this.numberOfColors != 256 && this.numberOfColors != 4096 )
 			throw 'illegal_function_call';
 	}
-	if ( this.numberOfColors == 64 || this.pixelMode.indexOf( 'hbm' ) >= 0 )
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() != 'pc' && this.numberOfColors == 64 || this.pixelMode.indexOf( 'hbm' ) >= 0 )
 	{
 		this.halfBrightMode = true;
 		for ( var p = 0; p < 32; p++ )
@@ -645,8 +645,8 @@ Screen.prototype.setColour = function( number, color )
 			throw 'illegal_function_call';
 		number = number % this.numberOfColors;
 		this.palette[ number ] = this.utilities.getModernColorString( color, this.aoz.manifest.compilation.useShortColors );
-		if ( this.halfBrightMode && p < 32 )
-			this.setHalfBrightColor( p );
+		if ( this.halfBrightMode && number < 32 )
+			this.setHalfBrightColor( number );
 	}
 };
 Screen.prototype.getColour = function( number )
@@ -1183,8 +1183,16 @@ Screen.prototype.box = function( rectangle )
 	this.context.strokeRect( zone.x, zone.y, zone.width, zone.height );
 	this.endDrawing();
 
-	this.grPosition.x = rectangle.x + rectangle.width;
-	this.grPosition.y = rectangle.y + rectangle.height;
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() == 'pc' )
+	{
+		this.grPosition.x = rectangle.x + rectangle.width;
+		this.grPosition.y = rectangle.y + rectangle.height;
+	}
+	else
+	{
+		this.grPosition.x = rectangle.x;
+		this.grPosition.y = rectangle.y;
+	}
 };
 Screen.prototype.bar = function( rectangle )
 {
@@ -1208,8 +1216,16 @@ Screen.prototype.bar = function( rectangle )
 	}
 	this.endDrawing();
 
-	this.grPosition.x = rectangle.x + rectangle.width;
-	this.grPosition.y = rectangle.y + rectangle.height;
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() == 'pc' )
+	{
+		this.grPosition.x = rectangle.x + rectangle.width;
+		this.grPosition.y = rectangle.y + rectangle.height;
+	}
+	else
+	{
+		this.grPosition.x = rectangle.x;
+		this.grPosition.y = rectangle.y;
+	}
 };
 Screen.prototype.circle = function( rectangle, angle1, angle2 )
 {

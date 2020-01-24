@@ -26,9 +26,9 @@
  * @author BP - FL
  * @date first pushed on 24/12/2019
  */
-#include_folder:"3D"
-#need_file:"3D/three.min.js"	
-#need_file:"3D/loaders/GLTFLoader.js"
+#include_javascript_folder:"3D"
+#need_javascript_file:"3D/three.min.js"	
+#need_javascript_file:"3D/loaders/GLTFLoader.js"
 #need_server
 
 //

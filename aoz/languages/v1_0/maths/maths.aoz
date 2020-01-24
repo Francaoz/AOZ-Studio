@@ -1,0 +1,170 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Rainbow Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+#warning_off:"instruction_not_implemented"
+
+//
+// Initialization
+//
+{
+	this.aoz.maths = this;
+}
+
+// Instructions
+////////////////////////////////////////////////////////////////
+Instruction "fix", _a
+{
+	this.aoz.fix=%_a;
+}
+End Instruction
+
+Instruction "radian"
+{
+	this.aoz.degreeRadian=1.0;
+}
+End Instruction
+
+Instruction "degree"
+{
+	this.aoz.degreeRadian=Math.PI/180.0;
+}
+End Instruction
+
+// Functions
+Function "rnd", _n
+{
+}
+End Function( {this.aoz.rnd(%_n)} )
+
+Function "randomize", _seed
+{
+}
+End Function( {this.aoz.randomize(%_seed)} )
+
+Function "sgn", _a
+{
+}
+End Function( {(%_a==0?0:(%_a<0?-1:1))} )
+
+Function "abs", _a
+{
+}
+End Function( {Math.abs(%_a)} )
+
+Function "int", _a
+{
+}
+End Function( {Math.floor(%_a)} )
+
+Function "pi#", _a
+{
+}
+End Function( {Math.PI} )
+
+Function "min", _a, _b
+{
+}
+End Function( {(%_a<%_b?%_a:%_b)} )
+Function "min", _a$, _b$
+{
+	#returnstring
+}
+End Function( {(%_a$<%_b$?%_a$:%_b$)} )
+Function "max", _a, _b
+{
+}
+End Function( {(%_a>%_b?%_a:%_b)} )
+Function "max", _a$, _b$
+{
+	#returnstring
+}
+End Function( {(%_a$>%_b$?%_a$:%_b$)} )
+
+Function "sin", _angle
+{
+}
+End Function( {Math.sin(%_angle*this.aoz.degreeRadian)} )
+Function "cos", _angle
+{
+}
+End Function( {Math.cos(%_angle*this.aoz.degreeRadian)} )
+Function "tan", _angle
+{
+	#errors
+}
+End Function( {Math.tan(%_angle*this.aoz.degreeRadian)} )
+
+Function "asin", _angle
+{
+}
+End Function( {(Math.asin(%_angle)/this.aoz.degreeRadian)} )
+Function "acos", _angle
+{
+}
+End Function( {(Math.acos(%_angle)/this.aoz.degreeRadian)} )
+Function "atan", _angle
+{
+}
+End Function( {(Math.atan(%_angle)/this.aoz.degreeRadian)} )
+
+Function "hsin", _angle
+{
+}
+End Function( {Math.sinh(%_angle*this.aoz.degreeRadian)} )
+Function "hcos", _angle
+{
+}
+End Function( {Math.cosh(%_angle/*this.aoz.degreeRadian)} )
+Function "htan", _angle
+{
+	#errors
+}
+End Function( {Math.tan(h%_angle*this.aoz.degreeRadian)} )
+
+Function "sqr", _a
+{
+	#errors
+}
+End Function( {Math.sqrt(%_a)} )
+
+Function "log", _a
+{
+	#errors
+}
+End Function( {(Math.log(%_a)*0.434294481903251)} )
+Function "ln", _a
+{
+	#errors
+}
+End Function( {Math.log(%_a)} )
+Function "exp", _a
+{
+	#errors
+}
+End Function( {Math.exp(%_a)} )
+

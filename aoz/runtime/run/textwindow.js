@@ -617,19 +617,19 @@ TextWindow.prototype.setCursor = function( onOff )
 };
 TextWindow.prototype.cursorUp = function()
 {
-	this.cMove( 0, -1 );
+	this.cMove( { y: -1 } );
 };
 TextWindow.prototype.cursorDown = function()
 {
-	this.cMove( 0, 1 );
+	this.cMove( { y: 1 } );
 };
 TextWindow.prototype.cursorLeft = function()
 {
-	this.cMove( -1, 0 );
+	this.cMove( { x: -1 } );
 };
 TextWindow.prototype.cursorRight = function()
 {
-	this.cMove( 1, 0 );
+	this.cMove( { x: 1 } );
 };
 TextWindow.prototype.cursorMove = function( distance )
 {
@@ -970,7 +970,6 @@ TextWindow.prototype.centre = function( text )
 	this.cursorOff();
 	this.xCursor = Math.floor( this.lineWidth / 2 ) - Math.floor( l / 2 );
 	this.print( text, false, true );
-	this.xCursor += text.length;
 	this.cursorOn();
 };
 TextWindow.prototype.paper$ = function( value )
@@ -1233,6 +1232,7 @@ TextWindow.prototype.print = function( text, newLine, centre )
 
 	while( position < text.length )
 	{
+		var cCode = text.charCodeAt( position );
 		var c = text.charAt( position++ );
 		if ( c == '\t' )
 		{
@@ -1268,11 +1268,14 @@ TextWindow.prototype.print = function( text, newLine, centre )
 				}
 			}
 		}
-		line += c;
-		if ( this.xCursor + line.length >= this.lineWidth )
+		if ( cCode != 13 )
 		{
-			this.printLine( line, this.paper, this.pen, this.writing, true );
-			line = '';
+			line += c;
+			if ( this.xCursor + line.length >= this.lineWidth )
+			{
+				this.printLine( line, this.paper, this.pen, this.writing, true );
+				line = '';
+			}
 		}
 	}
 	if ( line != '' )
