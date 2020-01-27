@@ -1,11 +1,11 @@
 /*@****************************************************************************
 *
-*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗
 *  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
 *  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
 *  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
 *  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
-*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝
 *
 ****************************************************************************@*/
 /** @file
@@ -15,7 +15,7 @@
  */
 {
 	// Version of the manifest
-	version: "7"
+	version: "8"
 
 	// Informations about the application
 	infos:
@@ -58,7 +58,7 @@
 		scaleY: 2						// Scaling of canvas in the browser. Does not affect coordinates within the AOZ program
 		screenScale: 4					// Internal scaling of screens. Improves readability, does not affect AOZ program
 										// Usually, to get the best results, screenScale should be equal to scaleX and scaleY
-										// 0-> the AOZ screen will be resized to the size of the canvas on screen 
+										// 0-> the AOZ screen will be resized to the size of the canvas on screen
 										// (only in full-page/full-screen mode + PC mode, and only if the screen 'hardware' coordinates X and Y are both 0)
 										// 1-> the internal AOZ screen will be the same size as the size specified in Screen Open
 										// 2-> the internal AOZ screen will be the size specified in Screen Open * 2 etc.
@@ -71,7 +71,7 @@
 		fullScreen: true				// Allows passage to full-screen by a user interaction if the application is ran in the browser (security measure), or goes direct in full-screen for wrapped executables.
 		keepProportions: true			// For full-screen/full-page only, will maintain the width and height ratio calculated from the display.width / display.height value in this section. If not set, the display will match the size of the browser window and the application will be distorted.
 		fullScreenIcon: true			// Displays a 'switch to full-screen' 'quit full-screen' icon if the application is in full-page / full-screen mode AND both "fullScreen" and "fullPage" are true
-										// Image is resized to a size calculated from the current width of the browser window divided by the "display.width" property 
+										// Image is resized to a size calculated from the current width of the browser window divided by the "display.width" property
 		fullScreenIconX: -34			// Horizontal position of the icon, positive means on the left, negative values are subtracted from the width of the browser window
 		fullScreenIconY: 2				// Vertical position of the icon, positive means on the top, negative values are subtracted from the height of the browser window
 		fullScreenIconImage: "./runtime/resources/full_screen.png"		// The path to the image to use for full-screen, can be semi-transparent, here 32x32
@@ -86,7 +86,7 @@
 										// Set it higher if your game contains small sprites... (for total compatibility with Amiga, leave it to 1, images are small)
 		collisionAlphaThreshold: 1		// Level of alpha for which a pixel is considered 'not transparent' and will generate a collision ( 0 being transparent, and 255 being opaque)
 	}
-	
+
 	// Sounds
 	sounds:
 	{
@@ -100,7 +100,7 @@
 	// Gamepad
 	gamepad:
 	{
-		mapping: 	
+		mapping:
 		{
 			"up": 38					// Javascript key to press going up
 			"down": 40					// Javascript key to press going down
@@ -118,13 +118,13 @@
 
 	// Fonts
 	fonts:
-	{	
+	{
 		listFonts: "amiga"				// "PC" or "Amiga", =Font$ will return extended information for PC, and 40 characters strings for Amiga
-		
+
 		// Available Amiga fonts can be found in the "aoz/fonts/amiga" folder.
-		// Simply insert the name of the font in lowercase as found in the fonts/amiga 
+		// Simply insert the name of the font in lowercase as found in the fonts/amiga
 		// folder and the compiler will do the rest!
-		amiga: 
+		amiga:
 		[
 			"times"
 		]
@@ -177,11 +177,11 @@
 				},
 				cursorImage: "./runtime/resources/cursor_amiga.png"	// The path to the image to use as cursor from the aoz folder. Can also be an absolute path.
 				cursorColors: 										// New in manifest V6: list the colors AND alpha of the cursor (it is remapped)
-				[													// You can have a semi-transparent cursor much more modern														
+				[													// You can have a semi-transparent cursor much more modern
 					{ r: 68, g:68, b:0, a: 128 }					// and less intrusive...
 					{ r: 136, g:136, b:0, a: 128 }					// Put as many colors as you like! Colors are updated every FPS. At end of list, pointer resets to zero.
-					{ r: 187, g:187, b:0, a: 128 }					// A white boring cursor is very possible, any shape, the shape being defined in 
-					{ r: 221, g:221, b:0, a: 128 }					// the 'aoz/runtime/resources/cursor.png' file, the picture being resized to the size indicated 
+					{ r: 187, g:187, b:0, a: 128 }					// A white boring cursor is very possible, any shape, the shape being defined in
+					{ r: 221, g:221, b:0, a: 128 }					// the 'aoz/runtime/resources/cursor.png' file, the picture being resized to the size indicated
 					{ r: 238, g:238, b:0, a: 128 }					// above in fontWidth and fontHeight. Keep it small, only two colors, transparent and $FFFFFF! ;)
 					{ r: 255, g:255, b:34, a: 128 }
 					{ r: 255, g:255, b:136, a: 128 }

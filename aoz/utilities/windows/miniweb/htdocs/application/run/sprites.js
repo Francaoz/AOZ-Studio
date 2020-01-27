@@ -84,7 +84,7 @@ Sprites.prototype.sprite = function( index, x, y, image )
 	x = typeof x == 'undefined' ? sprite.xNew : x;
 	y = typeof y == 'undefined' ? sprite.yNew : y;
 	image = typeof image == 'undefined' ? sprite.imageNew : image;
-	this.banks.getImage( image, this.aoz.currentContextName );			// Check if undefined
+	this.banks.getImage( 'images', image, this.aoz.currentContextName );			// Check if undefined
 	sprite.xNew = x;
 	sprite.yNew = y;
 	sprite.imageNew = image;
@@ -384,7 +384,7 @@ Sprites.prototype.col = function( number )
 Sprites.prototype.setSpriteCollisionData = function( sprite )
 {
 	var collisions = sprite.collisions;
-	var image = this.getImage( sprite.imageNew );
+	var image = this.getImage( 'images', sprite.imageNew );
 	if ( image )
 	{
 		if ( sprite.angleNew == 0 )
@@ -418,7 +418,7 @@ Sprites.prototype.setSpriteCollisionData = function( sprite )
 Sprites.prototype.setBobCollisionData = function( bob, screen )
 {
 	var collisions = bob.collisions;
-	var image = this.getImage( bob.imageNew );
+	var image = this.getImage( 'images', bob.imageNew );
 	if ( image )
 	{
 		var xHard = bob.xNew * screen.scale.x + screen.position.x;
@@ -479,8 +479,8 @@ Sprites.prototype.isColliding = function( object1, object2 )
 
 	if ( colliding && !this.collisionBoxed && ( object1.angleNew == 0 && object2.angleNew == 0 ) )		// TODO
 	{
-		var maskDefinition1 = this.getCollisionMask( this.getImage( object1.imageNew ) );
-		var maskDefinition2 = this.getCollisionMask( this.getImage( object2.imageNew ) );
+		var maskDefinition1 = this.getCollisionMask( this.getImage( 'images', object1.imageNew ) );
+		var maskDefinition2 = this.getCollisionMask( this.getImage( 'images', object2.imageNew ) );
 		if ( !maskDefinition1 || !maskDefinition2 )
 			return colliging;
 

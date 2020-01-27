@@ -18,7 +18,7 @@
 /** @file
  *
  * AOZ Runtime
- * 
+ *
  * True Color Screens Class
  *
  * @author FL (Francois Lionet)
@@ -33,17 +33,17 @@ function Screen( aoz, renderer, contextName, definition )
 	this.utilities = aoz.utilities;
 	this.sprites = aoz.sprites;
 	this.banks = aoz.banks;
-	this.position = 
-	{ 
-		x: this.aoz.manifest.default.screen.x, 
-		y: this.aoz.manifest.default.screen.y, 
-		z: 0, 
+	this.position =
+	{
+		x: this.aoz.manifest.default.screen.x,
+		y: this.aoz.manifest.default.screen.y,
+		z: 0,
 	};
-	this.dimension = 
-	{ 
-		width: this.aoz.manifest.default.screen.width, 
-		height: this.aoz.manifest.default.screen.height, 
-		depth: 0 
+	this.dimension =
+	{
+		width: this.aoz.manifest.default.screen.width,
+		height: this.aoz.manifest.default.screen.height,
+		depth: 0
 	};
 	this.scale = { x: 1, y: 1, z: 1 };
 	this.skew = { x: 0, y: 0, z: 0 };
@@ -55,12 +55,12 @@ function Screen( aoz, renderer, contextName, definition )
 	this.skew = { x: 0, y: 0, z: 0 };
 
 	if ( definition.position )
-	{ 
+	{
 		this.position.x = typeof definition.position.x != 'undefined' ? definition.position.x : this.definition.x;
 		this.position.y = typeof definition.position.y != 'undefined' ? definition.position.y : this.definition.y;
 	}
 	if ( definition.dimension )
-	{ 		 
+	{
 		this.dimension.width = typeof definition.dimension.width != 'undefined' ? definition.width : this.definition.width;
 		this.dimension.height = typeof definition.dimension.height != 'undefined' ? definition.height : this.defintion.height;
 		if ( this.dimension.width <= 0 || this.dimension.height <= 0 )
@@ -69,35 +69,35 @@ function Screen( aoz, renderer, contextName, definition )
 		{
 			if ( this.dimension.width >= 1024 || this.dimension.height >= 1024 )
 				throw 'illegal_function_call';
-		}		
+		}
 	}
 	if ( definition.display )
-	{ 		 
+	{
 		this.display.width = typeof definition.display.width != 'undefined' ? display.width : this.display.width;
 		this.display.height = typeof definition.display.height != 'undefined' ? display.height : this.display.height;
 	}
 	if ( definition.angle )
-	{ 
+	{
 		this.angle.z = typeof definition.angle.z != 'undefined' ? definition.angle.z : this.angle.z;
 	}
 	if ( definition.hotSpot )
-	{ 
+	{
 		this.hotSpot.x = typeof definition.hotSpot.x != 'undefined' ? definition.hotSpot.x : this.hotSpot.x;
 		this.hotSpot.y = typeof definition.hotSpot.y != 'undefined' ? definition.hotSpot.y : this.hotSpot.y;
 	}
 	if ( definition.offset )
-	{ 
+	{
 		this.offset.x = typeof definition.offset.x != 'undefined' ? definition.offset.x : this.offset.x;
 		this.offset.y = typeof definition.offset.y != 'undefined' ? definition.offset.y : this.offset.y;
 	}
 	if ( definition.skew )
-	{ 
+	{
 		this.skew.x = typeof definition.skew.x != 'undefined' ? definition.skew.x : this.skew.x;
 		this.skew.y = typeof definition.skew.y != 'undefined' ? definition.skew.y : this.skew.y;
 	}
-	
+
 	if ( definition.clip )
-	{ 
+	{
 		this.clip = this.utilities.getZone( definition.clip, this.dimension, this.scale );;
 	}
 
@@ -157,7 +157,7 @@ function Screen( aoz, renderer, contextName, definition )
 			&& this.numberOfColors != 256 && this.numberOfColors != 4096 )
 			throw 'illegal_function_call';
 	}
-	if ( this.numberOfColors == 64 || this.pixelMode.indexOf( 'hbm' ) >= 0 )
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() != 'pc' && this.numberOfColors == 64 || this.pixelMode.indexOf( 'hbm' ) >= 0 )
 	{
 		this.halfBrightMode = true;
 		for ( var p = 0; p < 32; p++ )
@@ -180,13 +180,13 @@ function Screen( aoz, renderer, contextName, definition )
 	this.linePattern = [];
 
 	// Create canvas
-	this.scale = 
+	this.scale =
 	{
 		x: typeof this.aoz.manifest.display.screenScale != 'undefined' ? aoz.manifest.display.screenScale : 1,
 		y: typeof this.aoz.manifest.display.screenScale != 'undefined' ? aoz.manifest.display.screenScale : 1,
 		z: 1
 	};
-	this.renderScale = 
+	this.renderScale =
 	{
 		x: ( this.pixelMode.indexOf( 'hires' ) >= 0 ? 0.5 : 1 ),
 		y: ( this.pixelMode.indexOf( 'laced' ) >= 0 ? 0.5 : 1 ),
@@ -210,8 +210,8 @@ function Screen( aoz, renderer, contextName, definition )
 
 	// Bob context
 	this.bobsContext = new AOZContext( this.aoz, contextName, { sorted: true } );
-	this.bobsContext.addContext("v1_0_3d");
-this.bobsContext.addContext("v1_0_textwindows");
+	this.bobsContext.addContext("v1_0_textwindows");
+this.bobsContext.addContext("v1_0_3d");
 
 	this.bobsToUpdate = false;
 	this.bobsUpdateOn = true;
@@ -319,7 +319,7 @@ Screen.prototype.startDrawing = function()
 			this.context.clip();
 		}
 	}
-}; 
+};
 Screen.prototype.endDrawing = function( noCursor )
 {
 	this.toUpdate = true;
@@ -536,7 +536,7 @@ Screen.prototype.zone = function( number, position )
 			{
 				return z;
 			}
-		}	
+		}
 	}
 	return 0;
 };
@@ -582,7 +582,7 @@ Screen.prototype.setHalfBrightColor = function( p )
 };
 Screen.prototype.getPalette = function( index, mask )
 {
-	var screen = this.renderer.getScreen( index );
+	var screen = this.aoz.getScreen( index );
 	var b = 1;
 	for ( var c = 0; c < screen.palette.length; c++ )
 	{
@@ -647,8 +647,8 @@ Screen.prototype.setColour = function( number, color )
 			throw 'illegal_function_call';
 		number = number % this.numberOfColors;
 		this.palette[ number ] = this.utilities.getModernColorString( color, this.aoz.manifest.compilation.useShortColors );
-		if ( this.halfBrightMode && p < 32 )
-			this.setHalfBrightColor( p );
+		if ( this.halfBrightMode && number < 32 )
+			this.setHalfBrightColor( number );
 	}
 };
 Screen.prototype.getColour = function( number )
@@ -836,7 +836,7 @@ Screen.prototype.pasteCanvas = function( canvas, rectangle )
 	*/
 	this.endDrawing();
 };
-Screen.prototype.pasteImage = function( number, position, scale, angle, tags, contextName )
+Screen.prototype.paste = function( bankName, number, position, scale, angle, tags, contextName )
 {
 	var x = typeof position.x != 'undefined' ? position.x * this.scale.x : 0.0;
 	var y = typeof position.y != 'undefined' ? position.y * this.scale.y : 0.0;
@@ -850,10 +850,19 @@ Screen.prototype.pasteImage = function( number, position, scale, angle, tags, co
 	var angleZ = !isNaN( angle ) ? angle : 0;
 
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
-	var image = this.banks.getImage( number, contextName );
+	var hRev = false;
+	var vRev = false;
+	if ( typeof number == 'number' )
+	{
+		hRev = ( number & 0x8000 ) != 0;
+		vRev = ( number & 0x4000 ) != 0;
+		number &= 0x3FFF;
+	}
+	var image = this.banks.getImage( bankName, number, contextName );
+
 	if ( image )
 	{
-		var canvas = image.getCanvas();
+		var canvas = image.getCanvas( hRev, vRev );
 
 		this.startDrawing();
 		this.context.imageSmoothingEnabled= false;
@@ -1185,8 +1194,16 @@ Screen.prototype.box = function( rectangle )
 	this.context.strokeRect( zone.x, zone.y, zone.width, zone.height );
 	this.endDrawing();
 
-	this.grPosition.x = rectangle.x + rectangle.width;
-	this.grPosition.y = rectangle.y + rectangle.height;
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() == 'pc' )
+	{
+		this.grPosition.x = rectangle.x + rectangle.width;
+		this.grPosition.y = rectangle.y + rectangle.height;
+	}
+	else
+	{
+		this.grPosition.x = rectangle.x;
+		this.grPosition.y = rectangle.y;
+	}
 };
 Screen.prototype.bar = function( rectangle )
 {
@@ -1210,8 +1227,16 @@ Screen.prototype.bar = function( rectangle )
 	}
 	this.endDrawing();
 
-	this.grPosition.x = rectangle.x + rectangle.width;
-	this.grPosition.y = rectangle.y + rectangle.height;
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() == 'pc' )
+	{
+		this.grPosition.x = rectangle.x + rectangle.width;
+		this.grPosition.y = rectangle.y + rectangle.height;
+	}
+	else
+	{
+		this.grPosition.x = rectangle.x;
+		this.grPosition.y = rectangle.y;
+	}
 };
 Screen.prototype.circle = function( rectangle, angle1, angle2 )
 {
@@ -1242,7 +1267,7 @@ Screen.prototype.ellipse = function( rectangle, angle1, angle2, rotation )
 	this.grPosition.y = rectangle.y;
 };
 Screen.prototype.polyline = function( coords )
-{	
+{
 	var x = typeof coords[ 0 ] != 'undefined' ? coords[ 0 ] : this.grPosition.x;
 	var y = typeof coords[ 1 ] != 'undefined' ? coords[ 1 ] : this.grPosition.y;
 
@@ -1324,7 +1349,7 @@ Screen.prototype.createPattern = function( pattern )
 				var mask = 0x80 >> x;
 				for ( xx = 0; xx < this.scale.x; xx++ )
 				{
-					if ( ( source[ y ] & mask ) != 0 )
+					if ( ( source[ y ] & mask ) == 0 )
 					{
 						var offset = ( y * this.scale.y + yy ) * 32 * this.scale.x + ( x * this.scale.x + xx ) * 4;
 						imageData.data[ offset ] = colorInk.r;
@@ -1382,6 +1407,57 @@ Patterns =
 
 
 //////////////////////////////////////////////////////////////////////
+// Icons
+//////////////////////////////////////////////////////////////////////
+Screen.prototype.getIconPalette = function( mask, contextName )
+{
+	var self = this;
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	var palette = this.banks.getIconPalette( contextName );
+	for ( var p = 0; p < Math.min( this.numberOfColors, palette.length ); p++ )
+	{
+		if ( typeof palette[ p ] != 'undefined' )
+		{
+			if ( typeof mask == 'undefined' )
+				pokeColor( p, palette[ p ] );
+			else if ( ( p & mask ) != 0 )
+				pokeColor( p, palette[ p ] );
+		}
+	}
+	function pokeColor( number, color )
+	{
+		self.palette[ number ] = color;
+		if ( number < 16 && self.numberOfColors <= 16 )
+			self.palette[ number + 16 ] = color;
+	}
+};
+Screen.prototype.getIcon = function( index, rectangle, tags, contextName )
+{
+	var zone = this.utilities.getZone( rectangle, this.dimension, this.scale );
+
+	var canvas = document.createElement( 'canvas' );
+	canvas.width = rectangle.width;
+	canvas.height = rectangle.height;
+	var context = canvas.getContext( '2d' );
+	context.imageSmoothingEnabled= false;
+	this.startDrawing();
+	context.drawImage( this.canvas, zone.x, zone.y, zone.width, zone.height, 0, 0, canvas.width, canvas.height );
+	this.endDrawing();
+
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	this.banks.insertIcon( index, undefined, tags, contextName, undefined, canvas );
+};
+Screen.prototype.pasteIcon = function( number, x, y, scaleX, scaleY, angle, tags, contextName )
+{
+	x = typeof x != 'undefined' ? x : 0.0;
+	y = typeof y != 'undefined' ? y : 0.0;
+	scaleX = scaleX ? scaleX : 1.0;
+	scaleY = scaleY ? scaleY : scaleX;
+	angle = !isNaN( angle ) ? angle : 0;
+	this.paste( 'icons', number, { x: x, y: y }, { x: scaleX, y: scaleY }, angle, tags, contextName );
+};
+
+//////////////////////////////////////////////////////////////////////
 // Bobs
 //////////////////////////////////////////////////////////////////////
 Screen.prototype.getBobFromIndex = function( index, contextName )
@@ -1416,7 +1492,7 @@ Screen.prototype.bobOff = function( index, contextName )
 	}
 	else
 	{
-		this.bobsContext.deleteElement( contextName, index, 'bob_not_defined' );
+		this.bobsContext.deleteElement( contextName, index );
 		this.bobsToUpdate = true;
 		this.setModified();
 	}
@@ -1469,11 +1545,11 @@ Screen.prototype.isBob = function( index, contextName )
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	return this.bobsContext.getElement( contextName, index ) != null;
 };
-Screen.prototype.getBobPalette = function( mask, contextName )
+Screen.prototype.getImagePalette = function( bankName, mask, contextName )
 {
 	var self = this;
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
-	var palette = this.banks.getImagePalette( contextName );
+	var palette = this.banks.getImagePalette( bankName, contextName );
 	for ( var p = 0; p < Math.min( this.numberOfColors, palette.length ); p++ )
 	{
 		if ( typeof palette[ p ] != 'undefined' )
@@ -1561,60 +1637,77 @@ Screen.prototype.setBobsPriorityReverse = function( on_off, contextName )
 };
 Screen.prototype.sortBobsPriority = function( contextName )
 {
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	if ( this.bobsPriorityOn )
 	{
 		if ( this.bobsPriorityReverseOn )
 		{
-			this.bobsContext.sort( undefined, function( b1, b2 )
+			this.bobsContext.sort( contextName, function( b1, b2 )
 			{
-				if ( b1.y == b2.y )
+				if ( b1.position.y == b2.position.y )
 					return 0;
-				return ( b1.y > b2.y ) ? -1 : 1;
+				return ( b1.position.y > b2.position.y ) ? -1 : 1;
 			} );
 		}
 		else
 		{
-			this.bobsContext.sort( undefined, function( b1, b2 )
+			this.bobsContext.sort( contextName, function( b1, b2 )
 			{
-				if ( b1.y == b2.y )
+				if ( b1.position.y == b2.position.y )
 					return 0;
-				return ( b1.y < b2.y ) ? -1 : 1;
+				return ( b1.position.y < b2.position.y ) ? -1 : 1;
 			} );
 		}
 	}
 };
-Screen.prototype.getBob = function( index, rectangle, tags, contextName )
+Screen.prototype.getImage = function( bankName, index, rectangle, tags, contextName )
 {
 	var zone = this.utilities.getZone( rectangle, this.dimension, this.scale );
+	zone.width -= this.scale.x;
+	zone.height -= this.scale.y;
 
 	var canvas = document.createElement( 'canvas' );
 	canvas.width = zone.width;
 	canvas.height = zone.height;
 	var context = canvas.getContext( '2d' );
 	context.imageSmoothingEnabled= false;
-	this.parent.startDrawing();
-	context.drawImage( this.canvas, zone.x, zone.y, zone.width, zone.height, 0, 0, canvas.width, canvas.height );
-	this.parent.endDrawing();
+	this.startDrawing();
+	context.drawImage( this.canvas, zone.x, zone.y, zone.width, zone.height, 0, 0, zone.width, zone.height );
+	this.endDrawing();
 
-	this.utilities.remapBlock( context, [ { r: 0, g: 0, b: 0, a: 255 } ], [ { r: 0, g: 0, b: 0, a: 0 } ], { x: 0, y: 0, width: canvas.width, height: canvas.height } );
+	// Proper resize of canvas
+	if ( rectangle.width < zone.width || rectangle.height < zone.height )
+		this.utilities.resample_canvas( canvas, rectangle.width, rectangle.height, true );
 
-	contextName = typeof contextName == 'undefined' ? contextName : contextName;
-	this.banks.insertImage( index, undefined, tags, contextName, undefined, canvas );
+	if ( bankName != 'icons' )
+		this.utilities.remapBlock( context, [ { r: 0, g: 0, b: 0, a: 255 } ], [ { r: 0, g: 0, b: 0, a: 0 } ], { x: 0, y: 0, width: canvas.width, height: canvas.height } );
+
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	this.banks.insertImage( bankName, index, undefined, tags, contextName, undefined, canvas );
 };
 Screen.prototype.putBob = function( index, contextName )
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	var bob = this.bobsContext.getElement( contextName, index, 'bob_not_defined' );
-	this.pasteImage( bob.image, bob.position, bob.scale, bob.angle );
+	if ( bob.clipping )
+	{
+		this.context.save();
+		path = new Path2D();
+		path.rect( bob.clipping.x * this.scale.x, bob.clipping.y * this.scale.y, bob.clipping.width * this.scale.x, bob.clipping.height * this.scale.y );
+		this.context.clip( path );
+	}
+	this.paste( 'images', bob.image, bob.position, bob.scale, bob.angle );
+	if ( bob.clipping )
+		this.context.restore();
 };
-Screen.prototype.pasteBob = function( number, x, y, scaleX, scaleY, angle, tags, contextName )
+Screen.prototype.pasteImage = function( bankName, number, x, y, scaleX, scaleY, angle, tags, contextName )
 {
 	x = typeof x != 'undefined' ? x : 0.0;
 	y = typeof y != 'undefined' ? y : 0.0;
 	scaleX = scaleX ? scaleX : 1.0;
 	scaleY = scaleY ? scaleY : scaleX;
 	angle = !isNaN( angle ) ? angle : 0;
-	this.pasteImage( number, { x: x, y: y }, { x: scaleX, y: scaleY }, angle, tags, contextName );
+	this.paste( bankName, number, { x: x, y: y }, { x: scaleX, y: scaleY }, angle, tags, contextName );
 };
 
 //////////////////////////////////////////////////////////////////////

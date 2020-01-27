@@ -18,7 +18,7 @@
 /** @file
  *
  * AOZ Runtime
- * 
+ *
  * Renderer - to be improved and expanded...
  *
  * @author FL (Francois Lionet)
@@ -119,11 +119,21 @@ Renderer.prototype.setDoubleBuffer = function()
 {
 	this.doubleBuffer = true;
 };
+Renderer.prototype.autoback = function( mode )
+{
+	if ( !this.doubleBuffer )
+		throw 'illegal_function_call';
+	if ( mode == 0 || mode == 1 )
+		this.viewOn = false;
+	else
+		this.viewOn = true;
+};
 Renderer.prototype.screenSwap = function()
 {
 	if ( !this.doubleBuffer )
 		throw 'illegal_function_call';
-	this.render( true );
+	if ( !this.viewOn )
+		this.render( true );
 };
 Renderer.prototype.setModified = function()
 {
@@ -140,6 +150,7 @@ Renderer.prototype.setView = function( onOff )
 };
 Renderer.prototype.view = function( onOff )
 {
+	this.viewOn = true;
 	this.render( true );
 };
 Renderer.prototype.setScreenDisplay = function()
@@ -185,7 +196,8 @@ Renderer.prototype.render = function( force )
 {
 	var self = this;
 	force = typeof force == 'undefined' ? false : true;
-	if ( !this.rendering && ( ( !this.doubleBuffer && this.viewOn && this.modified ) || force ) )
+	force |= this.viewOn;
+	if ( !this.rendering && force )
 	{
 		this.rendering = true;
 		this.context.save();
@@ -264,19 +276,19 @@ Renderer.prototype.render = function( force )
 			// Rainbows
 			var rainbowsToRemove;
 			var rainbowsToDraw;
-			if ( this.aoz.rainbows )
+			if ( this.aoz.moduleRainbows )
 			{
 				var numberOfRainbows = 0;
 				var rainbows = [];
-				for ( var rainbow = this.aoz.rainbows.context.getFirstElement( this.aoz.currentContextName ); rainbow != null; rainbow = this.aoz.rainbows.context.getNextElement( this.aoz.currentContextName ) )
+				for ( var rainbow = this.aoz.moduleRainbows.context.getFirstElement( this.aoz.currentContextName ); rainbow != null; rainbow = this.aoz.moduleRainbows.context.getNextElement( this.aoz.currentContextName ) )
 					rainbows[ numberOfRainbows++ ] = rainbow;
 
-				if ( this.aoz.rainbows.mode == 'slow' )
-				{ 
+				if ( this.aoz.moduleRainbows.mode == 'slow' )
+				{
 					if ( numberOfRainbows )
 						rainbowsToDraw = rainbows;
-				}	
-				else if ( this.aoz.rainbows.mode == 'fast' )
+				}
+				else if ( this.aoz.moduleRainbows.mode == 'fast' )
 				{
 					if ( numberOfRainbows > 0 )
 					{
@@ -290,7 +302,7 @@ Renderer.prototype.render = function( force )
 							{
 								var rainbow = rainbows[ r ];
 								if ( countScreens == rainbow.zPosition && rainbow.screen )
-								{ 
+								{
 									if ( !screens[ r ] )
 									{
 										screens[ r ] = screen;
@@ -328,7 +340,7 @@ Renderer.prototype.render = function( force )
 								}
 							}
 						}
-					}			
+					}
 				}
 			}
 
@@ -396,7 +408,7 @@ Renderer.prototype.render = function( force )
 						{
 							if ( !bob.hidden && typeof bob.positionDisplay.x != 'undefined' && typeof bob.positionDisplay.y != 'undefined' && typeof bob.imageDisplay != 'undefined' )
 							{
-								var image = self.banks.getImage( bob.imageDisplay, bob.contextName );
+								var image = self.banks.getImage( 'images', bob.imageDisplay, bob.contextName );
 								if ( image )
 								{
 									var canvas = image.getCanvas( bob.hRev, bob.vRev );
@@ -404,6 +416,16 @@ Renderer.prototype.render = function( force )
 									var yBob = bob.positionDisplay.y * screen.displayScale.y * self.yRatioDisplay + yDrawScreen;
 									var xScale = xScaleScreen * bob.scaleDisplay.x * screen.scale.x;
 									var yScale = yScaleScreen * bob.scaleDisplay.y * screen.scale.y;
+									if ( bob.clipping )
+									{
+										self.context.save();
+										path = new Path2D();
+										path.rect( bob.clipping.x * screen.displayScale.x * self.xRatioDisplay + xDrawScreen,
+												   bob.clipping.y * screen.displayScale.y * self.yRatioDisplay + yDrawScreen,
+												   bob.clipping.width * screen.displayScale.x * self.xRatioDisplay,
+												   bob.clipping.height * screen.displayScale.y * self.yRatioDisplay );
+										self.context.clip( path );
+									}
 									if ( !screenRotated && ( bob.angleDisplay.z == 0 && bob.skewDisplay.x == 0 && bob.skewDisplay.y == 0 ) )
 									{
 										var deltaX = image.hotSpotX * screen.displayScale.x * xScale;
@@ -421,6 +443,8 @@ Renderer.prototype.render = function( force )
 										self.context.resetTransform();
 										self.context.rotate( 0 );
 									}
+									if ( bob.clipping )
+										self.context.restore();
 								}
 							}
 						} );
@@ -440,7 +464,7 @@ Renderer.prototype.render = function( force )
 			else if ( rainbowsToDraw )
 			{
 				for ( var r = 0; r < rainbowsToDraw.length; r++ )
-				{					
+				{
 					var rainbow = rainbowsToDraw[ r ];
 					rainbow.render( this.context, { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height } );
 				}
@@ -453,7 +477,7 @@ Renderer.prototype.render = function( force )
 		{
 			if ( !sprite.hidden && typeof sprite.xDisplay != 'undefined' && typeof sprite.yDisplay != 'undefined' && typeof sprite.imageDisplay != 'undefined' )
 			{
-				var image = self.banks.getImage( sprite.imageDisplay, sprite.contextName );
+				var image = self.banks.getImage( 'images', sprite.imageDisplay, sprite.contextName );
 				if ( image )
 				{
 					var canvas = image.getCanvas( sprite.hRev, sprite.vRev );

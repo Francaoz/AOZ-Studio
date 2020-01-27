@@ -1,3 +1,9 @@
+//
+// Help_18.AMOS - Converted to AOZ on the 27/01/2020-16:08:48
+//
+#manifest:"amiga"
+#speed:"safe"
+
 '**********************************  
 '*    AMOS Professional HELP 18   *               SUBJECTS COVERED 
 '*                                *
@@ -125,7 +131,6 @@ Do
       '
       '
       Rem *** end of inner loop
-      Wait Vbl
       '
    Until COUNT=0 or TIME=0
    If TIME<1

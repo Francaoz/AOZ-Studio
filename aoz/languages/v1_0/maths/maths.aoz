@@ -32,7 +32,7 @@
 // Initialization
 //
 {
-	this.aoz.maths = this;
+	this.aoz.moduleMaths = this;
 }
 
 // Instructions
@@ -61,10 +61,11 @@ Function "rnd", _n
 }
 End Function( {this.aoz.rnd(%_n)} )
 
-Function "randomize", _seed
+Instruction "randomize", _seed
 {
+	this.aoz.randomize(%_seed);
 }
-End Function( {this.aoz.randomize(%_seed)} )
+End Instruction
 
 Function "sgn", _a
 {
@@ -108,16 +109,16 @@ End Function( {(%_a$>%_b$?%_a$:%_b$)} )
 Function "sin", _angle
 {
 }
-End Function( {Math.sin(%_angle*this.aoz.degreeRadian)} )
+End Function( {Math.sin((%_angle)*this.aoz.degreeRadian)} )
 Function "cos", _angle
 {
 }
-End Function( {Math.cos(%_angle*this.aoz.degreeRadian)} )
+End Function( {Math.cos((%_angle)*this.aoz.degreeRadian)} )
 Function "tan", _angle
 {
 	#errors
 }
-End Function( {Math.tan(%_angle*this.aoz.degreeRadian)} )
+End Function( {Math.tan((%_angle)*this.aoz.degreeRadian)} )
 
 Function "asin", _angle
 {
@@ -135,16 +136,16 @@ End Function( {(Math.atan(%_angle)/this.aoz.degreeRadian)} )
 Function "hsin", _angle
 {
 }
-End Function( {Math.sinh(%_angle*this.aoz.degreeRadian)} )
+End Function( {Math.sinh((%_angle)*this.aoz.degreeRadian)} )
 Function "hcos", _angle
 {
 }
-End Function( {Math.cosh(%_angle/*this.aoz.degreeRadian)} )
+End Function( {Math.cosh((%_angle)/*this.aoz.degreeRadian)} )
 Function "htan", _angle
 {
 	#errors
 }
-End Function( {Math.tan(h%_angle*this.aoz.degreeRadian)} )
+End Function( {Math.tanh((%_angle)*this.aoz.degreeRadian)} )
 
 Function "sqr", _a
 {
@@ -167,4 +168,3 @@ Function "exp", _a
 	#errors
 }
 End Function( {Math.exp(%_a)} )
-

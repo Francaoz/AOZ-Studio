@@ -518,7 +518,7 @@ function AOZ( canvasId, manifest )
 							}
 							self.returns.pop();
 							break;
-	
+
 					}
 					ret = null;
 					self.loopCounter--;
@@ -994,12 +994,17 @@ AOZ.prototype.screenOpen = function( number, width, height, numberOfColors, pixe
 	screenDefinition.pixelMode = pixelMode;
 	screenDefinition.palette = palette;
 
-	if ( this.currentScreen )
+	// Close screen if same number?
+	var previousScreen = this.screensContext.getElement( this.currentContextName, number );
+	if ( previousScreen )
+		this.screenClose( number );
+	else if ( this.currentScreen && this.currentScreen.number >= 0  )
 		this.currentScreen.deactivate();
 	this.currentScreen = new Screen( this, this.renderer, this.currentContextName, screenDefinition );
 	this.currentScreen.number = number;
 	this.screensContext.setElement( this.currentContextName, this.currentScreen, number, true );
 	this.renderer.setModified();
+	return this.currentScreen;
 };
 AOZ.prototype.screenClose = function( number )
 {
@@ -1031,16 +1036,19 @@ AOZ.prototype.screenClose = function( number )
 		self.screensContext.deleteElement( self.currentContextName, screen );
 		self.currentScreen = self.screensContext.getLastElement( self.currentContextName );
 		if ( !self.currentScreen )
+		{
 			self.currentScreen = new Screen.ScreenEmpty( self );
+			self.currentScreen.number = -1;
+		}
 	}
 };
 AOZ.prototype.screenClone = function( number )
 {
-	var screen = this.getScreen( number );
+	//var screen = this.getScreen( number );
 	var oldScreen = this.currentScreen;
-	this.screenOpen( number, this.currentScreen.width, this.currentScreen.height, this.currentScreen.numberOfColors, this.currentScreen.pixelMode, this.currentScreen.palette );
+	var screen = this.screenOpen( number, this.currentScreen.width, this.currentScreen.height, this.currentScreen.numberOfColors, this.currentScreen.pixelMode, this.currentScreen.palette );
 	screen.setCloned( oldScreen );
-	this.screen( oldScreen.number );
+	this.setScreen( oldScreen.number );
 	this.renderer.setModified();
 };
 AOZ.prototype.setScreen = function( number )
@@ -1050,7 +1058,7 @@ AOZ.prototype.setScreen = function( number )
 		this.currentScreen.deactivate();
 	this.currentScreen = screen;
 	this.currentScreen.activate();
-};	
+};
 AOZ.prototype.getScreen = function( number )
 {
 	if ( typeof number == 'undefined' )
@@ -1079,7 +1087,7 @@ AOZ.prototype.screenIn = function( number, position )
 	{
 		return this.getScreen( number ).isIn( position ) ? number : -1;
 	}
-	for ( var s = this.screensContext.getLastElement( this.currentContextName ); s != null; s = this.screensContext.getNextElement( this.currentContextName ) )
+	for ( var screen = this.screensContext.getLastElement( this.currentContextName ); screen != null; screen = this.screensContext.getNextElement( this.currentContextName ) )
 	{
 		if ( screen.isIn( position ) )
 		{
@@ -1953,25 +1961,6 @@ AOZ.prototype.setMouse = function()
 AOZ.prototype.xor = function( a, b )
 {
 	return ( a && !b ) || ( !a && b );
-};
-AOZ.prototype.screenIn = function( number, x, y )
-{
-	if ( typeof number != 'undefined' )
-	{
-		if ( number < 0 || ( !this.unlimitedScreens && number >= 8 ) )
-			throw 'illegal_function_call';
-		if ( !this.screens[ number ] )
-			throw 'screen_not_opened';
-		return this.screens[ number ].isIn( x, y ) ? number : -1;
-	}
-	for ( var s = this.screensZ.length - 1; s >= 0; s-- )
-	{
-		if ( this.screens[ s ] && this.screens[ s ].isIn( x, y ) )
-		{
-			return s;
-		}
-	}
-	return -1;
 };
 AOZ.prototype.mouseScreen = function()
 {

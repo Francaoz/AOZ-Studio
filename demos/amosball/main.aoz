@@ -1,4 +1,6 @@
 #nobank:"images"
+#manifest:"amiga"
+#fullPage:true
 
 Boob Load "amigaball.js", 1
 Boob Load "aoz.js",2

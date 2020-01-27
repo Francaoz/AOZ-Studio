@@ -1,3 +1,9 @@
+//
+// Help_26.AMOS - Converted to AOZ on the 27/01/2020-16:08:52
+//
+#manifest:"amiga"
+#speed:"safe"
+
 '**********************************  
 '*    AMOS Professional HELP 26   *               SUBJECTS COVERED 
 '*                                *
@@ -90,7 +96,7 @@
 'WORKING EXAMPLES
 '------------------------------------------- 
 Dim X(4),Y(4),DY(4),DX(4)
-Load "BOBS.abk"
+Load "AMOSPro_Examples:OBJECTS/BOBS.abk"
 '
 Rem *** tidy up screen 
 '

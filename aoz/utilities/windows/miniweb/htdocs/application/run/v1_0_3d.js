@@ -15,7 +15,7 @@
 // 24/12/2019
 // (c) AOZ Studio 2019
 //
-// Compiled with AOZ Transpiler Version 0.9.2.6 - 17/01/2020 on the 17/01/2020-17:58:47
+// Compiled with AOZ Transpiler Version 0.9.3.1 - 21/01/2020 on the 27/01/2020-18:37:25
 //
 
 function v1_0_3d( aoz )
@@ -295,7 +295,7 @@ function v1_0_3d( aoz )
 	};
 	this.blocks[1]=function()
 	{
-		return {type:0};
+		return{type:0}
 	};
 	this.aoz.run(this,0,null);
 };

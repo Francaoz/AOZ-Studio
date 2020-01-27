@@ -304,7 +304,7 @@ Utilities.prototype.loadScript = function( scripts, options, callback, extra )
 	if ( typeof scripts == 'string' )
 		scripts = [ scripts ];
 
-	
+
 	var loaded = 0;
 	var toLoad = scripts.length;
 	var handle = setTimeout( onTimeout, timeout );
@@ -438,7 +438,16 @@ Utilities.prototype.getProperty = function ( obj, prop, noCase )
 	if ( typeof prop != 'string' )
 		return obj[ prop ];
 	if ( noCase )
-		return obj[ prop.toLowerCase() ];
+	{
+		prop = prop.toLowerCase();
+		for ( p in obj )
+		{
+			if ( p.toLowerCase() == prop )
+			{
+				return obj[ p ];
+			}
+		}
+	}
 	return obj[ prop ];
 };
 Utilities.prototype.cleanObject = function ( obj, exclude, noCase )
@@ -817,7 +826,7 @@ MemoryBlock.prototype.copyArray = function( address, sourceArray, type, length )
 					this.poke( address + p, sourceArray[ p ].charCodeAt( 0 ) );
 				else
 					this.poke( address + p, sourceArray[ p ] );
-			}			
+			}
 			break;``
 		case 'word':	// TODO
 			debugger;
@@ -827,7 +836,7 @@ MemoryBlock.prototype.copyArray = function( address, sourceArray, type, length )
 					this.poke( address + p * 2, sourceArray[ p ].charCodeAt( 0 ) );
 				else
 					this.poke( address + p, sourceArray[ p ] );
-			}			
+			}
 			break;
 		case 'dword':	// TODO
 			debugger;
@@ -903,7 +912,7 @@ Utilities.prototype.checkRectangle = function( rectangle, position, dimension )
 	rectangle.x = typeof rectangle.x != 'undefined' ? rectangle.x : position.x;
 	rectangle.y = typeof rectangle.y != 'undefined' ? rectangle.y : position.y;
 	if ( dimension )
-	{		
+	{
 		if ( typeof rectangle.width == 'undefined' || typeof rectangle.height == 'undefined' )
 			throw 'illegal_function_call';
 		if ( rectangle.x + rectangle.width > dimension.width )
@@ -924,6 +933,19 @@ Utilities.prototype.makeTransparentImage = function( image )
 	context.drawImage( image, 0, 0 );
 	this.remapBlock( context, [ { r: 0, g: 0, b: 0 } ], [ { r: 0, g: 0, b: 0, a: 0 } ], { x: 0, y: 0, width: image.width, height: image.height } );
 	return canvas;
+};
+Utilities.prototype.flipCanvas = function( canvas, horizontal, vertical )
+{
+	var flipCanvas = document.createElement( 'canvas' );
+	flipCanvas.width = canvas.width;
+	flipCanvas.height = canvas.height;
+	var flipContext = flipCanvas.getContext( '2d' );
+	flipContext.translate( horizontal ? canvas.width : 0, vertical ? canvas.height : 0 );
+	flipContext.scale( horizontal ? -1 : 1, vertical ? -1 : 1 );
+	flipContext.drawImage( canvas, 0, 0 );
+	//flipContext.fillStyle = this.backgroundColor;
+	//flipContext.fillRect( 0, 0, canvas.width, canvas.height );
+	return flipCanvas;
 };
 Utilities.prototype.remapBlock = function( context, rgbaSource, rgbaDestination, coordinates )
 {
@@ -972,6 +994,90 @@ Utilities.prototype.remapBlock = function( context, rgbaSource, rgbaDestination,
 		context.putImageData( imageData, coordinates.x, coordinates.y );
 	}
 };
+/**
+ * Hermite resize - fast image resize/resample using Hermite filter. 1 cpu version!
+ *
+ * @param {HtmlElement} canvas
+ * @param {int} width
+ * @param {int} height
+ * @param {boolean} resize_canvas if true, canvas will be resized. Optional.
+ */
+Utilities.prototype.resample_canvas = function(canvas, width, height, resize_canvas)
+{
+    var width_source = canvas.width;
+    var height_source = canvas.height;
+    width = Math.round(width);
+    height = Math.round(height);
+
+    var ratio_w = width_source / width;
+    var ratio_h = height_source / height;
+    var ratio_w_half = Math.ceil(ratio_w / 2);
+    var ratio_h_half = Math.ceil(ratio_h / 2);
+
+    var ctx = canvas.getContext("2d");
+    var img = ctx.getImageData(0, 0, width_source, height_source);
+    var img2 = ctx.createImageData(width, height);
+    var data = img.data;
+    var data2 = img2.data;
+
+    for (var j = 0; j < height; j++) {
+        for (var i = 0; i < width; i++) {
+            var x2 = (i + j * width) * 4;
+            var weight = 0;
+            var weights = 0;
+            var weights_alpha = 0;
+            var gx_r = 0;
+            var gx_g = 0;
+            var gx_b = 0;
+            var gx_a = 0;
+            var center_y = (j + 0.5) * ratio_h;
+            var yy_start = Math.floor(j * ratio_h);
+            var yy_stop = Math.ceil((j + 1) * ratio_h);
+            for (var yy = yy_start; yy < yy_stop; yy++) {
+                var dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
+                var center_x = (i + 0.5) * ratio_w;
+                var w0 = dy * dy; //pre-calc part of w
+                var xx_start = Math.floor(i * ratio_w);
+                var xx_stop = Math.ceil((i + 1) * ratio_w);
+                for (var xx = xx_start; xx < xx_stop; xx++) {
+                    var dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
+                    var w = Math.sqrt(w0 + dx * dx);
+                    if (w >= 1) {
+                        //pixel too far
+                        continue;
+                    }
+                    //hermite filter
+                    weight = 2 * w * w * w - 3 * w * w + 1;
+                    var pos_x = 4 * (xx + yy * width_source);
+                    //alpha
+                    gx_a += weight * data[pos_x + 3];
+                    weights_alpha += weight;
+                    //colors
+                    if (data[pos_x + 3] < 255)
+                        weight = weight * data[pos_x + 3] / 250;
+                    gx_r += weight * data[pos_x];
+                    gx_g += weight * data[pos_x + 1];
+                    gx_b += weight * data[pos_x + 2];
+                    weights += weight;
+                }
+            }
+            data2[x2] = gx_r / weights;
+            data2[x2 + 1] = gx_g / weights;
+            data2[x2 + 2] = gx_b / weights;
+            data2[x2 + 3] = gx_a / weights_alpha;
+        }
+    }
+    //clear and resize canvas
+    if (resize_canvas === true) {
+        canvas.width = width;
+        canvas.height = height;
+    } else {
+        ctx.clearRect(0, 0, width_source, height_source);
+    }
+
+    //draw
+    ctx.putImageData(img2, 0, 0);
+}
 Utilities.prototype.loadUnlockedImage = function( path, type, options, callback, extra )
 {
 	var self = this;
@@ -1391,17 +1497,27 @@ AOZContext.prototype.deleteElement = function( contextName, index, errorString )
 		else
 		{
 			if ( errorString ) throw errorString;
-			return;	
+			return;
 		}
 	}
 	else if ( typeof index == 'string' )
 	{
 		contextIndexName = contextName + ':' + index;
+		if ( !this.listNames[ contextIndexName ] )
+		{
+			if ( errorString ) throw errorString;
+			return;
+		}
 		contextIndex = contextName + ':' + this.listNames[ contextIndexName ].index;
 	}
 	else
 	{
 		contextIndex = contextName + ':' + index;
+		if ( !this.list[ contextIndex ] )
+		{
+			if ( errorString ) throw errorString;
+			return;
+		}
 		contextIndexName = contextName + ':' + this.list[ contextIndex ].name;
 	}
 	var element = this.list[ contextIndex ];
@@ -1420,7 +1536,7 @@ AOZContext.prototype.deleteElement = function( contextName, index, errorString )
 		for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
 			this.listSortedInContext[ contextName ][ i ].indexSortedInContext = i;
 		for ( var i = 0; i < this.listSorted.length; i++ )
-			this.listSorted[ i ].indexSorted = i;	
+			this.listSorted[ i ].indexSorted = i;
 	}
 	this.numberOfElements--;
 	this.numberOfElementsInContext[ contextName ]--;
@@ -1592,7 +1708,7 @@ AOZContext.prototype.moveToStart = function( contextName, element )
 	if ( this.options.sorted )
 	{
 		if ( contextName )
-		{			
+		{
 			this.listSortedInContext[ contextName ].splice( element.indexSortedInContext, 1 );
 			this.listSortedInContext[ contextName ].unshift( element );
 			for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
@@ -1609,7 +1725,7 @@ AOZContext.prototype.moveToEnd = function( contextName, element )
 	if ( this.options.sorted )
 	{
 		if ( contextName )
-		{			
+		{
 			this.listSortedInContext[ contextName ].splice( element.indexSortedInContext, 1 );
 			this.listSortedInContext[ contextName ].push( element );
 			for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
@@ -1626,7 +1742,7 @@ AOZContext.prototype.moveAfter = function( contextName, source, destination )
 	if ( this.options.sorted )
 	{
 		if ( contextName )
-		{			
+		{
 			this.listSortedInContext[ contextName ].splice( source.indexSortedInContext, 1 );
 			if ( source.indexSortedInContext < destination.indexSortedInContext )
 				this.listSortedInContext[ contextName ].splice( destination.indexSortedInContext, 0, source );
@@ -1650,7 +1766,7 @@ AOZContext.prototype.moveBefore = function( contextName, source, destination )
 	{
 		var result = [];
 		if ( contextName )
-		{			
+		{
 			for ( var i = 0; i < this.listSortedInContext[ contextName ].length; i++ )
 			{
 				var element = this.listSortedInContext[ contextName ][ i ];
@@ -1689,5 +1805,3 @@ AOZContext.prototype.moveBefore = function( contextName, source, destination )
 		this.listSorted = result;
 	}
 };
-
-

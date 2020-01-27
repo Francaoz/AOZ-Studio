@@ -1,3 +1,9 @@
+//
+// Help_3.AMOS - Converted to AOZ on the 27/01/2020-16:08:43
+//
+#manifest:"amiga"
+#speed:"safe"
+
 '**********************************  
 '*    AMOS Professional HELP 3    *               SUBJECTS COVERED   
 '*                                *
@@ -25,7 +31,7 @@
 '------------------------------------------- 
 'Gosub 
 '------------------------------------------- 
-'Jump to a subroutine 
+'Jump to a subroutine
 '
 '      Gosub 6           (Jump to a line number) 
 '      Gosub LABEL       (jump to label) 

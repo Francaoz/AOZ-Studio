@@ -1,4 +1,8 @@
-Screen Display 0,,,,
+//
+// Help_5.AMOS - Converted to AOZ on the 27/01/2020-16:08:43
+//
+#manifest:"amiga"
+#speed:"safe"
 
 '********************************* 
 '*    AMOS Professional HELP 5   *                SUBJECTS COVERED 

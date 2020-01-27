@@ -32,6 +32,7 @@
 // Initialization
 //
 {
+	this.aoz.moduleAmal = this;
     this.banks = this.aoz.banks;
 }
 
@@ -40,64 +41,64 @@ Instruction "move x", _number, _angle
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "move x", _number, _string To _number2
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "move y", _number, _angle
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "move y", _number, _string To _number2
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 
 Instruction "move off", _number
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "move on", _number
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "move freeze", _number
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 
 Instruction "anim off", _number
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "anim on", _number
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "anim freeze", _number
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "anim", _number, _angle
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Instruction "anim", _number, _string To _number2
 {
 	#notimplemented
 }
-End Instruction 
+End Instruction
 Function "movon", _number
 {
 	#notimplemented

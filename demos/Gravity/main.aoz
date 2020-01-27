@@ -6,6 +6,8 @@
 '
 '
 '
+#manifest:"amiga"
+#fullScreen:true
 
 Set Buffer 200
 Screen Open 2,320,256,32,Lowres
@@ -16,9 +18,9 @@ Screen Open 1,320,256,32,Lowres
 
 palette $0,$fff,$999,$333
 
-Hide 
+Hide
 
-Double Buffer 
+Double Buffer
 Autoback 0
 
 
@@ -77,7 +79,7 @@ CHECKY#=0
 BX#=0
 BY#=0
 
-Degree 
+Degree
 
 NUMLEVELENT=5
 LEVELENTX#(0)=10200
@@ -114,7 +116,7 @@ For T=0 To 5
 Next T
 
 
-Repeat 
+Repeat
    cls 0
    A=Timer
    A$=Inkey$
@@ -122,44 +124,44 @@ Repeat
 
       If EDMODE=False
          EDMODE=True
-         Show 
-      Else 
+         Show
+      Else
          EDMODE=False
-         Hide 
-      End If 
+         Hide
+      End If
       Wait 4
       Locate 1,1 : Print Scancode
       Locate 1,2 : Print ROT
-   End If 
-   Rem Scancode 
+   End If
+   Rem Scancode
    If Mouse Key=1
       X=X Screen(X Mouse)
       Y=Y Screen(Y Mouse)
-      Rem Text 10,40,Str$(X)+","+Str$(Y) 
+      Rem Text 10,40,Str$(X)+","+Str$(Y)
       OFFSETX#=OFFSETX#-(SHIPX#-X)
       OFFSETY#=OFFSETY#-(SHIPY#-Y)
-      While Mouse Key=1 : Wend 
-   End If 
+      While Mouse Key=1 : Wend
+   End If
 
    If A>0
       If Key State(80)
          PAUSE=True
-      End If 
+      End If
       If Key State(81)
          PAUSE=False
-      End If 
+      End If
       If Key State(32)
          If ROT>0 : ROT=ROT-5
-         Else 
+         Else
             ROT=ROT+360
-         End If 
-      End If 
+         End If
+      End If
       If Key State(34)
          If ROT<360 : ROT=ROT+5
-         Else 
+         Else
             ROT=ROT-360
-         End If 
-      End If 
+         End If
+      End If
       If key State(17)
          GROUNDED=False
          If Abs(BX#+Cos(ROT)/ENGINE)<MAXSPEED and Abs(BY#+Sin(ROT)/ENGINE)<MAXSPEED
@@ -170,63 +172,63 @@ Repeat
             ENT=11
             Gosub SPAWNENT
          Next T
-      End If 
+      End If
       If Key State(64) and SDELAY<0
          ENT=20 : SDELAY=2
          Gosub SPAWNENT
-      End If 
+      End If
       If GRAV>0 and GROUNDED=False and EDMODE=False
-      
+
        If Abs(BX#+Cos(270)/GRAV)<MAXSPEED and Abs(BY#+Sin(270)/GRAV)<MAXSPEED
          BX#=BX#+Cos(270)/GRAV
          BY#=BY#+Sin(270)/GRAV
       End If
        If BX#>0 And BX#-AIR#<MAXSPEED
           BX#=BX#-AIR#
-       Else 
+       Else
          If BX#+AIR#<MAXSPEED
           BX#=BX#+AIR#
          End If
-       End If 
+       End If
          If BY#>0 and BY#-AIR#<MAXSPEED
             BY#=BY#-AIR#
-         Else 
+         Else
             If BY#+AIR#<MAXSPEED
             BY#=BY#+AIR#
             End If
-         End If 
+         End If
       Else
          If GROUNDED=True
             If Abs(BX#)<0.3 and Abs(BY#)<0.3
                BX#=0 : BY#=0 : ROT=90
             End If
          End IF
-      End If 
+      End If
 
       'Ink 0
-      'Bar SHIPX#-(ZO+2),SHIPY#-(ZO+2) To SHIPX#+(ZO+2),SHIPY#+(ZO+2) 
+      'Bar SHIPX#-(ZO+2),SHIPY#-(ZO+2) To SHIPX#+(ZO+2),SHIPY#+(ZO+2)
       If GROUNDED=False
       OFFSETX#=OFFSETX#-BX#
       OFFSETY#=OFFSETY#-BY#
       End If
-      
-      'Screen Copy 2 To Logic(1) 
 
-      Rem Gosub _CLEARENTS 
-      
+      'Screen Copy 2 To Logic(1)
+
+      Rem Gosub _CLEARENTS
+
       Gosub _UPDATEBACKGROUND
       Gosub _UPDATEENTS
-     
 
-      
-      
+
+
+
       RX#=Cos(ROT)*ZO
       RY#=Sin(ROT)*ZO
       RX2#=Cos(ROT+140)*ZO
       RY2#=Sin(ROT+140)*ZO
       RX3#=Cos(ROT-140)*ZO
       RY3#=Sin(ROT-140)*ZO
-      
+
       Ink 4,0
       Rem Draw SHIPX#,SHIPY# To SHIPX#-RX#,SHIPY#-RY#,4
        draw SHIPX#-RX2#,SHIPY#-RY2# To SHIPX#-RX3#,SHIPY#-RY3#
@@ -238,42 +240,42 @@ Repeat
       'Text 10,20,Str$(BY#)+" "
       'Text 10,20,Str$(ROT)
 
-      
+
       'For t=0 To BGSTARS
       ''   Ink Int(BSTARS#(t,2))
       ''   plot BSTARS#(t,0)-OFFSETX#,BSTARS#(t,1)-OFFSETY#
       'Next t
 
-      Screen Swap 
-      Wait Vbl 
+      Screen Swap
+      Wait Vbl
       Timer=0
       Dec SDELAY
-   End If 
-   
+   End If
+
 Until Mouse Key=2
 
-End 
+End
 
 _CLEARENTS:
 ENTPOS=0
-Repeat 
+Repeat
    ENTPOS=ENTPOS+1
    If ENTTYPE(ENTPOS)>0
       If ENTTYPE(ENTPOS)=10
          Ink 0
           circle ENTX#(ENTPOS),ENTY#(ENTPOS),5-ENTTIME(ENTPOS)/2
-      End If 
+      End If
       If ENTTYPE(ENTPOS)=11
          Ink 0
           plot ENTX#(ENTPOS),ENTY#(ENTPOS)
-      End If 
+      End If
       If ENTTYPE(ENTPOS)=20
          Ink 0
           plot ENTX#(ENTPOS),ENTY#(ENTPOS)
-      End If 
-   End If 
+      End If
+   End If
 Until ENTPOS>MAXENTS
-Return 
+Return
 
 _UPDATEBACKGROUND:
 For t=0 To BGSTARS
@@ -289,7 +291,7 @@ Return
 _UPDATELEVELENTS:
 LPOS=0 : GROUNDED=False
 If NUMLEVELENT>0
-   Repeat 
+   Repeat
     If LEVELENTTYPE(LPOS)>0
       If(LEVELENTX#(LPOS)-OFFSETX#)>-200 and(LEVELENTX#(LPOS)-OFFSETX#)+320<850
          If(LEVELENTY#(LPOS)-OFFSETY#)>-200 and(LEVELENTY#(LPOS)-OFFSETY#)+256<800
@@ -303,29 +305,29 @@ If NUMLEVELENT>0
                   CDIST#=CSIZE#
                   POSOX#=Abs(Abs(SHIPX#)-Abs(CHECKX#))
                   POSOY#=Abs(Abs(SHIPY#)-Abs(CHECKY#))
-                  Rem Text 10,50,Str$(((POSOX#*POSOX#)+(POSOY#*POSOY#))) 
-                  
+                  Rem Text 10,50,Str$(((POSOX#*POSOX#)+(POSOY#*POSOY#)))
+
                   If(((POSOX#*POSOX#)+(POSOY#*POSOY#))/100)<CDIST#
-                     Rem Text 10,30,"KOLLISION :"+Str$((Abs((Abs(SHIPX#)-Abs(CHECKX#))+(Abs(SHIPY#)-Abs(CHECKY#)))*3.14)/2) 
+                     Rem Text 10,30,"KOLLISION :"+Str$((Abs((Abs(SHIPX#)-Abs(CHECKX#))+(Abs(SHIPY#)-Abs(CHECKY#)))*3.14)/2)
                      Rem Text 10,40,Str$(CDIST#*2)
                      If CHECKY#<SHIPY#
                         If BX#>0 : BX#=0-BX#
-                        Else 
+                        Else
                            BX#=Abs(BX#)
-                        End If 
+                        End If
                         If BY#>0 : BY#=0-BY#
-                        Else 
+                        Else
                            BY#=Abs(BY#)
-                        End If 
+                        End If
                         BY#=-0.1
                         BX#=0
                         GROUNDED=False
-                     Else 
-                        If SHIPX#<CHECKX#                          
+                     Else
+                        If SHIPX#<CHECKX#
                            BX#=0.2+((CHECKY#-SHIPXY#)/CDIST#)/10
-                        Else 
+                        Else
                            BX#=-(0.2+((CHECKY#-SHIPXY#)/CDIST#)/10)
-                        End If 
+                        End If
                         BY#=0.1
                         Rem OFFSETX#=OFFSETX#-BX#
                         Rem OFFSETY#=OFFSETY#-BY#
@@ -333,11 +335,11 @@ If NUMLEVELENT>0
                            GROUNDED=True
                            ROT=90
                         End If
-                     End If 
-                  End If 
-               End If 
+                     End If
+                  End If
+               End If
                ENTPOS=0
-               Repeat 
+               Repeat
                   ENTPOS=ENTPOS+1
                   If ENTTYPE(ENTPOS)=21
                      CEX#=ENTX#(ENTPOS)-OFFSETX#
@@ -347,33 +349,33 @@ If NUMLEVELENT>0
                      If(((POSOX#*POSOX#)+(POSOY#*POSOY#))/100)<CDIST#
                         If ENTMX#(ENTPOS)>0 : ENTMX#(ENTPOS)=0-ENTMX#(ENTPOS)
                         Else : ENTMX#(ENTPOS)=Abs(ENTMX#(ENTPOS))
-                        End If 
+                        End If
                         If ENTMY#(ENTPOS)>0 : ENTMY#(ENTPOS)=0-ENTMY#(ENTPOS)
                         Else : ENTMY#(ENTPOS)=Abs(ENTMY#(ENTPOS))
-                        End If 
+                        End If
                         ENTX#(ENTPOS)=ENTX#(ENTPOS)-(ENTMX#(ENTPOS)*2)
                         ENTY#(ENTPOS)=ENTY#(ENTPOS)-(ENTMY#(ENTPOS)*2)
-                     End If 
-                  End If 
+                     End If
+                  End If
                Until ENTPOS>MAXENTS
-               
-            End If 
-         End If 
-      End If 
+
+            End If
+         End If
+      End If
       Inc LPOS
    End If
    Until LPOS=NUMLEVELENT
-End If 
+End If
 
 
 
-Return 
+Return
 
 _UPDATEENTS:
 ENTPOS=0
-Repeat 
+Repeat
    ENTPOS=ENTPOS+1
-   If ENTTYPE(ENTPOS)>0     
+   If ENTTYPE(ENTPOS)>0
       if ENTTIME(ENTPOS)>-2
          ENTTIME(ENTPOS)=ENTTIME(ENTPOS)-1
          If ENTTYPE(ENTPOS)=30
@@ -385,15 +387,15 @@ Repeat
       End If
       If ENTTIME(ENTPOS)<0 and ENTTIME(ENTPOS)>-2
          ENTTYPE(ENTPOS)=0
-      End If 
-      
+      End If
+
       If ENTTYPE(ENTPOS)=10
          ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+AIR#
          ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
          ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
          Ink 4,0
           circle ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,5-ENTTIME(ENTPOS)/2
-      End If 
+      End If
       If ENTTYPE(ENTPOS)=11
          ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+AIR#
          ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
@@ -401,7 +403,7 @@ Repeat
          Ink 12,0
          '' plot ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
          Circle ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,1
-      End If 
+      End If
       If ENTTYPE(ENTPOS)=20
          'ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
          'ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
@@ -413,11 +415,11 @@ Repeat
                   If (ENTY#(ENTPOS)-OFFSETY#)>(ENTY#(TENT)-OFFSETY#) And (ENTY#(ENTPOS)-OFFSETY#)<(ENTY#(TENT)-OFFSETY#)+CX
                      If ENTTYPE(TENT)=30
                         ENTTIME(TENT)=ENTTIME(TENT)+10
-                        ENTTYPE(ENTPOS)=10   
+                        ENTTYPE(ENTPOS)=10
                         ENTTIME(ENTPOS)=8
                         ENTMX#(ENTPOS)=0
                         ENTMY#(ENTPOS)=0
-                        'Gosub SPAWNENT                 
+                        'Gosub SPAWNENT
                         Exit
                      End If
                   End If
@@ -429,16 +431,16 @@ Repeat
          Ink 6
          'plot ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
          Circle ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,1
-      End If     
+      End If
       If ENTTYPE(ENTPOS)=30
          'ENTMY#(ENTPOS)=ENTMY#(ENTPOS)+Sin(270)/GRAV
          'ENTMX#(ENTPOS)=ENTMX#(ENTPOS)+Cos(270)/GRAV
          _DISTX#=ENTX#(ENTPOS)-(OFFSETX#+SHIPX#)
          _DISTY#=ENTY#(ENTPOS)-(OFFSETY#+SHIPY#)
          '_DISTTOT=((_DISTX^2+_DISTY^2)/2^2)/128^2
-         
-         '_SPEEDX=(_DISTX/_DISTTOT)*4 : _SPEEDY=(_DISTY/_DISTTOT)*4 
-         
+
+         '_SPEEDX=(_DISTX/_DISTTOT)*4 : _SPEEDY=(_DISTY/_DISTTOT)*4
+
          _TDIST#=(abs(_DISTX#)+abs(_DISTY#))/2
 
          _SPEEDX#=(_DISTX#/_TDIST#)/4
@@ -452,54 +454,54 @@ Repeat
 
          Ink 7
          'plot ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
-         
+
          'Circlef ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,8
          paste bob ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#,1,0.1,0.1,20
-         'Paint ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY# 
-      End If  
+         'Paint ENTX#(ENTPOS)-OFFSETX#,ENTY#(ENTPOS)-OFFSETY#
+      End If
       ENTX#(ENTPOS)=ENTX#(ENTPOS)-ENTMX#(ENTPOS)
       ENTY#(ENTPOS)=ENTY#(ENTPOS)-ENTMY#(ENTPOS)
-   End If 
+   End If
 Until ENTPOS>MAXENTS
 
-Return 
+Return
 
 SPAWNENT:
 SPAWNENTPOS=0
-Repeat 
+Repeat
    SPAWNENTPOS=SPAWNENTPOS+1
 Until ENTTYPE(SPAWNENTPOS)=0
 
 If ENT=10
    ROTO=ROT+180
-   If ROTO>360 : ROTO=ROTO-360 : End If 
+   If ROTO>360 : ROTO=ROTO-360 : End If
    ENTMX#(SPAWNENTPOS)=Cos(ROTO)*2
    ENTMY#(SPAWNENTPOS)=Sin(ROTO)*2
    ENTTIME(SPAWNENTPOS)=6
    ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#-ENTMX#(SPAWNENTPOS)*6
    ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#-ENTMY#(SPAWNENTPOS)*6
-End If 
+End If
 If ENT=11
    ROTO=ROT+170+Rnd(20)
-   If ROTO>360 : ROTO=ROTO-360 : End If 
+   If ROTO>360 : ROTO=ROTO-360 : End If
    ENTMX#(SPAWNENTPOS)=Cos(ROTO)*2
    ENTMY#(SPAWNENTPOS)=Sin(ROTO)*2
    ENTTIME(SPAWNENTPOS)=8+rnd(8)
    ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#-ENTMX#(SPAWNENTPOS)*2
    ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#-ENTMY#(SPAWNENTPOS)*2
-End If 
+End If
 If ENT=20
    ROTO=ROT
-   If ROTO>360 : ROTO=ROTO-360 : End If 
+   If ROTO>360 : ROTO=ROTO-360 : End If
    ENTMX#(SPAWNENTPOS)=Cos(ROTO)*6
    ENTMY#(SPAWNENTPOS)=Sin(ROTO)*6
    ENTTIME(SPAWNENTPOS)=32
    ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#-ENTMX#(SPAWNENTPOS)
    ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#-ENTMY#(SPAWNENTPOS)
-End If 
+End If
 If ENT=30
    ROTO=ROT
-    If ROTO>360 : ROTO=ROTO-360 : End If 
+    If ROTO>360 : ROTO=ROTO-360 : End If
    'ENTMX#(SPAWNENTPOS)=Cos(ROTO)*8
    'ENTMY#(SPAWNENTPOS)=Sin(ROTO)*8
    ENTMX#(SPAWNENTPOS)=0
@@ -514,11 +516,11 @@ If ENT=1
    ENTTIME(SPAWNENTPOS)=4
    ENTX#(SPAWNENTPOS)=OFFSETX#+SHIPX#
    ENTY#(SPAWNENTPOS)=OFFSETY#+SHIPY#
-End If 
+End If
 ENTTYPE(SPAWNENTPOS)=ENT
-Return 
+Return
 
 _FINDENTS:
 
 
-Return 
+Return

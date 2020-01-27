@@ -1,5 +1,11 @@
-'**********************************  
-'*    AMOS Professional HELP 28   *               SUBJECTS COVERED 
+//
+// Help_28.AMOS - Converted to AOZ on the 27/01/2020-16:08:53
+//
+#manifest:"amiga"
+#speed:"safe"
+
+'**********************************
+'*    AMOS Professional HELP 28   *               SUBJECTS COVERED
 '*                                *
 '*     (c) Europress Software     *          Limit Bob        (line 11)
 '*                                *          Get Bob          (line 31)
@@ -7,32 +13,32 @@
 '**********************************          Bob Off          (line 57)
 '                                            Del Bob / Sprite (line 69)
 '                                            Ins Bob / Sprite (line 83)
-'------------------------------------------- 
-'Limit Bob 
-'------------------------------------------- 
-'restrict one or all bobs to a part of the screen  
+'-------------------------------------------
+'Limit Bob
+'-------------------------------------------
+'restrict one or all bobs to a part of the screen
 '
-'There are three variations of the Limit Bob instruction:- 
+'There are three variations of the Limit Bob instruction:-
 '
-'   Limit Bob                     (with no parameters this restores the) 
-'                                 ( default of full screen visability. ) 
+'   Limit Bob                     (with no parameters this restores the)
+'                                 ( default of full screen visability. )
 '
-'   Limit Bob 10,20 To 130,140    ( restrict visability of all bobs to ) 
-'                                 ( within the area of the rectangle.  ) 
-'               __________________ 
-'              /                  \  
-'   Limit Bob 1,10,20 To 130,140  ( with the optional bob number added ) 
-'                                 (    only this bob is restricted.    ) 
+'   Limit Bob 10,20 To 130,140    ( restrict visability of all bobs to )
+'                                 ( within the area of the rectangle.  )
+'               __________________
+'              /                  \
+'   Limit Bob 1,10,20 To 130,140  ( with the optional bob number added )
+'                                 (    only this bob is restricted.    )
 '
-'Please note that the X coordinates are rounded to the nearest 16 pixel  
-'boundary and that the bob must already be initialised for the effect to work.   
+'Please note that the X coordinates are rounded to the nearest 16 pixel
+'boundary and that the bob must already be initialised for the effect to work.
 '
-'------------------------------------------- 
-'Get Bob 
-'------------------------------------------- 
-'grab a section of the screen to the sprite bank 
+'-------------------------------------------
+'Get Bob
+'-------------------------------------------
+'grab a section of the screen to the sprite bank
 '
-'eg.      Get Bob 1,10,20 To 30,40 
+'eg.      Get Bob 1,10,20 To 30,40
 '
 'The above would grab image number 1 from the current screen from the
 'given coordinates.
@@ -40,51 +46,51 @@
 'An optional screen number can be added BEFORE the image number if you wish
 'to grab from another opened screen
 '
-'eg.      Get Bob 2,1,10,20 To 30,40   (grab from screen number 2) 
-'------------------------------------------- 
-'Put Bob 
-'------------------------------------------- 
-'prevent background of bob being redrawn 
+'eg.      Get Bob 2,1,10,20 To 30,40   (grab from screen number 2)
+'-------------------------------------------
+'Put Bob
+'-------------------------------------------
+'prevent background of bob being redrawn
 '
 'eg.      Put Bob 1   (fix a copy of bob 1 to the screen)
 '
-'This instruction is the opposite to the above Get Bob and should always 
-'be followed ba a Wait Vbl instruction to avoid screen corruption. 
+'This instruction is the opposite to the above Get Bob and should always
+'be followed ba a Wait Vbl instruction to avoid screen corruption.
 'This instruction gives a similar effect to a brush being stamped down in
 'art programs like D/Paint.
 '
-'------------------------------------------- 
-'Bob Off 
-'------------------------------------------- 
+'-------------------------------------------
+'Bob Off
+'-------------------------------------------
 'Terminate and remove one or all bobs
 '
 'eg.     Bob Off     (terminate and remove all bobs from the display)
 '        Bob Off 2   (terminate and remove only the stated bob)
 '
-'If you only wish to remove a bob from the display without interupting any 
+'If you only wish to remove a bob from the display without interupting any
 'annimations etc. then an alternative would be to place the bob outside the
 'viewing area with a call like:-    Bob 3,500,500,1
 '
-'------------------------------------------- 
-'Del Bob    Del Sprite 
-'------------------------------------------- 
+'-------------------------------------------
+'Del Bob    Del Sprite
+'-------------------------------------------
 'delete images from the sprite bank
 '
 'Since bob and sprite images are held in the same bank these two commands
-'are identical in operation. If used without parameters all images will be 
+'are identical in operation. If used without parameters all images will be
 'deleted, if a single number is entered then that image will be deleted and
-'the 3rd. version erases a series of images:-  
+'the 3rd. version erases a series of images:-
 '
-'        Del Sprite       (delete all images from the bank)  
-'        Del Bob 3        (delete only image number 3)   
-'        Del Bob 2 To 5   (delete range of images from 2 to 5 inclusive) 
+'        Del Sprite       (delete all images from the bank)
+'        Del Bob 3        (delete only image number 3)
+'        Del Bob 2 To 5   (delete range of images from 2 to 5 inclusive)
 '
-'------------------------------------------- 
-'Ins Bob    Ins Sprite 
-'------------------------------------------- 
-'Insert a space into the sprite bank 
+'-------------------------------------------
+'Ins Bob    Ins Sprite
+'-------------------------------------------
+'Insert a space into the sprite bank
 '
-'These two commands are identical in operation and insert a space into the 
+'These two commands are identical in operation and insert a space into the
 'bank at the given point, all existing images will be moved up one number
 'and this for example would allow you to grab another image into the middle
 'of a bank without erasing any existing images.
@@ -92,56 +98,56 @@
 '        Ins Sprite 3
 '        Ins Bob 11
 '
-'------------------------------------------- 
+'-------------------------------------------
 'WORKING EXAMPLES
-'------------------------------------------- 
-Rem *** load some bobs and use the palette 
+'-------------------------------------------
+Rem *** load some bobs and use the palette
 '
-Flash Off 
+Flash Off
 Load "AMOSPro_Examples:OBJECTS/bobs.abk"
-Get Sprite Palette 
+Get Sprite Palette
 '
 '
-Rem *** reserve some memory for the screen zones 
+Rem *** reserve some memory for the screen zones
 '
 Reserve Zone 4
 '
 '
 Rem start main loop
 '
-Do 
+Do
    '
    '
    Rem *** set out the display
    '
-   Bob Off 1 : Wait Vbl : Show On 
+   Bob Off 1 : Wait Vbl : Show On
    Curs Off : Cls 0 : Ink 14 : Paper 0 : Pen 3
    For N=1 To 4
       Paste Bob N*80-81,5,N
       Box N*80-79,2 To N*80-1,102
       Set Zone N,N*80-79,2 To N*80-1,102
-   Next 
+   Next
    Locate 0,14 : Centre "TAKE YOUR PICK WITH THE LEFT MOUSE KEY"
    Pen 4 : Locate 0,19 : Centre "or right mouse key to quit"
-   Show On 
+   Show On
    '
    '
    Rem *** get the users choice of picture
    '
    Repeat : Until Mouse Key=0
-   Repeat 
+   Repeat
       M=Mouse Zone
-      If Mouse Key=2 Then Edit 
+      If Mouse Key=2 Then Edit
    Until Mouse Key=1 and M>0
    '
    '
-   Rem *** grab a section of the screen to the sprite bank  
+   Rem *** grab a section of the screen to the sprite bank
    '
    Get Bob 5,M*80-78,5 To M*80-1,90 : Hot Spot 5,$11
    Bob 1,X Screen(X Mouse),Y Screen(Y Mouse),5
    '
    '
-   Rem *** limit the bob to a rectangle 
+   Rem *** limit the bob to a rectangle
    '
    Limit Bob 1,16,32 To 305,169
    Cls 0,15,31 To 306,169
@@ -149,15 +155,15 @@ Do
    Pen 3 : Locate 0,22 : Centre "LEFT MOUSE KEY TO 'PUT BOB'"
    Pen 4 : Locate 0,24 : Centre "RIGHT MOUSE KEY TO CONTINUE"
    Repeat : Until Mouse Key=0
-   Hide On 
+   Hide On
    '
    '
    Rem *** place a copy of bob on screen if required
    '
-   Repeat 
+   Repeat
       Bob 1,X Screen(X Mouse),Y Screen(Y Mouse),5
-      If Mouse Key=1 Then Put Bob 1 : Wait Vbl 
+      If Mouse Key=1 Then Put Bob 1 : Wait Vbl
    Until Mouse Key=2
    '
    '
-Loop 
+Loop

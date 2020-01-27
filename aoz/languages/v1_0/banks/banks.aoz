@@ -32,7 +32,7 @@
 // Initialization
 //
 {
-    this.banks = this.aoz.banks;
+    this.aoz.moduleBanks = this;
 }
 
 Instruction "bank swap", _number1, _number2
@@ -111,3 +111,133 @@ Function "image height", _image
 	#errors
 }
 End Function( {this.aoz.banks.getImageHeight(%_image)} )
+
+Function "hrev", _image
+{
+}
+End Function( {(%_image|0x8000)} )
+Function "vrev", _image
+{
+}
+End Function( {(%_image|0x4000)} )
+Function "rev", _image
+{
+}
+End Function( {(%_image|0xC000)} )
+
+// Sprites banks
+//////////////////////////////////////////////////////////////////////
+Instruction "ins sprite", _number
+{
+	#errors
+	this.aoz.banks.insertImage('images',%_number);
+}
+End Instruction
+Instruction "ins sprite", _theStart To _theEnd
+{
+	#errors
+	this.aoz.banks.insertImageRange('images',%_theStart,%_theEnd);
+}
+End Instruction
+Instruction "del sprite", _number
+{
+	#errors
+	this.aoz.banks.deleteImage('images',%_number);
+}
+End Instruction
+Instruction "del sprite", _number1 To _number2
+{
+	#errors
+	this.aoz.banks.deleteImageRange('images',%_number1,%_number2);
+}
+End Instruction
+
+// Bobs
+///////////////////////////////////////////////////////////////////////
+Instruction "ins bob", _number
+{
+	#errors
+	this.aoz.banks.insertImage('images',%_number);
+}
+End Instruction
+Instruction "ins bob", _theStart To _theEnd
+{
+	#errors #errors
+	this.aoz.banks.insertImageRange('images',%_theStart,%_theEnd);
+}
+End Instruction
+Instruction "del bob", _number
+{
+	#errors
+	this.aoz.banks.deleteImage('images',%_number);
+}
+End Instruction
+Instruction "del bob", _number1 To _number2
+{
+	#errors
+	this.aoz.banks.deleteImageRange('images',%_number1,%_number2);
+}
+End Instruction
+Instruction "make mask", _number
+{
+	#errors
+	this.aoz.banks.processMask('images',%_number,true);
+}
+End Instruction
+Instruction "no mask", _number
+{
+	#errors
+	this.aoz.banks.processMask('images',%_number,false);
+}
+End Instruction
+Instruction "hot spot", _number, _x, _y
+{
+	#errors
+	this.aoz.banks.setImageHotSpot("images",%_number,{x:%_x,y:%_y});
+}
+End Instruction
+Instruction "hot spot", _number, _mask
+{
+	#errors
+	this.aoz.banks.setImageHotSpot("images",%_number,{x:"mask",y:%_mask});
+}
+End Instruction
+
+// Icons
+///////////////////////////////////////////////////////////////////////
+Instruction "ins icon", _number
+{
+	#errors
+	this.aoz.banks.insertImage('icons',%_number);
+}
+End Instruction
+Instruction "ins icon", _theStart To _theEnd
+{
+	#errors #errors
+	this.aoz.banks.insertImageRange('icons',%_theStart,%_theEnd);
+}
+End Instruction
+Instruction "del icon", _number
+{
+	#errors
+	this.aoz.banks.deleteImage('icons',%_number);
+}
+End Instruction
+Instruction "del icon", _number1 To _number2
+{
+	#errors
+	this.aoz.banks.deleteImageRange('icons',%_number1,%_number2);
+}
+End Instruction
+Instruction "make icon mask", _number
+{
+	#errors
+	this.aoz.banks.processMask('icons',%_number,true);
+}
+End Instruction
+Instruction "no icon mask", _number
+{
+	#errors
+	this.aoz.banks.processMask('icons',%_number,false);
+}
+End Instruction

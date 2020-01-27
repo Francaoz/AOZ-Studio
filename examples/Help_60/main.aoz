@@ -1,3 +1,9 @@
+//
+// Help_60.AMOS - Converted to AOZ on the 27/01/2020-16:09:06
+//
+#manifest:"amiga"
+#speed:"safe"
+
 '**********************************
 '*    AMOS Professional HELP 60   *              SUBJECTS COVERED
 '*                                *

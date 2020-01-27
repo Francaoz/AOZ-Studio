@@ -32,13 +32,13 @@
 
 {
     // Base initilizations
-	this.aoz.thisFilesystem = this;
+	this.aoz.moduleFilesystem = this;
 
 	// Image loading
 	this.loadImage = function( args )
 	{
 		this.load_done = false;
-		var number = args[ 1 ]; 
+		var number = args[ 1 ];
 		var isIff = args[ 2 ];
 
 		var descriptor = this.aoz.filesystem.getFile( args[ 0 ] );
@@ -51,7 +51,7 @@
 			if ( extension.toLowerCase() == 'iff' )
 				isIff = true;
 		}
-		
+
 		if ( descriptor.isFileSystem )
 		{
 			this.aoz.filesystem.loadFile( descriptor, { binary: true }, function( response, arrayBuffer, extra )
@@ -79,7 +79,7 @@
 						};
 						image.src = imageUrl;
 					}
-					
+
 				}
 				else
 				{
@@ -127,17 +127,16 @@
 		{
 			if ( response )
 			{
-				var convertedBank = self.convertBank( 'bank', block , { convert: true });
+				var convertedBank = self.convert_bank( 'bank', block , { convert: true });
 				if ( convertedBank )
 				{
 					switch ( convertedBank.type )
 					{
-						case 'sprite':
-							bankNumber = 1;
-							self.aoz.banks.erase( bankNumber );
-							bank = self.aoz.banks.reserve( bankNumber, 'sprite', convertedBank.data.length, self.aoz.currentContextName );
+						case 'images':
+							self.aoz.banks.erase( convertedBank.number );
+							bank = self.aoz.banks.reserve( convertedBank.number, convertedBank.type, 0, self.aoz.currentContextName );
 							for ( var i = 0; i < convertedBank.data.length; i++ )
-								bank.addCanvas( i, convertedBank.data[ i ], tags );
+								self.aoz.banks.insertImage( convertedBank.type, i + 1, undefined, undefined, tags, convertedBank.number, convertedBank.data[ i ] )
 							break;
 						case 'sound':
 							bankNumber = 2;
@@ -153,7 +152,7 @@
 							bank = self.aoz.banks.reserve( bankNumber, type, convertedBank.memoryBlock.byteLength, self.aoz.currentContextName );
 							bank.memoryBlock.copyFrom( 0, convertedBank.data, 0, convertedBank.data.byteLength );
 							break;
-					}						
+					}
 				}
 			}
 		} );
@@ -169,13 +168,13 @@
 		this.aoz.filesystem.loadFile( descriptor, { binary: true }, function( response, arrayBuffer, extra )
 		{
 			var block;
-			if ( response ) 
+			if ( response )
 				block = new MemoryBlock( self.aoz, arrayBuffer, 'big' );
 			else
 				throw 'cannot_load_file';
 			callback( response, block, extra );
 			self.load_done = true;
-		}, extra );		
+		}, extra );
 	};
 
 	this.bLoad = function( args )
@@ -274,7 +273,7 @@
 	var ID_AmIc = 0x416D4963;
 
 	var IFF_ILBM_HEADER_LEN = 0xb0;
-	var iff_ilbm_header = 
+	var iff_ilbm_header =
 	[
 		'F', 'O', 'R', 'M',    	/* 00 FORM                        */
 		0,   0,   0,   0,     	/* 04   form length               */
@@ -329,24 +328,24 @@
 								/* 30     raw sample data         */
 	];
 
-	this.convert_amos = function( name, block, options ) 
+	this.convert_amos = function( name, block, options )
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
 
 		var result;
-		if ( block.length < 4 ) 
+		if ( block.length < 4 )
 		{
 			throw 'unknown_bank_format';
 		}
-		else 
+		else
 		{
-			switch ( block.leek( 0 ) ) 
+			switch ( block.leek( 0 ) )
 			{
 			case ID_AMOS:
 				result = this.convert_source( name, block, options );
 				break;
 
-			case ID_AmBs:            
+			case ID_AmBs:
 				result = this.convert_banks( name, block, options );
 				break;
 
@@ -363,11 +362,11 @@
 		return result;
 	};
 
-	this.convert_source = function( name, block, options ) 
+	this.convert_source = function( name, block, options )
 	{
 		var result;
 		options = typeof options == 'undefined' ? { convert: true } : options;
-		if ( block.length < 30 ) 
+		if ( block.length < 30 )
 		{
 			throw 'unknown_bank_format';
 		}
@@ -376,9 +375,9 @@
 			var src_len = block.leek( 16 ) + 20;
 			var header = block.peek$( 0, 16 );
 
-			if ( src_len < block.length ) 
+			if ( src_len < block.length )
 			{
-				var block_bank = new MemoryBlock( this.aoz, 2, 'big' ); 
+				var block_bank = new MemoryBlock( this.aoz, 2, 'big' );
 				block_bank.setFromMemoryBlock( block, src_len );
 				result = this.convert_banks( name, block_bank, options );
 			}
@@ -386,27 +385,27 @@
 		return result;
 	}
 
-	function convert_banks( name, block, options ) 
+	function convert_banks( name, block, options )
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
-		if ( block.length < 6) 
+		if ( block.length < 6)
 		{
 			throw 'unknown_bank_format';
 		}
-		else 
+		else
 		{
 			var count = 0;
 			var result = {};
 			var num_banks = block.deek( 4 );
 			var bank_pos = 6;
-			while ( num_banks-- ) 
+			while ( num_banks-- )
 			{
 				var bank_len = this.get_bank_length( block, bank_pos );
 				var bank_num = this.get_bank_number( block, bank_pos );
 				var bank_type = this.get_bank_type( block, bank_pos );
-				var block_bank = new MemoryBlock( this.aoz, 2, 'big' ); 
+				var block_bank = new MemoryBlock( this.aoz, 2, 'big' );
 				block_bank.setFromMemoryBlock( block, bank_pos, bank_pos + bank_len );
-				if ( bank_num > 0) 
+				if ( bank_num > 0)
 				{
 					var outname = "bank" + bank_num + ".abk";
 					var bankResult = this.convert_bank( outname, block_bank, options );
@@ -423,7 +422,7 @@
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
 		var bank_length = this.get_bank_length( block );
-		if ( !bank_length ) 
+		if ( !bank_length )
 			return;
 		var bank_num = this.get_bank_number( block );
 		var id = block.leek( 0 );
@@ -442,35 +441,35 @@
 			case ID_AmBk:
 				{
 					var id2 = block.peek$( 12, 8 );
-					if ( id2 == "Pac.Pic." ) 
+					if ( id2 == "Pac.Pic." )
 					{
 						type = 'img';
 						result = this.convert_pacpic( name, block, options );
 					}
-					else if ( id2 == "Samples " ) 
+					else if ( id2 == "Samples " )
 					{
 						type = 'samples';
 						result = this.convert_samples( name, block, options );
 					}
-					else if ( id2 == "Tracker " ) 
+					else if ( id2 == "Tracker " )
 					{
 						type = 'tracker';
 						result = this.convert_tracker( name, block, options );
-					}	
-					else 
+					}
+					else
 					{
 						type = 'data';
 						result = this.convert_data( name, block, options );
-					}	
+					}
 				}
-				break;	
+				break;
 			default:
 				throw 'unknown_bank_format';
 		}
 		return { type: type, number: bank_num, data: result };
 	};
 
-	this.convert_sprites = function( name, block, options ) 
+	this.convert_sprites = function( name, block, options )
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
 		var sprites = [];
@@ -479,7 +478,7 @@
 		var pal = block.length - 64;
 
 		/* create an IFF ILBM file for each sprite/icon */
-		for ( var i = 0; i < num_sprites; i++ ) 
+		for ( var i = 0; i < num_sprites; i++ )
 		{
 			var w, h, d, sp_len, ilbm_len, line, plane;
 			var body;
@@ -491,7 +490,7 @@
 			sp_len = w * h * d;
 			ilbm_len = IFF_ILBM_HEADER_LEN + sp_len;
 			var ilbmBlock = new MemoryBlock( this.aoz, ilbm_len, 'big' );
-			
+
 			ilbmBlock.copyArray( 0, iff_ilbm_header, 'byte' );
 			ilbmBlock.loke( 0x04, ilbm_len - 8 );
 			ilbmBlock.doke( 0x14, w * 8 );  				/* width */
@@ -504,20 +503,28 @@
 			ilbmBlock.loke( 0xAC, sp_len ); 				/* body length */
 
 			/* convert palette from 0x0RGB to 0xRR 0xGG 0xBB */
-			for ( var j = 0; j < 32; j++ ) 
+			var palette = [];
+			var color0;
+			for ( var j = 0; j < 32; j++ )
 			{
 				var c = block.deek( pal + j * 2 );
-				ilbmBlock.poke( 0x48 + ( j * 3 ) + 0, ( (c >> 8) & 0xF ) * 0x11 );
-				ilbmBlock.poke( 0x48 + ( j * 3 ) + 1, ( (c >> 4) & 0xF ) * 0x11 );
-				ilbmBlock.poke( 0x48 + ( j * 3 ) + 2, ( (c     ) & 0xF ) * 0x11 );
+				var r = ( (c >> 8) & 0xF ) * 0x11;
+				var g = ( (c >> 4) & 0xF ) * 0x11;
+				var b = ( (c     ) & 0xF ) * 0x11;
+				ilbmBlock.poke( 0x48 + ( j * 3 ) + 0, r );
+				ilbmBlock.poke( 0x48 + ( j * 3 ) + 1, g );
+				ilbmBlock.poke( 0x48 + ( j * 3 ) + 2, b );
+				palette[ j ] = this.aoz.utilities.getRGBAString( r, g, b, 255 );
+				if ( j == 0 )
+					color0 = { r: r, g: g, b: b };
 			}
 
 			/* interleave the sprite data (all lines of plane 0, plane 1, ...)
 				into ILBM format (line 0 plane 0, line 0 plane 1, ...) */
 			var body = IFF_ILBM_HEADER_LEN;
-			for ( var line = 0; line < h; line++ ) 
+			for ( var line = 0; line < h; line++ )
 			{
-				for ( var plane = 0; plane < d; plane++ ) 
+				for ( var plane = 0; plane < d; plane++ )
 				{
 					ilbmBlock.copyFrom( body, block, sp + 10 + line * w + plane * w * h, w );
 					body += w;
@@ -527,14 +534,15 @@
 			// Convert to PNG
 			if ( options.convert )
 			{
-				sprites[ i ] = loadIffBuffer( undefined, ilbmBlock.buffer );
-				if ( sprites[ i ].width <= 0 || sprites[ i ].height <= 0 )
+				var canvas = loadIffBuffer( undefined, ilbmBlock.buffer );
+				if ( canvas.width <= 0 || canvas.height <= 0 )
 				{
-					sprites[ i ].width = 8;
-					sprites[ i ].height = 8;
+					canvas.width = 8;
+					canvas.height = 8;
 				}
-				var context = sprites[ i ].getContext( '2d' );
-				this.aoz.utilities.remapBlock( context, [ { r: 0, g: 0, b: 0, a: 255 } ], [ { r: 0, g: 0, b: 0, a: 0 } ], { x: 0, y: 0, width: sprites[ i ].width, height: sprites[ i ].height } );
+				var context = canvas.getContext( '2d' );
+				this.aoz.utilities.remapBlock( context, [ color0 ], [ { r: 0, g: 0, b: 0, a: 0 } ], { x: 0, y: 0, width: canvas.width, height: canvas.height } );
+				sprites[ i ] = canvas;
 			}
 			else
 			{
@@ -545,7 +553,7 @@
 		return sprites;
 	}
 
-	this.convert_pacpic = function( name, block, options ) 
+	this.convert_pacpic = function( name, block, options )
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
 		var end = block.length;
@@ -555,22 +563,22 @@
 			rledata_offset, points_offset;
 
 		/* check if screen header present */
-		if ( block.length < 24) 
+		if ( block.length < 24)
 			return;
 		i = block.leek( 20 );
-		if ( block.length > 134 && (i == 0x12031990 || i == 0x00031990 || i == 0x12030090) ) 
+		if ( block.length > 134 && (i == 0x12031990 || i == 0x00031990 || i == 0x12030090) )
 		{
 			bplcon0 = block.deek( 20 + 20 ); 		/* screen mode */
 			pal = 20 + 26; 							/* palette */
 			s = 110; 								/* picture header */
 		}
-		else if (block.length > 44 && (i == 0x06071963 || i == 0x06070063)) 
+		else if (block.length > 44 && (i == 0x06071963 || i == 0x06070063))
 		{
 			bplcon0 = block.deek( 20 + 14 ) << 12 | 0x200; 	/* guess BPLCON0 */
 			pal = -1; 										/* no palette */
 			s = 20; 										/* picture header */
 		}
-		else 
+		else
 		{
 			throw 'unknown_picpac_header';
 		}
@@ -589,7 +597,7 @@
 
 		/* IFF ILBM requires an even width */
 		ilbm_width = width;
-		if (ilbm_width & 1) 
+		if (ilbm_width & 1)
 			ilbm_width++;
 
 		/* number of bytes jump to get to the next line in IFF */
@@ -614,7 +622,7 @@
 
 		/* convert palette from 0x0RGB to 0xRR 0xGG 0xBB */
 		var palette = [];
-		for ( var i = 0; i < 32; i++) 
+		for ( var i = 0; i < 32; i++)
 		{
 			var c = ( pal >= 0 ) ? block.deek( pal + i*2 ) : (i & 0x0F) * 0x111;
 			var r = ((c >> 8) & 0xF) * 0x11;
@@ -626,7 +634,7 @@
 			palette[ i ] = this.aoz.utilities.getRGBAString( r, g, b );
 		}
 
-        /* decrunch RLE streams */		
+        /* decrunch RLE streams */
         rbit = 7;
         rrbit = 6;
         picdata = block.peek( s + 24 );
@@ -634,51 +642,51 @@
         points  = block.peek( s + points_offset );
         picbyte = block.peek( picdata++ );
         rlebyte = block.peek( rledata++ );
-        if ( block.peek( points ) & 0x80 ) 
+        if ( block.peek( points ) & 0x80 )
 			rlebyte = block.peek( rledata++ );
         plane = IFF_ILBM_HEADER_LEN;
-        for (i = 0; i < bitplanes; i++) 
+        for (i = 0; i < bitplanes; i++)
 		{
             var lump_start = plane;
-            for (j = 0; j < lumps; j++) 
+            for (j = 0; j < lumps; j++)
 			{
                 var lump_offset = lump_start;
-                for (k = 0; k < width; k++) 
+                for (k = 0; k < width; k++)
 				{
                     var d = lump_offset;
-                    for (l = 0; l < lump_height; l++) 
+                    for (l = 0; l < lump_height; l++)
 					{
                         /* if the current RLE bit is set to 1, read in a new picture byte */
-                        if (rlebyte & (1 << rbit--)) 
+                        if (rlebyte & (1 << rbit--))
 						{
                             picbyte = block.peek( picdata++ );
-                            if (picdata > end) 
+                            if (picdata > end)
 							{
 								return;
 							}
                         }
 
                         /* write picture byte and move down by one line in the picture */
-                        ilbmBlock.poke( d, picbyte ); 
+                        ilbmBlock.poke( d, picbyte );
 						d += ilbm_line;
 
                         /* if we've run out of RLE bits, check the POINTS bits to see if
                          * a new RLE byte is needed */
-                        if (rbit > 7) 
+                        if (rbit > 7)
 						{
                             rbit = 7;
-                            if (block.peek( points ) & (1 << rrbit--)) 
+                            if (block.peek( points ) & (1 << rrbit--))
 							{
                                 rlebyte = block.peek( rledata++ );
-                                if (rledata > end) 
+                                if (rledata > end)
 								{
 									return;
 								}
                             }
-                            if (rrbit > 7) 
+                            if (rrbit > 7)
 							{
                                 rrbit = 7, points++;
-                                if (points > end) 
+                                if (points > end)
 								{
 									return;
 								}
@@ -691,32 +699,32 @@
             }
             plane += ilbm_width; 		/* ILBM interleaved bitplanes */
 		}
-		if ( options.convert )	
+		if ( options.convert )
 		{
 			return { palette: palette, image: loadIffBuffer( undefined, ilbmBlock.buffer ) };
 		}
 		return ilbmBlock;
 	};
 
-	this.convert_samples = function( name, block, options ) 
+	this.convert_samples = function( name, block, options )
 	{
 		options = typeof options == 'undefined' ? {} : options;
 		var samples = [];
 		var num_samples;
 
-		if (block.length < 22) 
+		if (block.length < 22)
 			return;
 		num_samples = block.deek( 20 );
-		if (block.length < 22 + (num_samples * 4)) 
+		if (block.length < 22 + (num_samples * 4))
 			return;
 
 		/* create an IFF 8SVX file for each sample */
-		for ( var i = 0; i < num_samples; i++) 
+		for ( var i = 0; i < num_samples; i++)
 		{
 			var offset = block.leek( 22 + i*4 ) + 22;
 			var freq, sam_len, svx_len;
 
-			if (offset > block.length) 
+			if (offset > block.length)
 				return;
 
 			/* copy sample name, change non-alnum to "_" */
@@ -725,7 +733,7 @@
 			freq    = block.deek( offset + 8 );
 			sam_len = block.leek( offset + 10 );
 
-			//if ((offset + 14 + sam_len) > block.length) 
+			//if ((offset + 14 + sam_len) > block.length)
 			{
 				sam_len = (block.length - (offset + 14));
 			}
@@ -751,7 +759,7 @@
 		return samples;
 	};
 
-	this.convert_tracker = function( name, block, options ) 
+	this.convert_tracker = function( name, block, options )
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
 		var mod_len = block.length - 20;
@@ -760,7 +768,7 @@
 		return bank_block;
 	}
 
-	this.convert_data = function( name, block, options ) 
+	this.convert_data = function( name, block, options )
 	{
 		options = typeof options == 'undefined' ? { convert: true } : options;
 		var bank_len = block.length - 20;
@@ -772,11 +780,11 @@
 	this.get_bank_length = function( block, offset )
 	{
 		offset = typeof offset == 'undefined' ? 0 : offset;
-		if ( block.length  >= 6 && ( block.leek( offset + 0 ) == ID_AmSp || block.leek(offset + 0 ) == ID_AmIc ) )  
+		if ( block.length  >= 6 && ( block.leek( offset + 0 ) == ID_AmSp || block.leek(offset + 0 ) == ID_AmIc ) )
 		{
 			var num_sprites = block.deek( offset + 4 );
 			var pos = 6, w, h, d;
-			while ( num_sprites-- ) 
+			while ( num_sprites-- )
 			{
 				if ( pos + 10 > block.length )
 					return 0;
@@ -788,44 +796,44 @@
 			pos += 64; /* include palette */
 			return pos > block.length ? 0 : pos;
 		}
-		else if ( block.length >= 20 && block.leek( offset + 0 ) == ID_AmBk ) 
+		else if ( block.length >= 20 && block.leek( offset + 0 ) == ID_AmBk )
 		{
 			var bank_len = ( block.leek( offset + 8 ) & 0x0FFFFFFF ) + 20 - 8;
 			return bank_len > block.length ? 0 : bank_len;
 		}
 		return 0;
 	};
-			
-	this.get_bank_number = function( block, offset ) 
+
+	this.get_bank_number = function( block, offset )
 	{
 		offset = typeof offset == 'undefined' ? 0 : offset;
-		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmSp ) 
+		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmSp )
 		{
 			return 1; /* Sprites always bank 1 */
 		}
-		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmIc ) 
+		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmIc )
 		{
 			return 2; /* Icons always bank 2 */
 		}
-		if ( block.length >= 20 && block.leek( offset + 0 ) == ID_AmBk) 
+		if ( block.length >= 20 && block.leek( offset + 0 ) == ID_AmBk)
 		{
 			return block.deek( 4 );
 		}
 		return 0;
 	};
 
-	this.get_bank_type = function( block, offset ) 
+	this.get_bank_type = function( block, offset )
 	{
 		offset = typeof offset == 'undefined' ? 0 : offset;
-		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmSp ) 
+		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmSp )
 		{
 			return "Sprites";
 		}
-		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmIc ) 
+		if ( block.length >= 6 && block.leek( offset + 0 ) == ID_AmIc )
 		{
 			return "Icons";
 		}
-		if ( block.length >= 20 && block.leek( offset + 0 ) == ID_AmBk ) 
+		if ( block.length >= 20 && block.leek( offset + 0 ) == ID_AmBk )
 		{
 			var type = block.extractString( offset + 12, 8 );
 			return utilities.trimString( type, { right: true } );
@@ -838,7 +846,7 @@ Instruction "load image", _file$, _number, _tags
 {
 	#waiting
 	#add_to_filesystem:"%_file$"
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadImage",waitFunction:"load_wait",args:[%_file$,%_number,false,%_tags]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"loadImage",waitFunction:"load_wait",args:[%_file$,%_number,false,%_tags]};
 }
 End Instruction
 
@@ -846,7 +854,7 @@ Instruction "load iff", _file$, _number, _tags
 {
 	#waiting
 	#add_to_filesystem:"%_file$"
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadImage",waitFunction:"load_wait",args:[%_file$,%_number,false,%_tags]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"loadImage",waitFunction:"load_wait",args:[%_file$,%_number,false,%_tags]};
 }
 End Instruction
 
@@ -856,7 +864,7 @@ Instruction "load", _file$, _bank_number, _tags
 	#add_to_filesystem:"%_file$"
 	var extension = this.aoz.utilities.getFilenameExtension( %_file$ );
 	var functionName = 'load' + extension.toUpperCase();
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:functionName,waitFunction:"load_wait",args:[%_file$,%_bank_number,%_tags]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:functionName,waitFunction:"load_wait",args:[%_file$,%_bank_number,%_tags]};
 }
 End Instruction
 
@@ -866,7 +874,7 @@ Instruction "track load", _file$, _address, _tags
 	#notimplemented
 	#add_to_filesystem:"%_file$"
 	//#waiting
-	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadTrack",waitFunction:"load_wait",args:[%_file$,%address,%_tags]};
+	//return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"loadTrack",waitFunction:"load_wait",args:[%_file$,%address,%_tags]};
 }
 End Instruction
 Instruction "med load", _file$, _address, _tags
@@ -874,7 +882,7 @@ Instruction "med load", _file$, _address, _tags
 	#notimplemented
 	#add_to_filesystem:"%_file$"
 	//#waiting
-	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"loadMed",waitFunction:"load_wait",args:[%_file$,%address,%_tags]};
+	//return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"loadMed",waitFunction:"load_wait",args:[%_file$,%address,%_tags]};
 }
 End Instruction
 
@@ -882,20 +890,20 @@ Instruction "bload", _file$, _address, _tags
 {
 	#waiting
 	#add_to_filesystem:"%_file$"
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"bLoad,waitFunction":"load_wait",args:[%_file$,%address,%_tags]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"bLoad,waitFunction":"load_wait",args:[%_file$,%address,%_tags]};
 }
 End Instruction
 Instruction "bsave", _file$, _number1 To _number2
 {
 	#waiting
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"bSave",waitFunction:"load_wait",args:[%_file$,%_number1,%_number2]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"bSave",waitFunction:"load_wait",args:[%_file$,%_number1,%_number2]};
 }
 End Instruction
 Instruction "pload", _file$, _number1 To _number2
 {
 	#notimplemented
 	#add_to_filesystem:"%_file$"
-	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"saveBinary", waitFunction:"load_wait",args:[%_file$,%_tags]};
+	//return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"saveBinary", waitFunction:"load_wait",args:[%_file$,%_tags]};
 }
 End Instruction
 Instruction "save", _file$, _number1 To _number2
@@ -919,40 +927,40 @@ Instruction "open random", _number, _string$
 {
 	#waiting
 	#add_to_filesystem:"%_string$"
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openRandom", waitFunction:"load_wait",args:[%_number,%_string$]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"openRandom", waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "open in", _number, _string$
 {
 	#waiting
 	#add_to_filesystem:"%_string$"
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openIn",waitFunction:"load_wait",args:[%_number,%_string$]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"openIn",waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "open out", _number, _string$
 {
 	#waiting
 	#add_to_filesystem:"%_string$"
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openOut",waitFunction:"load_wait",args:[%_number,%_string$]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"openOut",waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "open port", _number, _string$
 {
 	#notimplemented
 	//#waiting
-	//return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"openPort",waitFunction:"load_wait",args:[%_number,%_string$]};
+	//return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"openPort",waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "append", _number, _string$
 {
 	#waiting
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"append",waitFunction:"load_wait",args:[%_number,%_string$]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"append",waitFunction:"load_wait",args:[%_number,%_string$]};
 }
 End Instruction
 Instruction "close", _number
 {
 	#waiting
-	return{type:12,waitThis:this.aoz.thisFilesystem,callFunction:"close",waitFunction:"load_wait",args:[%_number]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"close",waitFunction:"load_wait",args:[%_number]};
 }
 End Instruction
 Instruction "parent"
@@ -978,12 +986,12 @@ Function "lof", _number
 {
 	#errors
 }
-End Function( {this.aoz.filesystem.lof(%_number)} ) 
+End Function( {this.aoz.filesystem.lof(%_number)} )
 Function "eof", _number
 {
 	#errors
 }
-End Function( {this.aoz.filesystem.eof(%_number)} ) 
+End Function( {this.aoz.filesystem.eof(%_number)} )
 Instruction "pof", _number
 {
 	#errors
@@ -994,36 +1002,36 @@ Function "pof", _number
 {
 	#errors
 }
-End Function( {this.aoz.filesystem.getPof(%_number)} ) 
+End Function( {this.aoz.filesystem.getPof(%_number)} )
 
 Function "port", _number
 {
 	#notimplemented
 }
-End Function( {0} ) 
+End Function( {0} )
 Function "drive", _drive$
 {
 	#notimplemented
 }
-End Function( {0} ) 
+End Function( {0} )
 Function "fsel$", _param1$, _param2$, _param3$, _param4$
 {
 	#notimplemented
 }
-End Function( {''} ) 
+End Function( {''} )
 
 Function "dir first$", _param1$
-{	
+{
 }
-End Function( {this.aoz.filesystem.dirFirst$(%_param1$)} ) 
+End Function( {this.aoz.filesystem.dirFirst$(%_param1$)} )
 Function "dir next$"
 {
 }
-End Function( {this.aoz.filesystem.dirNext$()} ) 
+End Function( {this.aoz.filesystem.dirNext$()} )
 Function "exist", _param1$
 {
 }
-End Function( {this.aoz.filesystem.exist(%_param1$)} ) 
+End Function( {this.aoz.filesystem.exist(%_param1$)} )
 
 Instruction "ldir/w", _param$
 {
@@ -1072,4 +1080,3 @@ Function "disc info$", _param$
 	#errors
 }
 End Function( {this.aoz.filesystem.discInfo$(%_param$)} )
-

@@ -33,6 +33,7 @@
 // Initialization
 //
 {
+	this.aoz.moduleScreens = this;
 }
 
 Instruction "screen open", _number, _width, _height, _numberOfColors, _pixelMode
@@ -44,26 +45,26 @@ End Instruction
 
 Function "x screen", _screen, _x
 {
-	#errors	
+	#errors
 	var s=this.aoz.getScreen(%_screen);
 }
 End Function( { (%_x-s.position.x)/s.renderScale.x } )
 Function "x screen", _x
 {
-	#errors	
+	#errors
 }
 End Function( { (%_x-this.aoz.currentScreen.position.x)/this.aoz.currentScreen.renderScale.x } )
 
 
 Function "y screen", _screen, _y
 {
-	#errors	
+	#errors
 	var s=this.aoz.getScreen(%_screen);
 }
 End Function( {(%_y-s.position.y)/s.renderScale.y} )
 Function "y screen", _y
 {
-	#errors	
+	#errors
 }
 End Function( { (%_y-this.aoz.currentScreen.position.y)/this.aoz.currentScreen.renderScale.y} )
 
@@ -87,7 +88,7 @@ Instruction "screen copy", _source To _destination, _mode
 }
 End Instruction
 
-Instruction "screen project", _source, _x1, _y1, _x2, _y2 To _destination, _dx1, _dy1, _dx2, _dy2, _dx3, _dy3, _dx4, _dy4		
+Instruction "screen project", _source, _x1, _y1, _x2, _y2 To _destination, _dx1, _dy1, _dx2, _dy2, _dx3, _dy3, _dx4, _dy4
 {
 	#errors
 	this.aoz.getScreen(%_source).screenProject(%_this.aoz.getScreen(%_destination),%_mode,%_x1,%_y1,%_x2,%_y2,%_dx1,%_dy1,%_dx2,%_dy2,%_dx3,%_dy3,%_dx4,%_dy4);
@@ -102,7 +103,7 @@ Instruction "screen clone", _number
 End Instruction
 
 Instruction "screen close", _number
-{	
+{
 	#errors
 	this.aoz.screenClose(%_number);
 }
@@ -237,19 +238,19 @@ End Instruction
 
 
 Instruction "cls", _number, _x1, _y1 To _x2, _y2
-{	
+{
 	#errors
 	this.aoz.currentScreen.cls(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)});
 }
 End Instruction
 Instruction "cls", _number, _x1, _y1, _width, _height
-{	
+{
 	#errors
 	this.aoz.currentScreen.cls(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height});
 }
 End Instruction
 Instruction "cls", _number
-{	
+{
 	#errors
 	this.aoz.currentScreen.cls(%_number);
 }
@@ -316,6 +317,8 @@ End Function( {0} )
 
 Instruction "autoback", _number
 {
+	#error
+	this.aoz.renderer.autoback(%_number);
 }
 End Instruction
 
@@ -418,7 +421,7 @@ End Instruction
 
 Function "text length", _text$
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.currentScreen.textLength(%_text$)} )
 
@@ -426,7 +429,7 @@ End Function( {this.aoz.currentScreen.textLength(%_text$)} )
 
 Function "text base"
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.currentScreen.textBase()} )
 
@@ -600,7 +603,7 @@ End Instruction
 
 Function "xgr"
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.currentScreen.grPosition.x} )
 
@@ -630,7 +633,7 @@ Function "zone$", _text$, _number
 {
 	#errors
 }
-End Function( {this.aoz.currentScreen.currentTextWindow.zone$(%_text$,%_number)} ) 
+End Function( {this.aoz.currentScreen.currentTextWindow.zone$(%_text$,%_number)} )
 
 Instruction "set zone", _number, _x1, _y1 To _x2, _y2
 {
@@ -698,7 +701,7 @@ End Function( {this.aoz.currentScreen.hZone2({x:this.aoz.xMouse,y:this.aoz.yMous
 
 Function "screen colour", _number
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.getScreen(%_number).numberOfColors} )
 Function "screen colour"
@@ -717,24 +720,24 @@ End Function( {0} )
 
 Function "screen width", _number
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.getScreen(%_number).dimension.width} )
 Function "screen width"
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.currentScreen.dimension.width} )
 
 
 Function "screen height", _number
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.getScreen(%_number).dimension.height} )
 Function "screen height"
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.currentScreen.dimension.height} )
 
@@ -747,16 +750,20 @@ End Instruction
 
 Function "hires"
 {
-	
 }
 End Function( {1} )
-
-
 Function "lowres"
 {
-	
 }
 End Function( {0} )
+Function "laced"
+{
+}
+End Function( {2} )
+Function "halfbright"
+{
+}
+End Function( {4} )
 
 
 Function "x hard", _x, _screen
@@ -868,10 +875,106 @@ Instruction "fade", _speed, _colour_ist
 }
 End Instruction
 
-Function "halfbright"
+
+// SPRITES
+//////////////////////////////////////////////////////////////////////////////////////////////
+Instruction "get sprite", _number, _x1, _y1 To _x2, _y2, _tags
 {
+	#errors
+	this.aoz.currentScreen.getImage('images',%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
 }
-End Function( {4} )
+End Instruction
+Instruction "get sprite", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getImage('images',%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get sprite", _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.currentScreen.getImage('images',%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get sprite", _screenNumber, _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getImage('images',%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get sprite palette", _mask
+{
+	#errors
+	this.aoz.currentScreen.getImagePalette('images',%_mask);
+}
+End Instruction
+
+// BOBS
+//////////////////////////////////////////////////////////////////////////////////////////////
+Instruction "get bob", _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.currentScreen.getImage('images',%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get bob", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getImage('images',%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get bob", _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.currentScreen.getImage('images',%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get bob", _screenNumber, _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getImage('images',%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get bob palette", _mask
+{
+	#errors
+	this.aoz.currentScreen.getImagePalette('images',%_mask);
+}
+End Instruction
+
+
+// ICONS
+//////////////////////////////////////////////////////////////////////////////////////////////
+Instruction "get icon", _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.currentScreen.getImage('icons',%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get icon", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getImage('icons',%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
+}
+End Instruction
+Instruction "get icon", _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.currentScreen.getImage('icons',%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get icon", _screenNumber, _number, _x1, _y1, _width, _height, _tags
+{
+	#errors
+	this.aoz.getScreen(%_screenNumber).getImage('icons',%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
+}
+End Instruction
+Instruction "get icon palette", _mask
+{
+	#errors
+	this.aoz.currentScreen.getImagePalette('icons',%_mask);
+}
+End Instruction
 
 
 /*
@@ -901,4 +1004,3 @@ Instruction "polygon", x1, y1 [ , width, height ]
 }
 End Instruction
 */
-

@@ -1,0 +1,88 @@
+/////////////////////////////////////////////////
+// AMAL DEMO - ZSN  - ZOOMING SPINNING NUMBERS //
+/////////////////////////////////////////////////
+
+//  By Dave Baldwin January 2020
+
+Centre "This may take a few seconds. Please be patient": Wait VBL
+number_of_colours = 32
+screenWidth = Screen Width
+screenHeight = Screen Height
+Screen Open 0, screenWidth, screenHeight, number_of_colours, Lowres
+Double buffer
+Curs Off
+
+// Move Hotspots - This moves the reference point of the image to the centre, so it rotates around a centre point.
+
+For F=1 to 40
+Hot spot F,-6,-8
+Next F
+
+
+SC#=3.0 // Start SCALE SIZE - Changes size of numbers
+
+// CHANGE THIS VARIABLE FOR MORE NUMBERS - ## WARNING ## - LOTS OF NUMBERS TAKES A WHILE TO SET UP, SO BE PATIENT
+MAXA=750 // NUMBER OF BOBS AND AMAL ANIMATION CHANNELS - SEE HOW MANY YOU CAN MAKE - MY i7 Laptop take about a minute to set up 1000
+
+Dim D#(MAXA) // Set up a rotation variable for each bob
+
+Gosub NUMBERS
+S#=0.0 // Rotation angle
+SSTEP#=0.08 // Rotation angle step
+HS#=0.0 // Hotspot X/Y Value
+HSSTEP#=0.1 // Hotspot Shift step
+//D#=0.0
+
+// Main Loop - Spin & re-size Bobs
+do
+	Screen swap // Display logical screen with all bob updates
+	S#=S#+SSTEP#
+	If S#>3.0 // Set Maximum Scale Size
+		SSTEP#=-0.02 // Set zoom speed
+	End if
+	If S#<-2.0 // Set Minimum Scale Size
+		SSTEP#=0.02 // Set Reverse Zoom Speed
+	End if
+	Randomize 0 //Reset the random number sequence so that the random rotation speed for each bob is the same each loop
+	For A=1 to MAXA step 2 // 2 at a time
+		Bob Scale A,SC#+S#,SC#+S# // Increase bob size
+		Bob Scale A+1,1.5*SC#-S#,1.5*SC#-S# // Decrease next bob size
+		Bob Rotate A,D#(A) // Rotate bob clockwise
+		D#(A)=D#(A)+(Rnd(8)+1)*0.01 // Increase Angle of rotation
+		Bob Rotate A+1,-D#(A) // Rotate next bob anti-clockwise
+		D#(A+1)=D#(A+1)-(Rnd(8)+1)*0.01 // Decrease Angle of rotation
+		If D#(A)=10 then D#(A)=0 // Check for full rotation and reset to 0 if 10
+	Next A
+	Bob draw // Draw bobs on Logical screen (in background, not visible)
+	wait vbl // Wait for the electron gun to reset
+	HS#=HS#+HSSTEP# // Increase the hotspot x/y value
+	IF HS#>10 then HSSTEP#=-HSSTEP# // Check for upper limit and reverse
+	IF HS#<-10 then HSSTEP#=-HSSTEP# // Check for lower limit and reverse
+	For F=1 to 40 		//
+	Hot spot F,HS#,HS#  // Set hot spots for each bob
+	Next F              //
+loop
+
+// Display Bobs and Define Amal animation strings
+NUMBERS:
+Gosub NUMBER_DISPLAY
+For N=1 To MAXA
+Channel N To Bob N
+Next N
+For A=1 to MAXA
+T=A-(MAXA/50)+3
+A$=Str$(T)
+Amal A,"Anim 0,(1,"+A$+")(2,3)(3,3)(4,3)(5,"+A$+")(6,3)(7,3)(8,3)(9,"+A$+")(10,3)(11,3)(12,3)(13,"+A$+")(14,3)(15,3)(16,3)(17,"+A$+")(18,3)(19,3)(20,3)(21,"+A$+")(22,3)(23,3)(24,3)(25,"+A$+")(26,3)(27,3)(28,3)(29,"+A$+")(30,3)(31,3)(32,3)(33,"+A$+")(34,3)(35,3)(36,3)(37,"+A$+")(38,3)(39,3)(40,3)"
+Next A
+Amal On
+Return
+
+// Place Bobs on Screen in random positions
+NUMBER_DISPLAY:
+For f=1 to MAXA
+	Bob f,rnd(screenWidth-26)+10,rnd(screenHeight-16)+10,1
+	M=Rnd(4)
+	Bob scale f,SC#+M,SC#+M
+Next f
+CLS
+Return

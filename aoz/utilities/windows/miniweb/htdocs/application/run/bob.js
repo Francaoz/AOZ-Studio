@@ -54,10 +54,10 @@ Bob.prototype.set = function( position, image, tags )
 	if ( typeof image != 'undefined' )
 	{
 		this.image = image;
-		this.imageObject = this.banks.getImage( image, this.aoz.currentContextName );		// Check the image
+		this.imageObject = this.banks.getImage( 'images', image, this.aoz.currentContextName );		// Check the image
 		this.dimension.width = this.imageObject.width * this.scale.x;
 		this.dimension.height = this.imageObject.height * this.scale.y;
-	}	
+	}
 	if ( typeof position.x != 'undefined' ) this.position.x = position.x;
 	if ( typeof position.y != 'undefined' ) this.position.y = position.y;
 	if ( typeof position.z != 'undefined' ) this.position.z = position.z;
@@ -73,6 +73,11 @@ Bob.prototype.update = function( options )
 	{
 		this.toUpdate = false;
 		this.imageDisplay = this.image;
+		if ( this.limits )
+		{
+			this.position.x = Math.max( this.limits.x, Math.min( this.position.x, this.limits.x + this.limits.width ) );
+			this.position.y = Math.max( this.limits.y, Math.min( this.position.y, this.limits.y + this.limits.height ) );
+		}
 		this.positionDisplay.x = this.position.x;
 		this.positionDisplay.y = this.position.y;
 		this.dimensionDisplay.width = this.dimension.width;
@@ -101,27 +106,11 @@ Bob.prototype.setLimits = function( rectangle, options )
 	rectangle.y = typeof rectangle.y != 'undefined' ? rectangle.y : 0;
 	rectangle.width = typeof rectangle.width != 'undefined' ? rectangle.width : this.parent.width;
 	rectangle.height = typeof rectangle.height != 'undefined' ? rectangle.height : this.parent.height;
+	if ( this.aoz.manifest.compilation.emulation.toLowerCase() != 'pc' )
+		rectangle.width &= 0xFFFFFFF0;
 	this.limits = rectangle;
-	this.computeLimits();
-};
-Bob.prototype.computeLimits = function( options )
-{
-	if ( this.limits )
-	{		
-		var image = this.banks.getImage( this.image, this.aoz.currentContextName );
-		if ( image )
-		{
-			if ( this.position.x - image.hotSpotX < this.limits.x1 )
-				this.position.x = this.limits.x + image.hotSpotX;
-			if ( this.position.x - image.hotSpotX + this.dimension.width > this.limits.x + this.limits.width )
-				this.position.x = this.limits.x + this.limits.width + image.hotSpotX - this.dimension.width;
-			if ( this.position.y - image.hotSpotY < this.limits.y )
-				this.position.y = this.limits.y + image.hotSpotY;
-			if ( this.position.y - image.hotSpotY + this.dimension.height > this.limits.y + this.limits.height )
-				this.position.y = this.limits.y + this.limits.width + image.hotSpotY - this.dimension.height;
-			this.toUpdate = true;
-		}
-	}
+	this.clipping = rectangle;
+	this.toUpdate = true;
 };
 Bob.prototype.setScale = function( vector, tags )
 {

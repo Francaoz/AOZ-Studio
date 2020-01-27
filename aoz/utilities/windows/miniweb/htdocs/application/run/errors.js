@@ -250,7 +250,9 @@ function Errors( aoz )
 		"non_contiguous_instructions:Non contiguous instruction definition",
 		"non_contiguous_functions:Non contiguous function definition",
 		"javascript_section_not_closed:Javascript section not closed",
-		"compiler_stuck_in_loop:Compiler stuck in loop"
+		"compiler_stuck_in_loop:Compiler stuck in loop",
+		"tag_parameter_not_defined:Tag parameter is not defined",
+		"tag_parameter_must_be_constant:Tag parameter must be a constant"
 	];
 };
 Errors.prototype.getErrorFromId = function( id )

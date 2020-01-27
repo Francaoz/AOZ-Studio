@@ -1,3 +1,9 @@
+//
+// Help_21.AMOS - Converted to AOZ on the 27/01/2020-16:08:50
+//
+#manifest:"amiga"
+#speed:"safe"
+
 '**********************************  
 '*    AMOS Professional HELP 21   *               SUBJECTS COVERED 
 '*                                *
@@ -141,7 +147,6 @@ Do
    If Mouse Key=1 and M>0 and M<17 Then F=M-1 : PLACE[F,B,N]
    If Mouse Key and M>16 and M<33 Then N=M-16 : PLACE[F,B,N]
    Pen 4 : Paper 3 : Locate 55,2 : Print Str$(M)+" "
-   Wait Vbl
 Loop 
 '
 '

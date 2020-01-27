@@ -3,6 +3,8 @@
 // By Francois Lionet
 //
 #nobank:"images"
+#manifest:"amiga"
+#fullScreen:true
 
 '
 ' IMPORTANT POLITICALLY CORRECT NOTE ;)

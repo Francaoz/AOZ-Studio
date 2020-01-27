@@ -9,6 +9,12 @@ a = Screen Height
 //
 // Note: control panel flash bug in version 07-04082019
 //
+#manifest:"PC"
+#screenWidth:1920
+#screenHeight:1080
+#fullScreen:true
+
+
 number_of_colours = 1024
 screenWidth = Screen Width
 screenHeight = Screen Height

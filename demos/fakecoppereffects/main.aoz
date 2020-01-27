@@ -1,7 +1,9 @@
 '
 ' Fake copper effects
 ' AMOS 2 demo By Nick Morisson
-' 
+'
+#manifest:"amiga"
+#fullScreen:true
 
 colour 1,16777215
 colour 2,15658734
@@ -30,7 +32,7 @@ Dim SX(NUMOFSTARS) : Dim SY(NUMOFSTARS) : Dim SS(NUMOFSTARS)
 
 for t = 0 to NUMOFSTARS-1
    SX(t) = Rnd(320) : SY(t) = rnd(200) : SS(t) = rnd(2)+1
-next 
+next
 
 repeat
     clw
@@ -46,12 +48,12 @@ repeat
          SY(t) = rnd(200)
          SS(t) = rnd(2)+1
        end if
-    next 
+    next
     for b = 0 to NUMOFBARS
         by = 100+sin(a+(b*10))*50
         DB[by]
-        next b
-        a = a + 4
+    next b
+    a = a + 4
     wait vbl
 until mouse key = 1
 end
@@ -63,10 +65,10 @@ procedure DB[y]
       draw 0,yy to 320,yy
       inc yy
   next
-  
+
   for c = 1 to 15 step 2
       ink c
       draw 0,yy to 320,yy
       inc yy
-   next 
+   next
 end proc

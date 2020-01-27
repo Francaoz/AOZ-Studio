@@ -32,9 +32,8 @@
 // Initialization
 //
 {
-	this.aoz = aoz;
+	this.aoz.moduleVideos = this;
     this.banks = this.aoz.banks;
-	this.aoz.videos = this;
 	this.context = new AOZContext( this.aoz, this.aoz.currentContextname, { sorted: true } );
 	this.current = null;
 
@@ -50,8 +49,8 @@
 		this.context.deleteElement( this.aoz.currentContextName, video.index );
 		this.currentVideo = this.context.getFirstElement( this.aoz.currentContextName );
 	};
-	
-	
+
+
 	this.video = function( rectangle, url, tags )
 	{
 		this.rectangle = {};
@@ -93,7 +92,7 @@
 		this.video.play();
 	};
 	this.video.prototype.show = function( visible )
-	{	
+	{
 		this.visible = visible;
 		if ( this.loaded )
 		{
@@ -137,7 +136,6 @@
 		this.video.src = url;
 		this.video.load();
 	}
-
 }
 
 
@@ -150,73 +148,73 @@ Instruction "video open", _index, _x, _y, _url$, _tags
 	this.aoz.videos.context.addElement(this.aoz.currentContextName,video,%_index);
 	this.aoz.videos.currentVideo = video;
 }
-End Instruction 
+End Instruction
 Instruction "video close", _number
 {
 	#errors
 	this.aoz.videos.close(%_number);
 }
-End Instruction 
+End Instruction
 Instruction "video play", _number
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).play();
 }
-End Instruction 
+End Instruction
 Instruction "video stop", _number
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).stop();
 }
-End Instruction 
+End Instruction
 Instruction "video pause", _number
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).pause();
 }
-End Instruction 
+End Instruction
 Instruction "video loop", _number, _loop
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setLooping(%_loop);
 }
-End Instruction 
+End Instruction
 Instruction "video controls", _number, _onOff
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setControls(%_onOff);
 }
-End Instruction 
+End Instruction
 Instruction "video volume", _number, _onOff
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setControls(%_onOff);
 }
-End Instruction 
+End Instruction
 Instruction "video playrate", _number, _playrate
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setPlayrate(%_playrate);
 }
-End Instruction 
+End Instruction
 Instruction "video url", _number, _url$
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setUrl(%_url$);
 }
-End Instruction 
+End Instruction
 Instruction "video position", _number, _x, _y
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setPosition({x:%_x,y:%_y});
 }
-End Instruction 
+End Instruction
 Instruction "video size", _number, _width, _height0
 {
 	#errors
 	this.aoz.videos.getCurrent(%_number).setSize({width:%_width,height:%_height});
 }
-End Instruction 
+End Instruction
 
 Function "video width", _index
 {
@@ -268,4 +266,3 @@ Function "video can play", _index, _type$
 	#errors
 }
 End Function( {this.aoz.videos.getCurrent(%_index).video.canPlayType(%_type$)} )
-

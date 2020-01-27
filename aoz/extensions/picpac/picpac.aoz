@@ -37,11 +37,11 @@
        	if ( !bank.isType( 'picpac' ) )
            throw 'bank_type_mismatch';
 
-        var converted = this.aoz.thisFileSystem.convert_pacpic( 'Essai', bank.getElement( undefined, 1 ), { convert: true } );
+        var converted = this.aoz.moduleFilesystem.convert_pacpic( 'Essai', bank.getElement( undefined, 1 ), { convert: true } );
         //var context = canvas.getContext( '2d' );
 		//context.fillStyle = screen.getColorString( 1 );
 		//context.fillRect( 0, 0, canvas.width, canvas.height );
-        
+
         //screen.pasteCanvas( canvas, {} );
         screen.setPalette( converted.palette );
     }

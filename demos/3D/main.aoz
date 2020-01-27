@@ -3,6 +3,8 @@
 // By Baptiste Bideaux
 //
 #need_server
+#manifest:"PC"
+#fullPage:true
 
 CW=0
 CH=0
@@ -42,4 +44,3 @@ Do
     Render3D "scene_darius", "camera1"
     Wait Vbl
 Loop
-

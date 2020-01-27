@@ -1,5 +1,11 @@
-'**********************************  
-'*    AMOS Professional HELP 31   *               SUBJECTS COVERED 
+//
+// Help_31.AMOS - Converted to AOZ on the 27/01/2020-16:08:54
+//
+#manifest:"amiga"
+#speed:"safe"
+
+'**********************************
+'*    AMOS Professional HELP 31   *               SUBJECTS COVERED
 '*                                *
 '*     (c) Europress Software     *            Wind Open    (line 11)
 '*                                *            Wind Save    (line 40)
@@ -7,57 +13,57 @@
 '**********************************            Title Top    (line 73)
 '                                              Title Bottom (line 73)
 '
-'------------------------------------------- 
-'Wind Open 
-'------------------------------------------- 
-'create a window 
-'  
+'-------------------------------------------
+'Wind Open
+'-------------------------------------------
+'create a window
+'
 '              +---> window identification number
 '              |  +--->X graphic coordinate of left hand side
 '              |  |  +--->Y graphic coordinate of top
-'              |  |  |  +--->width of window in characters 
-'              |  |  |  |  +--->height of window in characters 
+'              |  |  |  +--->width of window in characters
+'              |  |  |  |  +--->height of window in characters
 '              |  |  |  |  | +--->optional border style selection
-'              |  |  |  |  | | 
-'    Wind Open 1,16,20,20,10,1 
+'              |  |  |  |  | |
+'    Wind Open 1,16,20,20,10,1
 '
 'The current screen is treated as window 0 so any new windows opened can be
-'numbered from 1 upwards, there is no limit to the number of windows other 
-'than memory restrictions. 
+'numbered from 1 upwards, there is no limit to the number of windows other
+'than memory restrictions.
 'The X graphic coordinate will be rounded to the nearest 16 pixel boundary,
 'there are no restrictions on the Y coordinate.
-'The width and height are measured in text characters and must always be 
-'divisible by 2. 
-'The optional border style parameter numbers range from 1 to 16 and if a 
-'border is included the size of the window will automatically be increased 
-'by 8 pixels per side. 
+'The width and height are measured in text characters and must always be
+'divisible by 2.
+'The optional border style parameter numbers range from 1 to 16 and if a
+'border is included the size of the window will automatically be increased
+'by 8 pixels per side.
 '
-'Please Note:- Any opened windows are automatically closed when the program  
-'is re-run or when another is loaded, if there are more than a few windows 
+'Please Note:- Any opened windows are automatically closed when the program
+'is re-run or when another is loaded, if there are more than a few windows
 'opened this may take a little time for the system to free this memory.
 '
-'------------------------------------------- 
-'Wind Save 
-'------------------------------------------- 
-'save contents of current window 
+'-------------------------------------------
+'Wind Save
+'-------------------------------------------
+'save contents of current window
 '
 'When a Wind Save instruction is issued any subsequent window opened or
 'moved will cause the area underneath to be stored in memory and background
-'will be restored when the window is closed or moved.  
+'will be restored when the window is closed or moved.
 '
-'Please note that this instruction applies to the current window and not the 
-'one that you are opening. 
+'Please note that this instruction applies to the current window and not the
+'one that you are opening.
 '
-'------------------------------------------- 
+'-------------------------------------------
 'Border
-'------------------------------------------- 
+'-------------------------------------------
 'change border type or colour
 '
 '
 '
 '               +--->border style number 1-16
-'               | +--->pen colour index number 
-'               | | +--->paper colour index number 
+'               | +--->pen colour index number
+'               | | +--->paper colour index number
 '               | | |
 '        Border 2,1,3
 '
@@ -69,26 +75,26 @@
 'Border style numbers range from 1-16
 '
 '
-'------------------------------------------- 
-'Title Top 
+'-------------------------------------------
+'Title Top
 'Title Bottom
-'------------------------------------------- 
+'-------------------------------------------
 'define title bars for current window
 '
-'eg.       A$="WINDOW 2 BOTTOM TEXT" 
-'          Wind Open 2,5,5,25,15,1 
-'          Title Top "WINDOW 2 TOP TEXT" 
-'          Title Bottom A$ 
+'eg.       A$="WINDOW 2 BOTTOM TEXT"
+'          Wind Open 2,5,5,25,15,1
+'          Title Top "WINDOW 2 TOP TEXT"
+'          Title Bottom A$
 '
 'If the title is longer than the window then the text will be clipped to fit.
 '
-'------------------------------------------- 
-'WORKING EXAMPLE 
-'------------------------------------------- 
+'-------------------------------------------
+'WORKING EXAMPLE
+'-------------------------------------------
 '
-Rem *** tidy up screen 
+Rem *** tidy up screen
 '
-Screen Open 0,640,200,16,Hires : Flash Off 
+Screen Open 0,640,200,16,Hires : Flash Off
 Palette $0,$F00,$F0,$F,$FF0,$F0F,$FF,$F70,$7F,$70F,$F07,$333,$666,$999,$CCC,$FFF
 Curs Off : Cls 0 : Paper 0 : Pen 6
 Box 0,0 To 639,175 : Set Pattern 31 : Ink 3,6 : Paint 1,1
@@ -99,21 +105,22 @@ COUNT=0
 Global COUNT,P
 '
 '
-Rem *** save the contents of window 0 (the screen) 
+Rem *** save the contents of window 0 (the screen)
 '
-Wind Save 
+Wind Save
 '
 '
-Rem *** start of the main loop 
+Rem *** start of the main loop
 '
-Do 
+Do
    Exit If Mouse Key=3
    If COUNT<40 and Mouse Key=1 Then MORE
    If COUNT>0 and Mouse Key=2 Then LESS
-Loop 
+   Wait 5
+Loop
 '
 '
-Edit 
+Edit
 '
 '
 Procedure MORE
@@ -122,10 +129,10 @@ Procedure MORE
    Wind Open COUNT,Rnd(272),Rnd(80),Rnd(20)+26,Rnd(7)+5,1
    Title Top "WINDOW"+Str$(COUNT)
    Border Rnd(4)+1,P,15-P
-   Clw 
+   Clw
    Pen Rnd(14+1) : Locate 0,1 : Centre "THIS IS WINDOW NUMBER"+Str$(COUNT)
 End Proc
 Procedure LESS
-   Wind Close 
+   Wind Close
    Dec COUNT
 End Proc

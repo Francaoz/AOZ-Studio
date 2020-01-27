@@ -35,7 +35,7 @@
     // Base initilizations
     this.banks = this.aoz.banks;
     this.utilities = this.aoz.utilities;
-    this.aoz.rainbows = this;
+    this.aoz.moduleRainbows = this;
 	this.context = new AOZContext( this.aoz, this.aoz.currentContextName, { sorted: true } );
     this.mode = 'fast';
 
@@ -44,7 +44,7 @@
     {
         this.aoz = aoz;
         this.name = name;
-        this.rainbows = this.aoz.rainbows;
+        this.rainbows = this.aoz.moduleRainbows;
 
         this.position = null;
         this.dimension = null;
@@ -101,7 +101,7 @@
                 var rIndex = colours.r;
                 var gIndex = colours.g;
                 var bIndex = colours.b;
-                var length = this.redBuffer.length; 
+                var length = this.redBuffer.length;
                 for ( var y = 0; y < this.height; y++ )
                 {
                     var r = this.redBuffer[ position ];
@@ -128,7 +128,7 @@
     Rainbow.prototype.redraw = function()
     {
         if ( this.rainbows.mode == 'fast' )
-        {            
+        {
             // Redraw the screen?
             if ( this.offset != this.previousOffset )
             {
@@ -165,7 +165,7 @@
         // Calculates the values...
         this.redBuffer = calculate( red );
         this.greenBuffer = calculate( green );
-        this.blueBuffer = calculate( blue );   
+        this.blueBuffer = calculate( blue );
 
         var self = this;
         function interpret( string$ )
@@ -185,7 +185,7 @@
                     c = info.getNextChar();
                     if ( info.eol || c != ',' )
                         throw 'syntax_error_in_amal_string';
-                    
+
                     var delta = info.getNumber();
                     c = info.getNextChar();
                     if ( info.eol || c != ',' )
@@ -196,7 +196,7 @@
                     if ( c != ')' )
                         throw 'syntax_error_in_amal_string';
 
-                    definition[ destination ] = 
+                    definition[ destination ] =
                     {
                         lines: lines,
                         delta: delta,
@@ -204,7 +204,7 @@
                     };
                     destination++;
                     c = info.getNextChar();
-                } while( !info.eol );            
+                } while( !info.eol );
             }
             else
             {
@@ -225,7 +225,7 @@
                 {
                     for ( l = 0; l < definition[ position ].lines && line < height; l++ )
                     {
-                        lineBuffer[ line++ ] = color;                
+                        lineBuffer[ line++ ] = color;
                     }
                     color += definition[ position ].delta;
                     color &= 255;
@@ -322,21 +322,20 @@
 Instruction "set rainbow", _index, _ink, _height, _red$, _green$, _blue$, _alpha$
 {
     #errors
-    this.aoz.rainbows.setRainbow( %_index, %_ink, %_height, %_red$, %_green$, %_blue$, %_alpha$ );
+    this.aoz.moduleRainbows.setRainbow( %_index, %_ink, %_height, %_red$, %_green$, %_blue$, %_alpha$ );
 }
 End Instruction
 
 Instruction "rainbow", _number, _offset, _vertical_position, _height
 {
     #errors
-    this.aoz.rainbows.context.getElement( this.aoz.currentContextName, %_number, 'rainbow_not_defined' ).setDisplay( %_offset, %_vertical_position, %_height );
+    this.aoz.moduleRainbows.context.getElement( this.aoz.currentContextName, %_number, 'rainbow_not_defined' ).setDisplay( %_offset, %_vertical_position, %_height );
 }
 End Instruction
 
 Instruction "rainbow del", _index
-{    
+{
     #errors
-    this.aoz.rainbows.deleteRainbow( this.aoz.currentContextName, %_index );
+    this.aoz.moduleRainbows.deleteRainbow( this.aoz.currentContextName, %_index );
 }
 End Instruction
-

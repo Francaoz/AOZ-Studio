@@ -32,6 +32,7 @@
 // Initialization
 //
 {
+	this.aoz.moduleBobs = this;
 }
 
 Instruction "bob", _number, _image
@@ -88,7 +89,7 @@ Instruction "bob clear"
 End Instruction
 
 Instruction "bob clear"
-{		
+{
 }
 End Instruction
 
@@ -164,106 +165,6 @@ Instruction "bob skew", _number, _x, _y
 }
 End Instruction
 
-
-Instruction "ins bob", _number
-{
-	#errors
-	this.aoz.banks.insertImage(%_number);
-}
-End Instruction
-Instruction "ins bob", _theStart To _theEnd
-{
-	#errors #errors
-	this.aoz.banks.insertImageRange(%_theStart,%_theEnd);
-}
-End Instruction
-Instruction "get bob", _number, _x1, _y1 To _x2, _y2, _tags
-{
-	#errors
-	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
-}
-End Instruction
-Instruction "get bob", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
-{
-	#errors
-	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
-}
-End Instruction
-Instruction "get bob", _number, _x1, _y1, _width, _height, _tags
-{
-	#errors
-	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
-}
-End Instruction
-Instruction "get bob", _screenNumber, _number, _x1, _y1, _width, _height, _tags
-{
-	#errors
-	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
-}
-End Instruction
-Instruction "del bob", _number
-{
-	#errors
-	this.aoz.banks.deleteImage(%_number);
-}
-End Instruction
-Instruction "del bob", _number1 To _number2
-{
-	#errors
-	this.aoz.banks.deleteImageRange(%_number1,%_number2);
-}
-End Instruction
-
-Instruction "ins sprite", _number
-{
-	#errors
-	this.aoz.banks.insertImage(%_number);
-}
-End Instruction
-Instruction "ins sprite", _theStart To _theEnd
-{
-	#errors #errors
-	this.aoz.banks.insertImageRange(%_theStart,%_theEnd);
-}
-End Instruction
-Instruction "get sprite", _number, _x1, _y1 To _x2, _y2, _tags
-{
-	#errors
-	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
-}
-End Instruction
-Instruction "get sprite", _screenNumber, _number, _x1, _y1 To _x2, _y2, _tags
-{
-	#errors
-	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:(%_x2)-(%_x1),height:(%_y2)-(%_y1)},%_tags);
-}
-End Instruction
-Instruction "get sprite", _number, _x1, _y1, _width, _height, _tags
-{
-	#errors
-	this.aoz.currentScreen.getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
-}
-End Instruction
-Instruction "get sprite", _screenNumber, _number, _x1, _y1, _width, _height, _tags
-{
-	#errors
-	this.aoz.getScreen(%_screenNumber).getBob(%_number,{x:%_x1,y:%_y1,width:%_width,height:%_height},%_tags);
-}
-End Instruction
-Instruction "del sprite", _number
-{
-	#errors
-	this.aoz.banks.deleteImage(%_number);
-}
-End Instruction
-Instruction "del sprite", _number1 To _number2
-{
-	#errors
-	this.aoz.banks.deleteImageRange(%_number1,%_number2);
-}
-End Instruction
-
-
 Instruction "put bob", _number
 {
 	#errors
@@ -274,7 +175,7 @@ End Instruction
 Instruction "paste bob", _x, _y, _number, _scaleX, _scaleY, _angle, _tags
 {
 	#errors
-	this.aoz.currentScreen.pasteBob(%_number,%_x,%_y,%_scaleX,%_scaleY,%_angle*this.aoz.degreeRadian,%_tags);
+	this.aoz.currentScreen.pasteImage('images',%_number,%_x,%_y,%_scaleX,%_scaleY,%_angle*this.aoz.degreeRadian,%_tags);
 }
 End Instruction
 
@@ -310,13 +211,6 @@ Function "i bob", _number
 }
 End Function( {this.aoz.currentScreen.iBob(%_number)} )
 
-Instruction "get bob palette", _mask
-{
-	#errors
-	this.aoz.currentScreen.getBobPalette(%_mask);
-}
-End Instruction
-
 Instruction "priority reverse on"
 {
 	#errors
@@ -333,19 +227,12 @@ End Instruction
 
 Function "bob col", _bobNumber, _bob1 To _bob2
 {
-	#errors 
+	#errors
 }
 End Function( {this.aoz.sprites.bobCol(%_bobNumber,this.aoz.currentScreen,%_bob1,%_bob2)} )
 
 Function "bobsprite col", _bobNumber, _sprite1 To _sprite2
 {
-	#errors 
+	#errors
 }
 End Function( {this.aoz.sprites.bobSpriteCol(%_bobNumber,this.aoz.currentScreen,%_sprite1,%_sprite2)} )
-
-
-
-
-
-
-

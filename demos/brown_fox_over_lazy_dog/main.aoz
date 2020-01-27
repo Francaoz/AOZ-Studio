@@ -4,6 +4,7 @@
 // Demonstration of new font support in AOZ
 // FL - 2019 - Public domain
 //
+#fullScreen:true
 
 Degree
 

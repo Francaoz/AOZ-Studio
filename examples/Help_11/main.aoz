@@ -1,3 +1,9 @@
+//
+// Help_11.AMOS - Converted to AOZ on the 27/01/2020-16:08:46
+//
+#manifest:"amiga"
+#speed:"safe"
+
 '**********************************  
 '*    AMOS Professional HELP 11   *               SUBJECTS COVERED 
 '*                                *
@@ -124,7 +130,6 @@ For COUNT=1 To 10000
    If COUNT mod(100)=0 Then Locate 40,22 : Print COUNT
    '
    Rem *** Icrement For...Next counter
-   Wait Vbl
 Next COUNT
 '
 Rem *** end of program - return to editor

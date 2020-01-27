@@ -1,5 +1,11 @@
-'**********************************  
-'*    AMOS Professional HELP 38   *               SUBJECTS COVERED 
+//
+// Help_38.AMOS - Converted to AOZ on the 27/01/2020-16:08:57
+//
+#manifest:"amiga"
+#speed:"safe"
+
+'**********************************
+'*    AMOS Professional HELP 38   *               SUBJECTS COVERED
 '*                                *
 '*     (c) Europress Software     *           Default         (line 11)
 '*                                *           Default Palette (line 19)
@@ -7,87 +13,87 @@
 '**********************************           Def Scroll      (line 46)
 '                                             Scroll          (line 67)
 '
-'------------------------------------------- 
-'Default 
-'------------------------------------------- 
-'reset screen to default 
+'-------------------------------------------
+'Default
+'-------------------------------------------
+'reset screen to default
 '
 'Default requires no parameters and will close ALL currently opened screens
 'and return the system to the default settings.
 '
-'------------------------------------------- 
-'Default Palette 
-'------------------------------------------- 
+'-------------------------------------------
+'Default Palette
+'-------------------------------------------
 'set a standard palette
 '
 'eg.       Default Palette $0,$1,$2,$3......etc.  (up to maximum of 32)
 '
-'This instruction defines a palette of up to 32 colours which will be used 
-'as the default colours for all subsequently opened screens. 
-'Parameters are entered in the usual Colour format ranging from $0 to $FFF 
+'This instruction defines a palette of up to 32 colours which will be used
+'as the default colours for all subsequently opened screens.
+'Parameters are entered in the usual Colour format ranging from $0 to $FFF
 '
-'------------------------------------------- 
-'Get Palette 
-'------------------------------------------- 
-'set the palette to that of another screen 
+'-------------------------------------------
+'Get Palette
+'-------------------------------------------
+'set the palette to that of another screen
 '
 'eg.    Get Palette 1  (load palette from screen 1 to the current screen)
 '
-'An optional bit mask parameter can also be added to load just a selection 
+'An optional bit mask parameter can also be added to load just a selection
 'of the colours:-
 '
-'          Get Palette 1,%10100011110111 
+'          Get Palette 1,%10100011110111
 '
 'Each colour index is represented by a single bit in the mask counting from
 'right to left with index 0 at extreme right.
-'Any bits set with a 1 will be loaded otherwise the colour index will  
-'remain unchanged. 
-'------------------------------------------- 
+'Any bits set with a 1 will be loaded otherwise the colour index will
+'remain unchanged.
+'-------------------------------------------
 'Def Scroll
-'------------------------------------------- 
-'define an area to be scrolled 
+'-------------------------------------------
+'define an area to be scrolled
 '
 '
 '
 '               +--->scroll identification number
 '               |        +--->coordinates forming a rectangle
-'               |     __/ \__    +--->amount to be scrolled left to right  
-'               |    /       \   |  +--->amount to be scrolled top to bottom 
+'               |     __/ \__    +--->amount to be scrolled left to right
+'               |    /       \   |  +--->amount to be scrolled top to bottom
 '               |   /         \  |  |
 '    Def Scroll 1,10,20 To 30,40,1,-1
 '
-'The scroll identification number can range from 1 to 16.  
+'The scroll identification number can range from 1 to 16.
 'Coordinates are in the normal format measured in pixels from top left to
-'bottom right. 
-'The amount to be scrolled is also measured in pixels, negative values 
+'bottom right.
+'The amount to be scrolled is also measured in pixels, negative values
 'reverse the scrolling directions from the normal left to right and top
 'to bottom.
 '
-'------------------------------------------- 
+'-------------------------------------------
 'Scroll
-'------------------------------------------- 
-'scroll a pre defined area 
+'-------------------------------------------
+'scroll a pre defined area
 '
-'The scroll instructions scrolls the area pre-defined with the Def Scroll. 
+'The scroll instructions scrolls the area pre-defined with the Def Scroll.
 '
 'eg.         Box 100,100 To 119,119
-'            Def Scroll 1,100,100 To 140,140,1,1 
-'            Def Scroll 2,100,100 To 140,140,-1,-1 
-'            Do  
+'            Def Scroll 1,100,100 To 140,140,1,1
+'            Def Scroll 2,100,100 To 140,140,-1,-1
+'            Do
 '            For N=1 To 20 : Scroll 1 : Wait Vbl : Next
 '            For N=1 To 20 : Scroll 2 : Wait Vbl : Next
-'            Loop  
+'            Loop
 '
-'------------------------------------------- 
-'WORKING EXAMPLE 
-'------------------------------------------- 
-Rem *** load a picture and clear part not required 
+'-------------------------------------------
+'WORKING EXAMPLE
+'-------------------------------------------
+Rem *** load a picture and clear part not required
 '
 Load Iff "AMOSPro_Examples:IFF/LOGO.iff",1
 Cls 0,0,129 To 319,199
 '
 '
-Rem *** copy picture to top left hand corner of another screen 
+Rem *** copy picture to top left hand corner of another screen
 '
 Screen Open 0,320,200,32,Lowres
 Get Palette 1
@@ -99,9 +105,9 @@ Gr Writing 0
 Ink 1 : Text 20,20,"PRESS ANY MOUSE KET TO QUIT"
 '
 '
-Rem *** double buffer to stop flickering 
+Rem *** double buffer to stop flickering
 '
-Hide : Double Buffer 
+Hide : Double Buffer
 '
 '
 Rem *** divide the picture into 9 parts
@@ -110,8 +116,8 @@ Ink 0
 For X=0 To 2
    For Y=0 To 2
       Box X*88,Y*42 To X*88+88,Y*42+42
-   Next 
-Next 
+   Next
+Next
 '
 '
 Rem *** define the areas to be scrolled
@@ -125,15 +131,16 @@ Def Scroll 4,0,126 To 266,169,11,0
 Rem *** start the scrolling routine
 '
 COUNT=1
-Do 
-   Add COUNT,1,1 To 11 : If COUNT=11 Then For C=1 To 15000 : Exit If Mouse Key : Next 
+Do
+   Add COUNT,1,1 To 11 : If COUNT=11 Then For C=1 To 15000 : Exit If Mouse Key : Next
    Exit If Mouse Key
-   For N=1 To 7 : Scroll 1 : Next 
+   For N=1 To 7 : Scroll 1 : Wait Vbl : Next
    Exit If Mouse Key
-   For N=1 To 8 : Scroll 2 : Next 
+   For N=1 To 8 : Scroll 2 : Wait Vbl : Next
    Exit If Mouse Key
-   For N=1 To 7 : Scroll 3 : Next 
+   For N=1 To 7 : Scroll 3 : Wait Vbl : Next
    Exit If Mouse Key
-   For N=1 To 8 : Scroll 4 : Next 
-Loop 
-Edit 
+   For N=1 To 8 : Scroll 4 : Wait Vbl : Next
+   Wait Vbl
+Loop
+Edit

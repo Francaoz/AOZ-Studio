@@ -35,7 +35,7 @@
 //
 {
     // Base initiliations
-    this.aoz.sounds = this;
+    this.aoz.moduleSounds = this;
     this.banks = this.aoz.banks;
     this.soundBank = this.banks.soundBank;
     this.utilities = this.aoz.utilities;
@@ -95,7 +95,7 @@
         this.playing = {};
     };
     Voice.prototype.playSound = function( args, contextName )
-    {        
+    {
         var self = this;
         var name = args[ 0 ];
         var rate = args[ 1 ];
@@ -207,14 +207,14 @@
 // Boom
 Instruction "boom"
 {
-    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'boom' ], this.aoz.sounds.contextName );
+    this.aoz.moduleSounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'boom' ], this.aoz.moduleSounds.contextName );
 }
 End Instruction
 
 // Shoot
 Instruction "shoot"
 {
-    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'shoot' ], this.aoz.sounds.contextName );
+    this.aoz.moduleSounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'shoot' ], this.aoz.moduleSounds.contextName );
 }
 End Instruction
 
@@ -222,7 +222,7 @@ End Instruction
 // Bell PITCH
 Instruction "bell", _frequency
 {
-    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'bell', %_frequency ], this.aoz.sounds.contextName );
+    this.aoz.moduleSounds.callVoices( 'playSound', 0xFFFFFFFF, [ 'bell', %_frequency ], this.aoz.moduleSounds.contextName );
 }
 End Instruction
 
@@ -232,25 +232,25 @@ End Instruction
 Instruction "sam play", _index
 {
     #errors
-    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ %_index ] );
+    this.aoz.moduleSounds.callVoices( 'playSound', 0xFFFFFFFF, [ %_index ] );
 }
 End Instruction
 Instruction "sam play", _name$
 {
     #errors
-    this.aoz.sounds.callVoices( 'playSound', 0xFFFFFFFF, [ %_name$ ] );
+    this.aoz.moduleSounds.callVoices( 'playSound', 0xFFFFFFFF, [ %_name$ ] );
 }
 End Instruction
 Instruction "sam play", _voices, _index, _frequency
-{ 
+{
     #errors
-    this.aoz.sounds.callVoices( 'playSound', %_voices, [ %_index, %_frequency ] );
+    this.aoz.moduleSounds.callVoices( 'playSound', %_voices, [ %_index, %_frequency ] );
 }
 End Instruction
 Instruction "sam play", _voices, _name$, _frequency
 {
     #errors
-    this.aoz.sounds.callVoices( 'playSound', %_voices, [ %_name$, %_frequency ] );
+    this.aoz.moduleSounds.callVoices( 'playSound', %_voices, [ %_name$, %_frequency ] );
 }
 End Instruction
 
@@ -259,7 +259,7 @@ End Instruction
 Instruction "sam stop", _voices
 {
     #errors
-    this.aoz.sounds.callVoices( 'stopSound', %_voices );
+    this.aoz.moduleSounds.callVoices( 'stopSound', %_voices );
 }
 End Instruction
 
@@ -267,7 +267,7 @@ End Instruction
 Instruction "volume", _level, _voices
 {
     #errors
-    this.aoz.sounds.callVoices( 'setVolume', %_voices, [ %_level ] );
+    this.aoz.moduleSounds.callVoices( 'setVolume', %_voices, [ %_level ] );
 }
 End Instruction
 

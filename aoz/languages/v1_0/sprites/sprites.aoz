@@ -1,0 +1,136 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Rainbow Instruction Set
+ * By Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+#warning_off:"instruction_not_implemented"
+
+//
+// Initialization
+//
+{
+	this.aoz.moduleSprites = this;
+}
+
+Instruction "set sprite buffer", _number
+{
+}
+End Instruction
+Instruction "sprite off", _number
+{
+	#errors
+	this.aoz.sprites.spriteOff(%_number);
+}
+End Instruction
+Instruction "sprite priority", _number
+{
+	#errors
+	this.aoz.sprites.spritePriority(%_number);
+}
+End Instruction
+Instruction "sprite update off"
+{
+	#errors
+	this.aoz.sprites.setSpriteUpdate(false);
+}
+End Instruction
+Instruction "sprite update on"
+{
+	#errors
+	this.aoz.sprites.setSpriteUpdate(true);
+}
+End Instruction
+Instruction "sprite update"
+{
+	#errors
+	this.aoz.sprites.spriteUpdate();
+}
+End Instruction
+Instruction "sprite scale",_number, _x, _x
+{
+	#errors
+	this.aoz.sprites.setScale(%_number,%_x,%_y);
+}
+End Instruction
+Instruction "sprite rotate",_number, _angle
+{
+	#errors
+	this.aoz.sprites.setAngle(%_number,%_angle*this.aoz.degreeRadian);
+}
+End Instruction
+Instruction "sprite skew",_number, _x, _y
+{
+	#errors
+	this.aoz.sprites.setSkew(%_number,%_x,%_y);
+}
+End Instruction
+Instruction "sprite",_number, _x, _y, _i
+{
+	#errors
+	this.aoz.sprites.sprite(%_number,%_x,%_y,%_i);
+}
+End Instruction
+
+Function "spritebob col", _number, _start To _End
+{
+	#errors
+}
+End Function( {this.aoz.sprites.spriteBobCol(%_number,this.aoz.currentScreen,%_start,%_end)} )
+Function "spritebob col", _number
+{
+	#errors
+}
+End Function( {this.aoz.sprites.spriteCol(%_number)} )
+Function "sprite col", _number
+{
+	#errors
+}
+End Function( {this.aoz.sprites.spriteBobCol(%_number,this.aoz.currentScreen)} )
+Function "sprite col", _number, _start To _End
+{
+	#errors
+}
+End Function( {this.aoz.sprites.spriteCol(%_number,%_start,%_end)} )
+Function "sprite base", _number
+{
+	#notimplemented
+}
+End Function( {0} )
+Function "x sprite", _number
+{
+	#errors
+}
+End Function( {this.aoz.sprites.xSprite(%_number)} )
+Function "y sprite", _number
+{
+	#errors
+}
+End Function( {this.aoz.sprites.ySprite(%_number)} )
+Function "i sprite", _number
+{
+	#errors
+}
+End Function( {this.aoz.sprites.iSprite(%_number)} )

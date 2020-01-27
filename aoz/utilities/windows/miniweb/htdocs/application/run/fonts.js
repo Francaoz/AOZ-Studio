@@ -38,8 +38,8 @@ function Fonts( aoz )
 	this.windowFonts = {};
 	this.windowFontsInformations = {};
 
-	this.getFonts(["roboto"],[],"application");
-	this.setWindowFont( "IBM Plex Mono","google",53.5,"normal","normal","normal","","application");
+	this.getFonts(["expletus sans"],[],"application");
+	this.setWindowFont( "IBM Plex Mono","google",13.375,"normal","normal","normal","","application");
 
 
 	// Load first font on the list
@@ -617,9 +617,9 @@ Fonts.prototype.getTextMetrics = function(fontFamily, fontSize, fontWeight)
 AmigaFonts = {};
 AmigaCharacters = {};
 GoogleFonts = {};
-GoogleFonts["roboto"]=
+GoogleFonts["expletus sans"]=
 {
-	name:"Roboto",sizes:[{weight:"100",style:"normal"},{weight:"100",style:"italic"},{weight:"300",style:"normal"},{weight:"300",style:"italic"},{weight:"400",style:"normal"},{weight:"500",style:"normal"},{weight:"500",style:"italic"},{weight:"400",style:"italic"},{weight:"700",style:"italic"},{weight:"900",style:"normal"},{weight:"700",style:"normal"},{weight:"900",style:"italic"}]
+	name:"Expletus Sans",sizes:[{weight:"400",style:"normal"},{weight:"400",style:"italic"},{weight:"700",style:"normal"},{weight:"700",style:"italic"}]
 };
 GoogleFonts["ibm plex mono"]=
 {

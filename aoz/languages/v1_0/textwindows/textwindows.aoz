@@ -32,6 +32,7 @@
 // Initialization
 //
 {
+	this.aoz.moduleTextWindows = this;
 }
 
 Instruction "wind open", _number, _x, _y, _width, _height, _border, _tags$
@@ -82,7 +83,7 @@ Function "windon"
 }
 End Function( {this.aoz.currentScreen.currentTextWindow.number} )
 
-Instruction "locate", _x, _y 
+Instruction "locate", _x, _y
 {
 	#errors
 	this.aoz.currentScreen.currentTextWindow.locate({x:%_x,y:%_y});
@@ -384,34 +385,34 @@ Function "x graphic", _x
 }
 End Function( {this.aoz.currentScreen.currentTextWindow.xGraphic(%_x)} )
 
-Function "y graphic", _y 
+Function "y graphic", _y
 {
 	#errors
 }
-End Function( {this.aoz.currentScreen.currentTextWindow.yGraphic(%_y)} ) 
+End Function( {this.aoz.currentScreen.currentTextWindow.yGraphic(%_y)} )
 
 Function "border$", _text$, _number
 {
 	#errors
 }
-End Function( {this.aoz.currentScreen.currentTextWindow.border$(%_text$,%_number)} ) 
+End Function( {this.aoz.currentScreen.currentTextWindow.border$(%_text$,%_number)} )
 
 Function "x text", _coord
 {
 	#errors
 }
-End Function( {this.aoz.currentScreen.currentTextWindow.xText(%_coord)} ) 
+End Function( {this.aoz.currentScreen.currentTextWindow.xText(%_coord)} )
 Function "y text", _coord
 {
 	#errors
 }
-End Function( {this.aoz.currentScreen.currentTextWindow.yText(%_coord)} ) 
+End Function( {this.aoz.currentScreen.currentTextWindow.yText(%_coord)} )
 
 Function "text styles"
 {
 	#errors
 }
-End Function( {this.aoz.currentScreen.currentTextWindow.getTextStyle()} ) 
+End Function( {this.aoz.currentScreen.currentTextWindow.getTextStyle()} )
 
 Instruction "set text", _number
 {
@@ -429,7 +430,6 @@ End Instruction
 
 Function "text styles"
 {
-	#errors	
+	#errors
 }
 End Function( {this.aoz.currentScreen.currentTextWindow.getTextStyle()} )
-
