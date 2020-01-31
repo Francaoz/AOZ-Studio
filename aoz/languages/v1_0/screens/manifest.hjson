@@ -29,4 +29,8 @@
 		start: "screens.aoz"
 		object: "screens"
 	}
+	compilation:
+	{
+		noWarning: []
+	}
 }

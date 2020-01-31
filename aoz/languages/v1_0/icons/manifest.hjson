@@ -29,4 +29,8 @@
 		start: "icons.aoz"
 		object: "icons"
 	}
+	compilation:
+	{
+		noWarning: []
+	}
 }

@@ -28,7 +28,8 @@
  */
 #include_javascript:"howler.js-master/dist/howler.js"
 #include_javascript:"howler.js-master/dist/howler.spatial.min.js"
-#warning_off:"instruction_not_implemented"
+#noWarning:"instruction_not_implemented"
+
 
 //
 // Initialization
@@ -42,6 +43,7 @@
     this.voices = [];
     this.maxVoices = 32;
     this.numberOfLoops = 1;
+    this.aoz.useSounds = true;
 
     // Amiga mode...
     if ( this.aoz.manifest.sounds.mode == 'amiga' )

@@ -26,7 +26,7 @@
  * @author FL
  * @date first pushed on 27/10/2019
  */
-#warning_off:"instruction_not_implemented"
+#noWarning:"instruction_not_implemented"
 
 //
 // Initialization
@@ -63,7 +63,7 @@ End Instruction
 Instruction "bob off", _number
 {
 	#errors
-	this.aoz.currentScreen.bobOff(%_number);
+	this.aoz.currentScreen.destroyBob(%_number);
 }
 End Instruction
 
@@ -130,17 +130,24 @@ Instruction "set bob", _x, _y, _width, _height
 }
 End Instruction
 
+Instruction "bob alpha", _number, _alpha
+{
+	#errors
+	this.aoz.currentScreen.bobAlpha(%_number,%_alpha);
+}
+End Instruction
+
 Instruction "bob show", _number
 {
 	#errors
-	this.aoz.currentScreen.bobShow(true,%_number);
+	this.aoz.currentScreen.setBobVisible(true,%_number);
 }
 End Instruction
 
 Instruction "bob hide", _number
 {
 	#errors
-	this.aoz.currentScreen.bobShow(false,%_number);
+	this.aoz.currentScreen.setBobVisible(false,%_number);
 }
 End Instruction
 

@@ -28,7 +28,7 @@
  */
 #include_javascript:"ilbm.js-master/iff.js"
 #include_javascript:"ilbm.js-master/jdataview.js"
-#warning_off:"instruction_not_implemented"
+#noWarning:"instruction_not_implemented"
 
 {
     // Base initilizations
@@ -130,27 +130,28 @@
 				var convertedBank = self.convert_bank( 'bank', block , { convert: true });
 				if ( convertedBank )
 				{
+					bankNumber = typeof bankNumber != 'undefined' ? bankNumber : convertedBank.number;
+					self.aoz.banks.erase( bankNumber, true );
 					switch ( convertedBank.type )
 					{
 						case 'images':
-							self.aoz.banks.erase( convertedBank.number );
-							bank = self.aoz.banks.reserve( convertedBank.number, convertedBank.type, 0, self.aoz.currentContextName );
+							bank = self.aoz.banks.reserve( bankNumber, convertedBank.type, 0, self.aoz.currentContextName );
 							for ( var i = 0; i < convertedBank.data.length; i++ )
-								self.aoz.banks.insertImage( convertedBank.type, i + 1, undefined, undefined, tags, convertedBank.number, convertedBank.data[ i ] )
+								self.aoz.banks.insertImage( convertedBank.type, i + 1, undefined, undefined, tags, bankNumber, convertedBank.data[ i ] )
+							self.aoz.banks.updateBank( bank, bank.index, self.aoz.currentContextName );
 							break;
 						case 'sound':
-							bankNumber = 2;
-							self.aoz.banks.erase( bankNumber );
 							bank = self.aoz.banks.reserve( bankNumber, 'sample', convertedBank.data.length, self.aoz.currentContextName );
 							for ( var i = 0; i < convertedBank.data.length; i++ )
-								bank.addCanvas( i, convertedBank.data[ i ], tags );
+								bank.addSound( i, convertedBank.data[ i ], tags );
+							self.aoz.banks.updateBank( bank, bank.index, self.aoz.currentContextName );
 							break;
 						case 'tracker':
 						case 'data':
 						case 'work':
-							self.aoz.banks.erase( bankNumber );
 							bank = self.aoz.banks.reserve( bankNumber, type, convertedBank.memoryBlock.byteLength, self.aoz.currentContextName );
 							bank.memoryBlock.copyFrom( 0, convertedBank.data, 0, convertedBank.data.byteLength );
+							self.aoz.banks.updateBank( bank, bank.index, self.aoz.currentContextName );
 							break;
 					}
 				}
@@ -441,9 +442,9 @@
 			case ID_AmBk:
 				{
 					var id2 = block.peek$( 12, 8 );
-					if ( id2 == "Pac.Pic." )
+					if ( id2 == "img" )
 					{
-						type = 'img';
+						type = 'pacpic';
 						result = this.convert_pacpic( name, block, options );
 					}
 					else if ( id2 == "Samples " )

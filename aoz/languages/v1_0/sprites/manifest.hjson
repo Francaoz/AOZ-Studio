@@ -21,12 +21,16 @@
 	// Informations about the application
 	infos:
 	{
-		applicationName: "The Bob Instructions"
+		applicationName: "The Sprites Instructions"
 		author: "By Francois Lionet"
 		version: "Version 0.99"
-		date: "27/01/2020"
+		date: "30/01/2020"
 		copyright: "(c) AOZ Studio 2019-2020"
 		start: "sprites.aoz"
 		object: "sprites"
+	}
+	compilation:
+	{
+		noWarning: []
 	}
 }

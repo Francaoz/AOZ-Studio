@@ -15,7 +15,7 @@
  */
 {
 	// Version of the manifest
-	version: "8"
+	version: "9"
 
 	// Informations about the application
 	infos:
@@ -42,6 +42,7 @@
 		unlimitedWindows: true			// true / false. Default = false -> max number of text windows
 		maskHardwareCoordinates: false	// true / false. Default = true -> will round screen display X coordinates and width to multiple of 16
 		endian: "big"					// order of bytes in files: "big"-> as on Amiga, "little"-> as on PC
+		noWarning: []					// list of warnings NOT to output (see documentation)
 	},
 
 	// The display setup
@@ -136,6 +137,14 @@
 	fileSystem:
 	{
 		caseSensitive: false			// Should be false for perfect Amiga emulation
+	}
+
+	// Loading screen
+	bootScreen:
+	{
+		active: true
+		waitSounds: true
+		clickSounds: false
 	}
 
 	// Default settings

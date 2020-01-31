@@ -29,7 +29,6 @@ function Renderer( aoz, canvasId )
 {
 	this.aoz = aoz;
 	this.manifest = aoz.manifest;
-	this.sprites = aoz.sprites;
 	this.utilities = aoz.utilities;
 	this.banks = aoz.banks;
 	this.canvas = document.getElementById( canvasId );
@@ -196,13 +195,13 @@ Renderer.prototype.render = function( force )
 {
 	var self = this;
 	force = typeof force == 'undefined' ? false : true;
-	force |= this.viewOn;
-	if ( !this.rendering && force )
+	if ( !this.rendering && ( force || ( this.modified & this.viewOn ) ) )
 	{
 		this.rendering = true;
 		this.context.save();
 		this.context.imageSmoothingEnabled = true;
 		this.context.imageRendering = 'pixelated';
+		this.context.globalAlpha = 1.0;
 
 		// Drawing area
 		var widthDraw = this.width;
@@ -406,46 +405,43 @@ Renderer.prototype.render = function( force )
 						// Go through all the bobs...
 						screen.bobsContext.parseAll( undefined, function( bob )
 						{
-							if ( !bob.hidden && typeof bob.positionDisplay.x != 'undefined' && typeof bob.positionDisplay.y != 'undefined' && typeof bob.imageDisplay != 'undefined' )
+							if ( bob.visible && bob.canvas )
 							{
-								var image = self.banks.getImage( 'images', bob.imageDisplay, bob.contextName );
-								if ( image )
+								var canvas = bob.canvas;
+								var xBob = bob.positionDisplay.x * screen.displayScale.x * self.xRatioDisplay + xDrawScreen;
+								var yBob = bob.positionDisplay.y * screen.displayScale.y * self.yRatioDisplay + yDrawScreen;
+								var xScale = xScaleScreen * bob.scaleDisplay.x * screen.scale.x;
+								var yScale = yScaleScreen * bob.scaleDisplay.y * screen.scale.y;
+								if ( bob.clipping )
 								{
-									var canvas = image.getCanvas( bob.hRev, bob.vRev );
-									var xBob = bob.positionDisplay.x * screen.displayScale.x * self.xRatioDisplay + xDrawScreen;
-									var yBob = bob.positionDisplay.y * screen.displayScale.y * self.yRatioDisplay + yDrawScreen;
-									var xScale = xScaleScreen * bob.scaleDisplay.x * screen.scale.x;
-									var yScale = yScaleScreen * bob.scaleDisplay.y * screen.scale.y;
-									if ( bob.clipping )
-									{
-										self.context.save();
-										path = new Path2D();
-										path.rect( bob.clipping.x * screen.displayScale.x * self.xRatioDisplay + xDrawScreen,
-												   bob.clipping.y * screen.displayScale.y * self.yRatioDisplay + yDrawScreen,
-												   bob.clipping.width * screen.displayScale.x * self.xRatioDisplay,
-												   bob.clipping.height * screen.displayScale.y * self.yRatioDisplay );
-										self.context.clip( path );
-									}
-									if ( !screenRotated && ( bob.angleDisplay.z == 0 && bob.skewDisplay.x == 0 && bob.skewDisplay.y == 0 ) )
-									{
-										var deltaX = image.hotSpotX * screen.displayScale.x * xScale;
-										var deltaY = image.hotSpotY * screen.displayScale.y * yScale;
-										self.context.drawImage( canvas, 0, 0, canvas.width, canvas.height, xBob - deltaX, yBob - deltaY, xScale * canvas.width, yScale * canvas.height );
-									}
-									else
-									{
-										var xCenter = ( screen.position.x - self.hardLeftX ) * self.xRatioDisplay;
-										var yCenter = ( screen.position.y - self.hardTopY ) * self.yRatioDisplay;
-										var bobDisplay = self.utilities.rotate( xBob, yBob, xCenter, yCenter, screen.angle.z );
-										self.context.setTransform( xScale, screen.skew.x + bob.skew.x, screen.skew.y + bob.skew.y, yScale, bobDisplay.x, bobDisplay.y );
-										self.context.rotate( screen.angle.z + bob.angleDisplay.z );
-										self.context.drawImage( canvas, -image.hotSpotX, -image.hotSpotY );
-										self.context.resetTransform();
-										self.context.rotate( 0 );
-									}
-									if ( bob.clipping )
-										self.context.restore();
+									self.context.save();
+									path = new Path2D();
+									path.rect( bob.clipping.x * screen.displayScale.x * self.xRatioDisplay + xDrawScreen,
+											   bob.clipping.y * screen.displayScale.y * self.yRatioDisplay + yDrawScreen,
+											   bob.clipping.width * screen.displayScale.x * self.xRatioDisplay,
+											   bob.clipping.height * screen.displayScale.y * self.yRatioDisplay );
+									self.context.clip( path );
 								}
+								self.context.globalAlpha = bob.alpha;
+								if ( !screenRotated && ( bob.angleDisplay.z == 0 && bob.skewDisplay.x == 0 && bob.skewDisplay.y == 0 ) )
+								{
+									var deltaX = bob.imageObject.hotSpotX * screen.displayScale.x * xScale;
+									var deltaY = bob.imageObject.hotSpotY * screen.displayScale.y * yScale;
+									self.context.drawImage( canvas, 0, 0, canvas.width, canvas.height, xBob - deltaX, yBob - deltaY, xScale * canvas.width, yScale * canvas.height );
+								}
+								else
+								{
+									var xCenter = ( screen.position.x - self.hardLeftX ) * self.xRatioDisplay;
+									var yCenter = ( screen.position.y - self.hardTopY ) * self.yRatioDisplay;
+									var bobDisplay = self.utilities.rotate( xBob, yBob, xCenter, yCenter, screen.angle.z );
+									self.context.setTransform( xScale, screen.skew.x + bob.skew.x, screen.skew.y + bob.skew.y, yScale, bobDisplay.x, bobDisplay.y );
+									self.context.rotate( screen.angle.z + bob.angleDisplay.z );
+									self.context.drawImage( canvas, -bob.imageObject.hotSpotX, -bob.imageObject.hotSpotY );
+									self.context.resetTransform();
+									self.context.rotate( 0 );
+								}
+								if ( bob.clipping )
+									self.context.restore();
 							}
 						} );
 
@@ -473,29 +469,28 @@ Renderer.prototype.render = function( force )
 
 		// Sprites!
 		// Draw sprites
-		this.sprites.spriteContext.parseAll( undefined, function( sprite )
+		this.aoz.spritesContext.parseAll( undefined, function( sprite )
 		{
-			if ( !sprite.hidden && typeof sprite.xDisplay != 'undefined' && typeof sprite.yDisplay != 'undefined' && typeof sprite.imageDisplay != 'undefined' )
+			if ( sprite.visible && typeof sprite.canvas )
 			{
-				var image = self.banks.getImage( 'images', sprite.imageDisplay, sprite.contextName );
-				if ( image )
+				var canvas = sprite.canvas;
+				if ( canvas )
 				{
-					var canvas = image.getCanvas( sprite.hRev, sprite.vRev );
-					var xDraw = ( sprite.xDisplay - self.hardLeftX ) * ( widthDraw / self.hardWidth ) + xLeftDraw;
-					var yDraw = ( sprite.yDisplay - self.hardTopY ) * ( heightDraw / self.hardHeight ) + yTopDraw;
-					if ( sprite.angleDisplay == 0 && sprite.xSkewDisplay == 0 && sprite.ySkewDisplay == 0 )
+					var xDraw = ( sprite.positionDisplay.x - self.hardLeftX ) * ( widthDraw / self.hardWidth ) + xLeftDraw;
+					var yDraw = ( sprite.positionDisplay.y - self.hardTopY ) * ( heightDraw / self.hardHeight ) + yTopDraw;
+					if ( sprite.angleDisplay.z == 0 && sprite.skewDisplay.x == 0 && sprite.skewDisplay.y == 0 )
 					{
-						var deltaX = image.hotSpotX * ( widthDraw / self.hardWidth );
-						var deltaY = image.hotSpotY * ( heightDraw / self.hardHeight );
-						var width = image.width * ( widthDraw / self.hardWidth );
-						var height = image.height * ( heightDraw / self.hardHeight );
-						self.context.drawImage( canvas, 0, 0, image.width, image.height, xDraw - deltaX, yDraw - deltaY, width, height );
+						var deltaX = sprite.imageObject.hotSpotX * ( widthDraw / self.hardWidth );
+						var deltaY = sprite.imageObject.hotSpotY * ( heightDraw / self.hardHeight );
+						var width = sprite.imageObject.width * ( widthDraw / self.hardWidth );
+						var height = sprite.imageObject.height * ( heightDraw / self.hardHeight );
+						self.context.drawImage( canvas, 0, 0, canvas.width, canvas.height, xDraw - deltaX, yDraw - deltaY, width, height );
 					}
 					else
 					{
-						self.context.setTransform( sprite.xScaleDisplay * ( self.width / self.hardWidth ), sprite.xSkewDisplay, sprite.ySkewDisplay, sprite.yScaleDisplay * ( self.height / self.hardHeight ), xDraw, yDraw );
-						self.context.rotate( sprite.angleDisplay );
-						self.context.drawImage( canvas, -image.hotSpotX, -image.hotSpotY );
+						self.context.setTransform( sprite.scaleDisplay.x * ( self.width / self.hardWidth ), sprite.skewDisplay.x, sprite.skewDisplay.y, sprite.scaleDisplay.y * ( self.height / self.hardHeight ), xDraw, yDraw );
+						self.context.rotate( sprite.angleDisplay.z );
+						self.context.drawImage( canvas, -sprite.imageObject.hotSpotX, -sprite.imageObject.hotSpotY );
 						self.context.rotate( 0 );
 						self.context.setTransform( 1, 0, 0, 1, 0, 0 );
 					}
@@ -507,37 +502,6 @@ Renderer.prototype.render = function( force )
 		this.context.restore();
 	}
 
-	/*
-	// Display full screen?
-	debugger;
-	if ( this.manifest.display.fullScreen  && this.iconsFullScreen )
-	{
-		// Take the color of the background
-		var suffix = '_white';
-		switch ( this.manifest.display.fullScreenIconColor )
-		{
-			case 'black':
-			case 'white':
-				suffix = '_' + this.manifest.display.fullScreenIconColor;
-				break;
-			case 'background':
-			case 'automatic':
-			default:
-				var rgb = this.utilities.getRGBAColors( this.backgroundColor );
-				suffix = '_white';
-				if ( ( rgb.r * 1.0 + rgb.g * 0.8 + rgb.b * 0.8 ) / 3.0 > 128 )
-					suffix = '_black';
-				break;
-		}
-		var icon;
-		if ( this.isFullScreen )
-			icon= this.iconsFullScreen[ 'small_screen' + suffix ];
-		else
-			icon= this.iconsFullScreen[ 'full_screen' + suffix ];
-
-		this.canvas.drawImage( this.canvas.width - icon.width / 2  - 48, this.canvas.height -icon.height / 2 - 48, 32, 32 );
-	}
-	*/
 	// Display FPS?
 	if ( this.manifest.display.fps )
 	{
@@ -562,11 +526,11 @@ Renderer.prototype.render = function( force )
 	// Display Full Screen Icons?
 	if ( this.manifest.display.fullScreenIcon && this.fullScreenIcons )
 	{
-		var image;
 		if ( this.isFullScreen() )
-			image = this.fullScreenIcons[ 'small_screen' ];
+			this.fullScreenIconOn = 'small_screen';
 		else
-			image = this.fullScreenIcons[ 'full_screen' ];
+			this.fullScreenIconOn = 'full_screen';
+		var image = this.fullScreenIcons[ this.fullScreenIconOn ];
 		this.fullScreenIconX = this.manifest.display.fullScreenIconX >= 0 ? this.manifest.display.fullScreenIconX * this.fullScreenIconRatio : this.width + this.manifest.display.fullScreenIconX  * this.fullScreenIconRatio;
 		this.fullScreenIconY = this.manifest.display.fullScreenIconY >= 0 ? this.manifest.display.fullScreenIconY * this.fullScreenIconRatio : this.height + this.manifest.display.fullScreenIconY * this.fullScreenIconRatio;
 		this.fullScreenIconWidth = image.width * this.fullScreenIconRatio;
@@ -586,3 +550,24 @@ Renderer.prototype.isFullScreen = function()
 	var full_screen_element = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
 	return full_screen_element != null;
 };
+Renderer.prototype.isInFullScreenIcon = function( position)
+{
+	if ( this.fullScreenIconOn )
+	{
+		if ( position.x >= this.fullScreenIconX && position.x < this.fullScreenIconX + this.fullScreenIconWidth
+		  && position.y >= this.fullScreenIconY && position.y < this.fullScreenIconY + this.fullScreenIconHeight )
+		  return this.fullScreenIconOn;
+
+		return false;
+	}
+};
+Renderer.prototype.swapFullScreen = function()
+{
+	if ( document.fullscreenEnabled )
+	{
+		if ( this.fullScreenIconOn == 'full_screen' )
+			this.canvas.requestFullscreen();
+		else
+			document.exitFullscreen();
+	}
+}

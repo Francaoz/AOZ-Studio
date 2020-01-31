@@ -1,0 +1,302 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Sprite Instruction Set
+ * By Francois Lionet
+ *
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 30/01/2020
+ */
+#noWarning:"instruction_not_implemented"
+
+//
+// Initialization
+//
+{
+	this.aoz.collisions = this;
+	this.collisionList = [];
+
+	this.spriteCol = function( index, from, to )
+	{
+		var sprite = this.aoz.sprites.get( number, 'sprite_not_defined' );
+		sprite.updateCollisionData();								// IDEA: a callback
+
+		from = typeof from == 'undefined' ? 0 : from;
+		to = typeof to == 'undefined' ? this.aoz.sprites.getHighestIndex() : to;
+		if ( from < 0 || to < 0 || from > to )
+			throw 'illegal_function_call';
+
+		this.collisionList = [];
+		for ( var s = from; s <= to; s++ )
+		{
+			var testSprite = this.aoz.sprites.get( s );
+			if ( testSprite && testSprite != sprite )
+			{
+				testSprite.updateCollisionData( sprite );			// IDEA: transmit the other so it can go faster
+				if ( this.isColliding( sprite, testSprite ) )
+				{
+					this.collisionList[ s ] = true;
+				}
+			}
+		}
+		return this.collisionList.length > 0;
+	};
+	this.spriteBobCol = function( spriteIndex, screen, from, to )
+	{
+		var sprite = this.aoz.sprites.get( spriteIndex, 'sprite_not_defined' );
+		sprite.updateCollisionData( sprite );
+
+		from = typeof from == 'undefined' ? 0 : from;
+		to = typeof to == 'undefined' ? screen.getHighestBobIndex() : to;
+		if ( from < 0 || to < 0 || from > to )
+			throw 'illegal_function_call';
+
+		this.collisionList = [];
+		for ( var b = from; b <= to; b++ )
+		{
+			var bob = screen.getBob( b );
+			if ( bob )
+			{
+				bob.updateCollisionData();
+				if ( this.isColliding( sprite, bob ) )
+				{
+					this.collisionList[ b ] = true;
+				}
+			}
+		}
+		return this.collisionList.length > 0;
+	};
+	this.bobSpriteCol = function( bobIndex, screen, from, to )
+	{
+		var bob = screen.getBob( bobIndex, 'bob_not_defined' );
+		bob.updateCollisionData();
+
+		from = typeof from == 'undefined' ? 0 : from;
+		to = typeof to == 'undefined' ? this.aoz.sprites.getHighestIndex() : to;
+		if ( from < 0 || to < 0 || from > to )
+			throw 'illegal_function_call';
+
+		this.collisionList = [];
+		for ( var s = from; s <= to; s++ )
+		{
+			var sprite = this.aoz.sprites.get( s );
+			if ( sprite )
+			{
+				sprite.updateCollisionData();
+				if ( this.isColliding( sprite, bob ) )
+				{
+					this.collisionList[ s ] = true;
+				}
+			}
+		}
+		return this.collisionList.length > 0;
+	};
+	this.bobCol = function( bobIndex, screen, from, to )
+	{
+		var bob = screen.getBob( bobIndex, 'bob_not_defined' );
+		bob.setBobCollisionData( bob, screen );
+
+		from = typeof from == 'undefined' ? 0 : from;
+		to = typeof to == 'undefined' ? screen.getHighestBobIndex() : to;
+		if ( from < 0 || to < 0 || from > to )
+			throw 'illegal_function_call';
+
+		this.collisionList = [];
+		for ( var b = from; b <= to; b++ )
+		{
+			var testBob = screen.getBob( b );
+			if ( testBob && testBob != bob )
+			{
+				testBob.updateCollisionData();
+				if ( this.isColliding( bob, testBob ) )
+				{
+					this.collisionList[ b ] = true;
+				}
+			}
+		}
+		return this.collisionList.length > 0;
+	};
+	this.col = function( number )
+	{
+		if ( number < 0 )
+		{
+			for ( var c = 0; c < this.collisionList.length; c++ )
+			{
+				if ( this.collisionList[ c ] )
+					return c;
+			}
+			return 0;
+		}
+		return this.collisionList[ number ] == true;
+	};
+	this.isColliding = function( object1, object2 )
+	{
+		var collisions1 = object1.collisions;
+		var collisions2 = object2.collisions;
+
+		var colliding = ( collisions1.x2 > collisions2.x1 && collisions1.x1 <= collisions2.x2
+					   && collisions1.y2 > collisions2.y1 && collisions1.y1 <= collisions2.y2 );
+
+		if ( colliding && !this.collisionBoxed && ( object1.angleNew == 0 && object2.angleNew == 0 ) )		// TODO
+		{
+			var maskDefinition1 = object1.getCollisionMask();
+			var maskDefinition2 = object2.getCollisionMask();
+			if ( !maskDefinition1 || !maskDefinition2 )
+				return colliging;
+
+			colliding = false;
+			var o1Left, o1Top, o1Right, o1Bottom;
+			var o2Left, o2Top, o2Right, o2Bottom;
+			if ( collisions1.x1 <= collisions2.x1 )
+			{
+				o2Left = 0;
+				o1Left = collisions2.x1 - collisions1.x1;
+				if ( collisions1.x2 < collisions2.x2 )
+				{
+					o1Right = collisions1.x2 - collisions1.x1;
+					o2Right = collisions1.x2 - collisions2.x1;
+				}
+				else
+				{
+					o2Right = collisions2.x2 - collisions2.x1;
+					o1Right = collisions2.x2 - collisions1.x1;
+				}
+			}
+			else
+			{
+				o1Left = 0;
+				o2Left = collisions1.x1 - collisions2.x1;
+				if ( collisions1.x2 < collisions2.x2 )
+				{
+					o1Right = collisions1.x2 - collisions1.x1;
+					o2Right = collisions1.x2 - collisions2.x1;
+				}
+				else
+				{
+					o1Right = collisions2.x2 - collisions1.x1;
+					o2Right = collisions2.x2 - collisions2.x1;
+				}
+			}
+			if ( collisions1.y1 <= collisions2.y1 )
+			{
+				o2Top = 0;
+				o1Top = collisions2.y1 - collisions1.y1;
+				if ( collisions1.y2 < collisions2.y2 )
+				{
+					o1Bottom = collisions1.y2 - collisions1.y1;
+					o2Bottom = collisions1.y2 - collisions2.y1;
+				}
+				else
+				{
+					o2Bottom = collisions2.y2 - collisions2.y1;
+					o1Bottom = collisions2.y2 - collisions1.y1;
+				}
+			}
+			else
+			{
+				o1Top = 0;
+				o2Top = collisions1.y1 - collisions2.y1;
+				if ( collisions1.y2 < collisions2.y2 )
+				{
+					o1Bottom = collisions1.y2 - collisions1.y1;
+					o2Bottom = collisions1.y2 - collisions2.y1;
+				}
+				else
+				{
+					o1Bottom = collisions2.y2 - collisions1.y1;
+					o2Bottom = collisions2.y2 - collisions2.y1;
+				}
+			}
+
+			o1Left = o1Left * maskDefinition1.precision / object1.xScaleNew;
+			o1Top = o1Top * maskDefinition1.precision / object1.yScaleNew;
+			o2Left = o2Left * maskDefinition2.precision / object2.xScaleNew;
+			o2Top = o2Top * maskDefinition2.precision / object2.yScaleNew;
+			o1Right = Math.floor( o1Right * maskDefinition1.precision / object1.xScaleNew );
+			o1Bottom = Math.floor( o1Bottom * maskDefinition1.precision / object1.yScaleNew );
+			o2Right = Math.floor( o2Right * maskDefinition2.precision / object2.xScaleNew );
+			o2Bottom = Math.floor( o2Bottom * maskDefinition2.precision / object2.yScaleNew );
+			var o1PlusX = maskDefinition1.precision / object1.xScaleNew;
+			var o1PlusY = maskDefinition1.precision / object1.yScaleNew;
+			var o2PlusX = maskDefinition2.precision / object2.xScaleNew;
+			var o2PlusY = maskDefinition2.precision / object2.yScaleNew;
+
+			var x1, y1, x2, y2;
+
+			/*
+			for ( y1 = o1Top, y2 = o2Top; y1 < o1Bottom && y2 < o2Bottom; y1 += o1PlusY, y2 += o2PlusY )
+			{
+				var offset1 = Math.floor( y1 ) * maskDefinition1.width;
+				var offset2 = Math.floor( y2 ) * maskDefinition2.width;
+				for ( x1 = o1Left, x2 = o2Left; x1 < o1Right && x2 < o2Right; x1 += o1PlusX, x2 += o2PlusX )
+				{
+					this.aoz.currentScreen.plot( x1 - o1Left, y1 - o1Top, maskDefinition1.mask[ offset1 + Math.floor( x1 ) ] != 0 ? 2 : 0 );
+					this.aoz.currentScreen.plot( 100 + x2 - o2Left, y2 - o2Top, maskDefinition2.mask[ offset2 + Math.floor( x2 ) ] != 0 ? 2 : 0 );
+					if ( ( maskDefinition1.mask[ offset1 + Math.floor( x1 ) ] & maskDefinition2.mask[ offset2 + Math.floor( x2 ) ] ) != 0 )
+					{
+						this.aoz.currentScreen.plot( x1 - o1Left, y1 - o1Top, 5 );
+						this.aoz.currentScreen.plot( 100 + x2 - o2Left, y2 - o2Top, 5 );
+					}
+				}
+			}
+			*/
+
+			for ( y1 = o1Top, y2 = o2Top; y1 < o1Bottom && y2 < o2Bottom && !colliding; y1 += o1PlusY, y2 += o2PlusY )
+			{
+				var offset1 = Math.floor( y1 ) * maskDefinition1.width;
+				var offset2 = Math.floor( y2 ) * maskDefinition2.width;
+				for ( x1 = o1Left, x2 = o2Left; x1 < o1Right && x2 < o2Right; x1 += o1PlusX, x2 += o2PlusX )
+				{
+					if ( ( maskDefinition1.mask[ offset1 + Math.floor( x1 ) ] & maskDefinition2.mask[ offset2 + Math.floor( x2 ) ] ) != 0 )
+					{
+						colliding = true;
+						break;
+					}
+				}
+			}
+		}
+		return colliding;
+	};
+}
+
+Function "bob col", _number, _start To _end
+{
+	#errors
+}
+End Function( {this.aoz.collisions.bobCol(%_number,this.aoz.currentScreen,%_start,%_end)} )
+
+Function "bobsprite col", _number, _start To _end
+{
+	#errors
+}
+End Function( {this.aoz.collisions.bobSpriteCol(%_number,this.aoz.currentScreen,%_start,%_end)} )
+
+Function "sprite col", _number, _start To _end
+{
+	#errors
+}
+End Function( {this.aoz.collisions.spriteCol(%_number,this.aoz.currentScreen,%_start,%_end)} )
+
+Function "spritebob col", _number, _start To _end
+{
+	#errors
+}
+End Function( {this.aoz.collisions.spriteBobCol(%_number,this.aoz.currentScreen,%_start,%_end)} )

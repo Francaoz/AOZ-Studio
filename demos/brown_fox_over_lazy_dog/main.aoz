@@ -71,9 +71,10 @@ logo_x = screenWidth / 2
 logo_y = Screen Height / 2 - 16
 
 Screen 1
-Set Font Rnd( number_of_fonts - 1 ), font_height
+font_number = Rnd( number_of_fonts - 1 )
+Set Font font_number, font_height
 Text text_x, text_y, title$, "#center"
-Set Font Rnd( number_of_fonts - 1 ), font_height
+Set Font font_number, font_height
 Text text_x + scroll_width / 2, text_y, title$, "#center"
 
 Screen 0
@@ -86,7 +87,8 @@ Do
         Cls 0, 0, 0 To scroll_width / 2, 128
         Screen Copy 1, scroll_width / 2, 0, scroll_width, 128 To 1, 0, 0
         Cls 0, scroll_width / 2, 0 To scroll_width, 128
-        Set Font Rnd( number_of_fonts - 1 ), font_height
+        font_number = Rnd( number_of_fonts - 1 )
+        Set Font font_number, font_height
         Text text_x + scroll_width / 2, text_y, title$, "#center"
         Screen 0
         scroll_x = 0
@@ -108,6 +110,45 @@ Do
     Bob Scale 3, 0.75, 0.75
     Add logo_angle#, logo_speed#
 
-    //k$ = Inkey$
-    //If k$ <> "" Then Exit
+    k$ = Inkey$
+    If k$ <> "" Then Exit
 Loop
+
+Screen Close 1
+Screen Close 2
+Screen Open 0, Screen Width, Screen Height, 4, Lowres
+Palette $000000, $FFFFFF, $404040
+Curs Off
+Paper 0 : Pen 1
+
+k$ = ""
+Repeat
+
+    Cls 0
+    x = Screen Width / 2
+    y = 150
+
+    size = 40
+    Set Font font_number, size
+    Text x, y, "Font number: " + Str$( font_number ), "#center"
+
+    y = 250
+    size = 10
+    For count = 0 To 9
+        Home :  Print "Size: ";size;"             "
+        size = size + 5
+        Set Font font_number, size : Wait 1
+        Text x, y, Font$( font_number ), "#center"
+        y = y + size
+        Exit If inkey$ != ""
+    Next
+
+    Repeat
+        Wait Vbl
+        k$ = Inkey$
+    Until k$ != ""
+
+    if Key State( 37 ) Then Dec font_number : font_number = Max( 0, font_number )
+    if Key State( 39 ) then Inc font_number : font_number = Min( number_of_fonts - 1, font_number )
+
+Until k$ = "q"

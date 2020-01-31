@@ -29,4 +29,8 @@
 		start: "filesystem.aoz"
 		object: "filesystem"
 	}
+	compilation:
+	{
+		noWarning: []
+	}
 }

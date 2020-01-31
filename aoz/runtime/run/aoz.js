@@ -36,12 +36,12 @@ function AOZ( canvasId, manifest )
 	this.memoryHashMultiplier = 1000000000000;
 	this.loadingCount = 0;
 	this.loadingMax = 0;
+	this.use = {};
 
 	this.utilities = new Utilities( this );
 	this.errors = new Errors( this );
 	this.banks = new Banks( this );
 	this.filesystem = new Filesystem( this );
-	this.sprites = new Sprites( this );
 	this.renderer = new Renderer( this, canvasId );
 	this.amal = new AMAL( this );
 	this.fonts = new Fonts( this );
@@ -189,27 +189,180 @@ function AOZ( canvasId, manifest )
 
 	// Create contexts
 	this.screensContext = new AOZContext( this.aoz, this.currentContextName, { sorted: true } );
+	this.spritesContext = new AOZContext( this.aoz, this.currentContextName, { sorted: true } );
 
-	// Load sprites and sounds
+	// Load welcome images
+	var images = [];
+	var imageCount = 5;
+	var welcomeStep = 0;
+	var welcomeWaitEnd = 0;
+	var welcomeAlpha = 0;
+	this.welcomeClick = false;
+	if ( this.manifest.bootScreen.active )
+	{
+		for ( var i = 0; i < 7; i++ )
+		{
+			this.utilities.loadPng( "./run/resources/made_with_aoz_" + i + ".png", {}, function ( response, image, count )
+			{
+				if ( response )
+				{
+					images[ count ] = image;
+					imageCount--;
+					if ( imageCount == 0 )
+						welcomeStep = 1;
+				}
+			}, i );
+		}
+	}
+	else
+	{
+		welcomeStep = 100;
+	}
+	// Wait for initiialization / display welcome screen...
 	var self = this;
 	var handle = setInterval( function()
 	{
+		if ( welcomeStep >= 0 )
+		{
+			// Wait?
+			var now = new Date().getTime();
+			if ( welcomeWaitEnd )
+			{
+				if ( now > welcomeWaitEnd )
+				{
+					welcomeStep++;
+					welcomeWaitEnd = 0;
+				}
+				return;
+			}
+			else
+			{
+				// Step!
+				var welcomeWait = 0;
+				switch ( welcomeStep )
+				{
+					case 0:
+						break;
+					case 1:
+						// White renderer screem
+						self.renderer.context.fillStyle = self.utilities.getRGBAString( welcomeAlpha, welcomeAlpha, welcomeAlpha );
+						self.renderer.context.fillRect( 0, 0, self.renderer.canvas.width, self.renderer.canvas.height );
+						welcomeAlpha += 4;
+						if ( welcomeAlpha >= 256 )
+						{
+							self.renderer.context.fillStyle = '#FFFFFF';
+							self.renderer.context.fillRect( 0, 0, self.renderer.canvas.width, self.renderer.canvas.height );
+							welcomeWait = 100;
+						}
+						break;
+					case 2:
+						drawI( images[ 0 ], 144, -89, 1.0 );
+						drawI( images[ 1 ], 225, -89, 1.0 );
+						drawI( images[ 2 ], -165, 0, 1.0 );
+						welcomeStep = 4;
+						welcomeAlpha = 0;
+						break;
+					case 3:
+						break;
+					case 4:
+						drawI( images[ 3 ], 110, 15, welcomeAlpha );
+						welcomeAlpha += 0.02;
+						if ( welcomeAlpha >= 1 )
+							welcomeWait = 500;
+						break;
+					case 5:
+						welcomeStep = -1;
+						break;
+					case 6:
+						welcomeStep++;
+						break;
+					case 7:
+						if ( self.use[ 'sounds' ] )
+						{
+							if ( self.manifest.bootScreen.waitSounds )
+							{
+								drawI( images[ 6 ], 0, -48, 1.0, '#bottom' );
+								welcomeStep++;
+							}
+							if ( self.manifest.bootScreen.clickSounds )
+							{
+								setTimeout( function()
+								{
+									setInterval( function()
+									{
+										eventFire( self.renderer.canvas, 'click' );
+									}, 1000 );
+
+								} );
+							}
+							break;
+						}
+						else
+						{
+							drawI( images[ 4 ], 110, 15, 1.0 );
+							drawI( images[ 5 ], 247, 110, 1.0 );
+							welcomeStep = 99;
+							welcomeWait = 1000;
+						}
+						break;
+					case 8:
+						if ( self.welcomeClick )
+						{
+							drawI( images[ 6 ], 0, -48, 1.0, '#nodraw #bottom' );
+							drawI( images[ 4 ], 110, 15, 1.0 );
+							drawI( images[ 5 ], 247, 110, 1.0 );
+							welcomeWait = 1000;
+							welcomeStep = 99;
+						}
+						break;
+					case 100:
+						clearInterval( handle );
+						self.default( 'application' );
+						self.timer = new Date().getTime();
+						self.previousTime = self.timer;
+						window.requestAnimationFrame( doUpdate );
+						break;
+				}
+				if ( welcomeWait )
+					welcomeWaitEnd = now + welcomeWait;
+			}
+			return;
+		}
 		if ( self.loadingCount == self.loadingMax )
 		{
-			clearInterval( handle );
 			if ( self.loadingError )
 			{
+				clearInterval( handle );
 				var message = self.errors.getErrorFromId( self.loadingError );
 				alert( message );
 			}
 			else
 			{
-				self.loadingCount = 0;
-				self.loadingMax = 0;
-				self.default( 'application' );
-				self.timer = new Date().getTime();
-				self.previousTime = self.timer;
-				window.requestAnimationFrame( doUpdate );
+				if ( self.loadingCount != 0 )
+				{
+					self.loadingCount = 0;
+					self.loadingMax = 0;
+					welcomeStep = 6;
+				}
+			}
+		}
+		function drawI( image, x, y, alpha, options )
+		{
+			self.renderer.context.imageSmoothingEnabled = true;
+			self.renderer.context.imageRendering = 'pixelated';
+			var ratioX = ( self.renderer.width / 1280 ) * 1.25;
+			var ratioY = ratioX;
+			var xx = self.renderer.width / 2;
+			var yy = self.renderer.height / 2;
+			if ( options && options.indexOf( '#bottom' ) >= 0 )
+				yy = self.renderer.height;
+			self.renderer.context.fillStyle = '#FFFFFF';
+			self.renderer.context.globalAlpha = 1;
+			self.renderer.context.fillRect( xx + ( x - image.width / 2 ) * ratioX, yy + ( y - image.height / 2 ) * ratioY, image.width * ratioX, image.height * ratioY );
+			if ( !( options && options.indexOf( '#nodraw' ) >= 0 ) )
+			{
+				self.renderer.context.globalAlpha = alpha;
+				self.renderer.context.drawImage( image, 0, 0, image.width, image.height, xx + ( x - image.width / 2 )* ratioX, yy + ( y - image.height / 2 ) * ratioY, image.width * ratioX, image.height * ratioY );
 			}
 		}
 	}, 20 );
@@ -650,6 +803,8 @@ AOZ.prototype.pushExtension = function( section )
 {
 	this.extensionsToRun.push( section );
 };
+AOZ.HREV = 0x80000000;
+AOZ.VREV = 0x40000000;
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -683,7 +838,8 @@ AOZ.prototype.update = function( force )
 		force = !this.isUpdate;
 	if ( force )
 	{
-		this.sprites.spritesUpdate( force );
+		if ( this.sprites )
+			this.sprites.spritesUpdate( force );
 		for ( var screen = this.screensContext.getFirstElement(); screen != null; screen = this.screensContext.getNextElement() )
 			screen.bobsUpdate( force );
 	}
@@ -696,6 +852,82 @@ AOZ.prototype.updateEvery = function( every )
 	this.updateEveryCount = 0;
 };
 
+// add a global handler (on document) here
+//listen(d,'click',listenerFunction);
+function eventFire(el, etype)
+{
+  	if (el && el.fireEvent)
+	{
+    	(el.fireEvent('on' + etype));
+  	}
+	else
+	{
+    	var evObj = document.createEvent('Events');
+    	evObj.initEvent(etype, true, false);
+    	el.dispatchEvent(evObj);
+  	}
+}
+function listenerFunction(e) {
+        e = e || event;
+        var originator = e.srcElement || e.target;
+		/*
+        if (/mouseover/i.test(e.type)) {
+          if (/d2/.test(originator.id)) {
+           i = i+1;
+           originator.title='you hovered me ' +i +' time(s). Interesting!';
+          } else if (/d1/.test(originator.id)) {
+           originator.innerHTML = 'from global mouseover handler (#d2 was hovered: '+i+' time(s))<br />';
+          }
+        }
+        if (/click/i.test(e.type))
+        {
+          if (/d2/.test(originator.id)) {
+            alert('you clicked #d2');
+          } else if (/d1/.test(originator.id)) {
+            originator.innerHTML = 'you clicked me!<br />';
+          } else if (/heartbeat/.test(originator.id)){
+             var tck = document.querySelector('#tick');
+             tck.innerHTML = +(tck.innerHTML)+1;
+          }
+        }
+		*/
+}
+function listen(el,etype,fn,nobubble,stopdefault){
+            nobubble = nobubble || false;
+            stopdefault = stopdefault || false;
+
+            var fnwrap = function(e){
+                  e = e || event;
+                  if (nobubble) {
+                    noBubbles(e);
+                  }
+                  if (stopdefault){
+                    noDefault(e);
+                  }
+                  return fn.apply(el,Array.prototype.slice.call(arguments));
+                }
+            ;
+            if (el.attachEvent) {
+             el.attachEvent('on' + etype, fnwrap);
+            } else {
+             el.addEventListener(etype, fnwrap, false);
+            }
+}
+function noDefault(e) {
+            if (e.preventDefault){
+              e.preventDefault();
+            } else {
+              e.returnValue = false;
+            }
+}
+function noBubbles(e){
+          if (e.stopPropagation){
+              e.stopPropagation();
+
+          } else {
+              e.cancelBubble = true;
+          }
+}
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -1486,14 +1718,17 @@ AOZ.prototype.setKeyboard = function()
 };
 AOZ.prototype.keyState = function( code )
 {
-	for ( var k in AOZ.keyCodeToScanCode )
+	if ( this.manifest.compilation.emulation.toLowerCase() != 'pc' )
 	{
-		if ( AOZ.keyCodeToScanCode[ k ] == code )
+		for ( var k in AOZ.keyCodeToScanCode )
 		{
-			return this.keymap[ parseInt( k ) ];
+			if ( AOZ.keyCodeToScanCode[ k ] == code )
+			{
+				code = parseInt( k );
+			}
 		}
 	}
-	return 0;
+	return this.keymap[ code ];
 };
 AOZ.prototype.keyShift = function( shift )
 {
@@ -1620,6 +1855,8 @@ AOZ.prototype.scancode = function()
 	if ( this.lastScancode )
 	{
 		var key = this.lastScancode;
+		if ( this.manifest.compilation.emulation.toLowerCase() != 'pc' )
+			key = AOZ.keyCodeToScanCode[ key ];
 		this.lastScancode = 0;
 		return key;
 	}
@@ -1890,6 +2127,7 @@ AOZ.prototype.setMouse = function()
 	this.renderer.canvas.onclick = onClick;
 	this.renderer.canvas.ondblclick = onDblClick;
 	this.renderer.canvas.oncontextmenu = onContextMenu;
+	document.onclick = onClickDocument;
 	if ( document.body.addEventListener)
 	{
     	document.body.addEventListener( 'mousewheel', onMouseWheel, false );
@@ -1914,7 +2152,7 @@ AOZ.prototype.setMouse = function()
 	function onMouseMove( event )
 	{
 		self.xMouseDebug = event.clientX;
-		self.yMouseDebug = event.clientX;
+		self.yMouseDebug = event.clientY;
 		//console.log( "Client X: " + event.clientX + " - Client Y: " + event.clientY );
 		self.xMouse = ( event.clientX - self.renderer.canvas.offsetLeft - self.renderer.xLeftDraw ) / self.renderer.xRatioDisplay + self.renderer.hardLeftX;
 		self.yMouse = ( event.clientY - self.renderer.canvas.offsetTop - self.renderer.yTopDraw ) / self.renderer.yRatioDisplay + self.renderer.hardTopY;
@@ -1944,7 +2182,15 @@ AOZ.prototype.setMouse = function()
 	}
 	function onClick( event )
 	{
-		//self.clickMouse |= AOZ.buttonToMouse[ event.button ];
+		self.welcomeClick = true;
+	}
+	function onClickDocument( event )
+	{
+		self.welcomeClick = true;
+		if ( self.renderer.isInFullScreenIcon( { x: self.xMouseDebug, y: self.yMouseDebug } ) )
+		{
+			self.renderer.swapFullScreen();
+		}
 	}
 	function onDblClick( event )
 	{
@@ -2319,10 +2565,13 @@ AOZ.prototype.subtractString = function( string1, string2 )
 };
 AOZ.prototype.wait = function( args )
 {
-	if ( args[ 0 ] < 0 )
+	var delay = args[ 0 ];
+	if ( delay < 0 )
 		throw( 'illegal_function_call' );
 
-	this.waitEnd = new Date().getTime() + args[ 0 ] * 20;
+	if ( this.manifest.compilation.emulation.toLowerCase() != 'pc' )
+		delay *= 20;
+	this.waitEnd = new Date().getTime() + delay;
 };
 AOZ.prototype.wait_wait = function()
 {

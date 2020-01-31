@@ -29,4 +29,8 @@
 		start: "sounds.aoz"
 		object: "sounds"
 	}
+	compilation:
+	{
+		noWarning: []
+	}
 }

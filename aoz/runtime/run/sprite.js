@@ -17,17 +17,17 @@
 *****************************************************************************@*/
 /** @file
  *
- * AOZ - Bob Class
+ * AOZ Runtime
+ *
+ * Sprite bank and sprites
  *
  * @author FL (Francois Lionet)
- * @date first pushed on 10/11/2019
+ * @date first pushed on 29/01/2020
  */
-
-function Bob( aoz, parent, tags )
+function Sprite( aoz, parent, tags )
 {
 	this.aoz = aoz;
-	this.banks = aoz.banks;
-	this.screen = parent;
+	this.parent = aoz;
 	this.tags = tags;
 
 	this.position = { x: 0, y: 0, z: 0 };
@@ -43,20 +43,20 @@ function Bob( aoz, parent, tags )
 	this.scaleDisplay = {};
 	this.skewDisplay = {};
 	this.angleDisplay = {};
-	this.alpha = 1.0;
-	this.hRevDisplay = false;
-	this.vRevDisplay = false;
-	this.visible = true;
 	this.bankIndex = undefined;
 	this.bankReserveNumber = -1;
 
-	this.clipping = null;
-	this.limits = null;
 	this.toUpdate = false;
 	this.toUpdateCollisions = false;
 	this.collisions = {};
 }
-Bob.prototype.set = function( position, image, tags )
+Sprite.prototype.setModified = function()
+{
+	this.toUpdate = true;
+	this.toUpdateCollisions = true;
+	this.aoz.renderer.setModified();
+};
+Sprite.prototype.set = function( position, image, tags )
 {
 	var toUpdate = 0;
 	if ( typeof image != 'undefined' )
@@ -99,13 +99,7 @@ Bob.prototype.set = function( position, image, tags )
 	if ( toUpdate > 0 )
 		this.setModified();
 };
-Bob.prototype.setModified = function()
-{
-	this.toUpdate = true;
-	this.toUpdateCollisions = true;
-	this.screen.setModified();
-};
-Bob.prototype.updateBank = function( newBank, newBankIndex, contextName )
+Sprite.prototype.updateBank = function( newBank, newBankIndex, contextName )
 {
 	if ( this.bankIndex == newBankIndex )
 	{
@@ -134,12 +128,11 @@ Bob.prototype.updateBank = function( newBank, newBankIndex, contextName )
 		}
 	}
 };
-Bob.prototype.destroy = function( options )
+Sprite.prototype.destroy = function( options )
 {
-	this.parent.destroyBob( this.index );
-	this.setModified();
+	this.parent.destroy( this.index );
 };
-Bob.prototype.update = function( options )
+Sprite.prototype.update = function( options )
 {
 	if ( this.toUpdate || options.force )
 	{
@@ -158,40 +151,34 @@ Bob.prototype.update = function( options )
 	}
 	return false;
 };
-Bob.prototype.setVisible = function( yesNo )
+Sprite.prototype.setClipping = function( rectangle, options )
 {
-	this.visible = yesNo;
-	this.setModified();
-};
-Bob.prototype.setClipping = function( rectangle, options )
-{
-	rectangle.x = typeof rectangle.x != 'undefined' ? rectangle.x : 0;
-	rectangle.y = typeof rectangle.y != 'undefined' ? rectangle.y : 0;
-	rectangle.width = typeof rectangle.width != 'undefined' ? rectangle.width : this.parent.width;
-	rectangle.height = typeof rectangle.height != 'undefined' ? rectangle.height : this.parent.height;
+	if ( rectangle )
+	{
+		rectangle.x = typeof rectangle.x != 'undefined' ? rectangle.x : 0;
+		rectangle.y = typeof rectangle.y != 'undefined' ? rectangle.y : 0;
+		rectangle.width = typeof rectangle.width != 'undefined' ? rectangle.width : this.parent.width;
+		rectangle.height = typeof rectangle.height != 'undefined' ? rectangle.height : this.parent.height;
+	}
 	this.clipping = rectangle;
 	this.setModified();
 };
-Bob.prototype.setLimits = function( rectangle, options )
+Sprite.prototype.setLimits = function( rectangle, options )
 {
-	rectangle.x = typeof rectangle.x != 'undefined' ? rectangle.x : 0;
-	rectangle.y = typeof rectangle.y != 'undefined' ? rectangle.y : 0;
-	rectangle.width = typeof rectangle.width != 'undefined' ? rectangle.width : this.parent.width;
-	rectangle.height = typeof rectangle.height != 'undefined' ? rectangle.height : this.parent.height;
-	if ( this.aoz.manifest.compilation.emulation.toLowerCase() != 'pc' )
-		rectangle.width &= 0xFFFFFFF0;
+	if ( rectangle )
+	{
+		rectangle.x = typeof rectangle.x != 'undefined' ? rectangle.x : 0;
+		rectangle.y = typeof rectangle.y != 'undefined' ? rectangle.y : 0;
+		rectangle.width = typeof rectangle.width != 'undefined' ? rectangle.width : this.parent.width;
+		rectangle.height = typeof rectangle.height != 'undefined' ? rectangle.height : this.parent.height;
+		if ( this.aoz.manifest.compilation.emulation.toLowerCase() != 'pc' )
+			rectangle.width &= 0xFFFFFFF0;
+	}
 	this.limits = rectangle;
 	this.clipping = rectangle;
 	this.setModified();
 };
-Bob.prototype.setAlpha = function( alpha, tags )
-{
-	if ( alpha < 0 || alpha > 1.0 )
-		throw 'illegal_function_call';
-	this.alpha = alpha;
-	this.setModified();
-};
-Bob.prototype.setScale = function( vector, tags )
+Sprite.prototype.setScale = function( vector, tags )
 {
 	vector.x = typeof vector.x == 'undefined' ? 1 : vector.x;
 	vector.y = typeof vector.y == 'undefined' ? 1 : vector.y;
@@ -199,7 +186,7 @@ Bob.prototype.setScale = function( vector, tags )
 	this.scale = vector;
 	this.setModified();
 };
-Bob.prototype.setSkew = function( vector, tags )
+Sprite.prototype.setSkew = function( vector, tags )
 {
 	vector.x = typeof vector.x == 'undefined' ? 0 : vector.x;
 	vector.y = typeof vector.y == 'undefined' ? 0 : vector.y;
@@ -207,7 +194,7 @@ Bob.prototype.setSkew = function( vector, tags )
 	this.skew = vector;
 	this.setModified();
 };
-Bob.prototype.setAngle = function( angle, tags )
+Sprite.prototype.setAngle = function( angle, tags )
 {
 	angle.x = typeof angle.x == 'undefined' ? 0 : angle.x;
 	angle.y = typeof angle.y == 'undefined' ? 0 : angle.y;
@@ -215,34 +202,32 @@ Bob.prototype.setAngle = function( angle, tags )
 	this.angle = angle;
 	this.setModified();
 };
-Bob.prototype.updateCollisionData = function()
+Sprite.prototype.setVisible = function( yesNo )
+{
+	this.visible = yesNo;
+};
+Sprite.prototype.updateCollisionData = function()
 {
 	if ( this.toUpdateCollisions )
 	{
 		var collisions = this.collisions;
 		if ( this.imageObject )
 		{
-			var xHard = this.position.x * this.parent.scale.x + this.parent.position.x;
-			var yHard = this.position.y * this.parent.scale.y + this.parent.position.y;
-			var xHotspotHard = this.imageObject.hotSpotX * this.parent.scale.x;
-			var yHotspotHard = this.imageObject.hotSpotY * this.parent.scale.y;
-			var widthHard = this.imageObject.width * this.parent.scale.x;
-			var heightHard = this.imageObject.height * this.parent.scale.y;
 			if ( this.angle.z == 0 )
 			{
-				collisions.x1 = xHard - xHotspotHard * this.scale.x;
-				collisions.y1 = yHard - yHotspotHard * this.scale.y;
-				collisions.x2 = collisions.x1 + widthHard * this.scale.x;
-				collisions.y2 = collisions.y1 + heightHard * this.scale.y;
+				collisions.x1 = this.position.x - this.imageObject.hotSpotX * this.scale.x;
+				collisions.y1 = this.position.y - this.imageObject.hotSpotY * this.scale.y;
+				collisions.x2 = collisions.x1 + this.imageObject.width * this.scale.x;
+				collisions.y2 = collisions.y1 + this.imageObject.height * this.scale.y;
 			}
 			else
 			{
-				var x1 = xHard - xHotspotHard * this.scale.x;
-				var y1 = yHard - yHotspothard * this.scale.y;
-				var coords = this.aoz.utilities.rotate( x1, y1,	xHard, yHard, this.angle.z );
+				var x1 = this.position.x - this.imageObject.hotSpotX * this.scale.x;
+				var y1 = this.position.y - this.imageObject.hotSpotY * this.scale.y;
+				var coords = this.aoz.utilities.rotate( x1, y1,	this.position.x, this.position.y, this.angle.z );
 				collisions.x1 = coords.x;
 				collisions.y1 = coords.y;
-				coords = this.aoz.utilities.rotate( x1 + widthHard * this.scale.x, y1 + heightHard * this.scale.y, xHard, yHard, this.angle.z );
+				coords = this.aoz.utilities.rotate( x1 + this.imageObject.width * this.scale.x, y1 + this.imageObject.height * this.scale.y, this.position.x, this.position.y, this.angle.z );
 				collisions.x2 = coords.x;
 				collisions.y2 = coords.y;
 			}

@@ -26,7 +26,7 @@
  * @author FL
  * @date first pushed on 27/10/2019
  */
-#warning_off:"instruction_not_implemented"
+#noWarning:"instruction_not_implemented"
 
 //
 // Initialization
@@ -65,6 +65,21 @@ Instruction "erase", _number
 {
     #error
     this.aoz.banks.erase(%_number);
+    this.aoz.banks.updateBank(null,%_number);
+}
+End Instruction
+
+Instruction "erase all", _number
+{
+    #error
+    this.aoz.banks.eraseAll(%_number);
+}
+End Instruction
+
+Instruction "erase temp"
+{
+    #error
+    this.aoz.banks.eraseTemp();
 }
 End Instruction
 
@@ -78,26 +93,30 @@ End Instruction
 Instruction "reserve as work", _number, _length
 {
     #error
-    this.aoz.banks.reserve(%_number,"work",%_length);
+    var bank=this.aoz.banks.reserve(%_number,"work",%_length);
+    this.aoz.banks.updateBank(bank,%_number);
 }
 End Instruction
 Instruction "reserve as chip work", _number, _length
 {
     #error
-    this.aoz.banks.reserve(%_number,"work",%_length);
+    var bank=this.aoz.banks.reserve(%_number,"work",%_length);
+    this.aoz.banks.updateBank(bank,%_number);
 }
 End Instruction
 
 Instruction "reserve as data", _number, _length
 {
     #error
-    this.aoz.banks.reserve(%_number,"data",%_length);
+    var bank=this.aoz.banks.reserve(%_number,"data",%_length);
+    this.aoz.banks.updateBank(bank,%_number);
 }
 End Instruction
 Instruction "reserve as chip data", _number, _length
 {
     #error
-    this.aoz.banks.reserve(%_number,"data",%_length);
+    var bank=this.aoz.banks.reserve(%_number,"data",%_length);
+    this.aoz.banks.updateBank(bank,%_number);
 }
 End Instruction
 

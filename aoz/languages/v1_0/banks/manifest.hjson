@@ -29,4 +29,8 @@
 		start: "banks.aoz"
 		object: "banks"
 	}
+	compilation:
+	{
+		noWarning: []
+	}
 }

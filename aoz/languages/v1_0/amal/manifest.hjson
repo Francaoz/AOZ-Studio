@@ -29,4 +29,8 @@
 		start: "amal.aoz"
 		object: "amal"
 	}
+	compilation:
+	{
+		noWarning: []
+	}
 }

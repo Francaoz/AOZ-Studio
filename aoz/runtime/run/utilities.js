@@ -341,6 +341,15 @@ Utilities.prototype.loadScript = function( scripts, options, callback, extra )
 		};
 	}
 };
+Utilities.prototype.loadPng = function( path, options, callback, extra )
+{
+	var image = new Image();
+	image.onload = function()
+	{
+		callback( true, this, extra );
+	};
+	image.src = path;
+};
 Utilities.prototype.loadImages = function( images, options, callback, extra )
 {
 	options = typeof options != 'undefined' ? options : {};
@@ -572,6 +581,19 @@ Utilities.prototype.flattenObject = function( objet )
 		result.push( objet[ i ] );
 	return result;
 };
+function fireEvent( el, etype )
+{
+  	if ( el.fireEvent )
+	{
+    	( el.fireEvent( 'on' + etype ) );
+  	}
+	else
+	{
+    	var evObj = document.createEvent( 'Events' );
+    	evObj.initEvent( etype, true, false );
+    	el.dispatchEvent( evObj );
+  	}
+}
 
 
 
@@ -585,6 +607,24 @@ function MemoryBlock( aoz, buffer, endian )
 	this.bufferView = new Uint8Array( buffer );
 	this.length = this.bufferView.byteLength;
 	this.endian = typeof endian != 'undefined' ? endian : 'big';
+};
+MemoryBlock.prototype.setLength = function( newLength )
+{
+	if ( newLength != this.length )
+	{
+		if ( newLength < 0 )
+			throw 'illegal_function_call';
+
+		var currentBufferView = this.bufferView;
+		this.buffer = new ArrayBuffer( newLength );
+		this.bufferView = new Uint8Array( this.buffer );
+		var l = Math.min( newLength, this.length );
+		for ( var p = 0; p < l; p++ )
+			this.bufferView[ p ] = currentBufferView[ p ];
+		this.length = newLength;
+		return true;
+	}
+	return false;
 };
 MemoryBlock.prototype.extractString = function( address, length )
 {
@@ -1575,6 +1615,30 @@ AOZContext.prototype.getNumberOfElements = function( contextName )
 	if ( contextName )
 		return this.numberOfElementsInContext[ contextName ];
 	return this.numberOfElements;
+};
+AOZContext.prototype.getHighestElementIndex = function( contextName )
+{
+	var higher = -1;
+	for ( var e in this.list )
+	{
+		if ( this.list[ i ].indexIsNumber )
+		{
+			higher = Math.max( higher, this.list[ i ].index );
+		}
+	}
+	return higher >= 0 ? higher : undefined;
+};
+AOZContext.prototype.getLowestElementIndex = function( contextName )
+{
+	var lower = 999999999;
+	for ( var e in this.list )
+	{
+		if ( this.list[ i ].indexIsNumber )
+		{
+			lower = Math.min( lower, this.list[ i ].index );
+		}
+	}
+	return lower != 999999999 ? lower : undefined;
 };
 AOZContext.prototype.getFirstElement = function( contextName )
 {

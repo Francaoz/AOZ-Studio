@@ -17,76 +17,205 @@
 *****************************************************************************@*/
 /** @file
  *
- * The AOZ Rainbow Instruction Set
+ * The AOZ Sprite Instruction Set
  * By Francois Lionet
  *
- * Using the new modular language syntax system
  * Program the language with the language.
  *
  * @author FL
- * @date first pushed on 27/10/2019
+ * @date first pushed on 30/01/2020
  */
-#warning_off:"instruction_not_implemented"
+#noWarning:"instruction_not_implemented"
 
 //
 // Initialization
 //
 {
-	this.aoz.moduleSprites = this;
+	this.aoz.sprites = this;
+
+	this.banks = this.aoz.banks;
+	this.toUpdate = false;
+	this.updateOn = true;
+	this.priorityOn = false;
+	this.priorityReverseOn = false;
+
+	this.sprite = function( index, position, image, tags, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		var sprite = this.aoz.spritesContext.getElement( contextName, index );
+		if ( !sprite )
+		{
+			sprite = new Sprite( this.aoz, this, tags );
+			this.aoz.spritesContext.setElement( contextName, sprite, index );
+		}
+		sprite.set( position, image, tags );
+	};
+	this.destroy = function( index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		if ( typeof index == 'undefined' )
+		{
+			this.spritesContext.deleteRange( contextName );
+		}
+		else
+		{
+			this.spritesContext.deleteElement( contextName, index );
+		}
+		this.setModified();
+	};
+	this.setModified = function()
+	{
+		this.toUpdate = true;
+		this.aoz.renderer.setModified();
+	};
+	this.get = function( index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getElement( contextName, index );
+	};
+	this.getNumber = function()
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getNumberOfElements( contextName );
+	};
+	this.getHighestIndex = function()
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getHighestElementIndex( contextName );
+	};
+	this.getLowestIndex = function()
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getLowestElementIndex( contextName );
+	};
+
+	this.update = function( force )
+	{
+		var contextName = this.aoz.currentContextName;
+		if ( force || ( this.updateOn && this.toUpdate ) )
+		{
+			this.toUpdate = false;
+
+			var done = false;
+			this.aoz.spritesContext.parseAll( contextName, function( sprite )
+			{
+				done |= sprite.update( { force: force } );
+			};
+			if ( done )
+			{
+				this.sortSpritesPriority();
+				this.setModified();
+			}
+		}
+	};
+	this.updateBank = function( newBank, newBankIndex, contextName )
+	{
+		var update = false;
+		this.aoz.spritesContext.parseAll( contextName, function( sprite )
+		{
+			update |= sprite.updateBank( newBank, newBankIndex, contextName );
+		} );
+		if ( update )
+			this.setModified();
+	};
+	this.setUpdate = function( yes_no )
+	{
+		this.updateOn = yes_no;
+	};
+	this.setLimits = function( index, rectangle, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		if ( typeof index != 'undefined' )
+		{
+			this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).setLimits( rectangle );
+		}
+		else
+		{
+			this.aoz.spritesContext.parseAll( contextName, function( sprite )
+			{
+				sprite.setLimits( rectangle );
+			} );
+		}
+	};
+	this.setScale = function( index, scale, tags, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).setScale( scale, tags );
+	};
+	this.setSkew = function( index, skew, tags, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).setSkew( skew, tags );
+	};
+	this.setRotate = function( index, angle, tags, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).setAngle( { x:0, y: 0, z: angle }, tags );
+	};
+	this.setVisible = function( show_hide, index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).setShow( show_hide );
+	};
+	this.setPriority = function( on_off, contextName )
+	{
+		this.priorityOn = on_off;
+		this.setModified();
+	};
+	this.setPriorityReverse = function( on_off, contextName )
+	{
+		this.priorityReverseOn  = on_off;
+		this.setModified();
+	};
+
+	this.getX = function( index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).position.x;
+	};
+	this.getY = function( index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).position.y;
+	};
+	this.getI = function( index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getElement( contextName, index, 'sprite_not_defined' ).image;
+	};
+	this.isSprite = function( index, contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		return this.aoz.spritesContext.getElement( contextName, index ) != null;
+	};
+
+	this.sortPriority = function( contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		if ( this.priorityOn )
+		{
+			if ( this.priorityReverseOn )
+			{
+				this.aoz.spritesContext.sort( contextName, function( b1, b2 )
+				{
+					if ( b1.position.y == b2.position.y )
+						return 0;
+					return ( b1.position.y > b2.position.y ) ? -1 : 1;
+				} );
+			}
+			else
+			{
+				this.aoz.spritesContext.sort( contextName, function( b1, b2 )
+				{
+					if ( b1.position.y == b2.position.y )
+						return 0;
+					return ( b1.position.y < b2.position.y ) ? -1 : 1;
+				} );
+			}
+		}
+	};
 }
 
-Instruction "set sprite buffer", _number
-{
-}
-End Instruction
-Instruction "sprite off", _number
-{
-	#errors
-	this.aoz.sprites.spriteOff(%_number);
-}
-End Instruction
-Instruction "sprite priority", _number
-{
-	#errors
-	this.aoz.sprites.spritePriority(%_number);
-}
-End Instruction
-Instruction "sprite update off"
-{
-	#errors
-	this.aoz.sprites.setSpriteUpdate(false);
-}
-End Instruction
-Instruction "sprite update on"
-{
-	#errors
-	this.aoz.sprites.setSpriteUpdate(true);
-}
-End Instruction
-Instruction "sprite update"
-{
-	#errors
-	this.aoz.sprites.spriteUpdate();
-}
-End Instruction
-Instruction "sprite scale",_number, _x, _x
-{
-	#errors
-	this.aoz.sprites.setScale(%_number,%_x,%_y);
-}
-End Instruction
-Instruction "sprite rotate",_number, _angle
-{
-	#errors
-	this.aoz.sprites.setAngle(%_number,%_angle*this.aoz.degreeRadian);
-}
-End Instruction
-Instruction "sprite skew",_number, _x, _y
-{
-	#errors
-	this.aoz.sprites.setSkew(%_number,%_x,%_y);
-}
-End Instruction
 Instruction "sprite",_number, _x, _y, _i
 {
 	#errors
@@ -94,43 +223,98 @@ Instruction "sprite",_number, _x, _y, _i
 }
 End Instruction
 
-Function "spritebob col", _number, _start To _End
+Instruction "set sprite buffer", _number
+{
+}
+End Instruction
+
+Instruction "sprite show", _number
+{
+	#errors
+	this.aoz.sprites.setVisible(true,%_number);
+}
+End Instruction
+
+Instruction "sprite hide", _number
+{
+	#errors
+	this.aoz.sprites.setVisible(false,%_number);
+}
+End Instruction
+
+Instruction "sprite off", _number
+{
+	#errors
+	this.aoz.sprites.destroy(%_number);
+}
+End Instruction
+
+Instruction "sprite priority", _onOff
+{
+	#errors
+	this.aoz.sprites.setPriority(%_onOff);
+}
+End Instruction
+
+Instruction "sprite update off"
+{
+	this.aoz.sprites.setUpdate(false);
+}
+End Instruction
+
+Instruction "sprite update on"
+{
+	this.aoz.sprites.setUpdate(true);
+}
+End Instruction
+
+Instruction "sprite update"
+{
+	this.aoz.sprites.update();
+}
+End Instruction
+
+Instruction "sprite scale",_number, _x, _x
+{
+	#errors
+	this.aoz.sprites.setScale(%_number,%_x,%_y);
+}
+End Instruction
+
+Instruction "sprite rotate",_number, _angle
+{
+	#errors
+	this.aoz.sprites.setAngle(%_number,%_angle*this.aoz.degreeRadian);
+}
+End Instruction
+
+Instruction "sprite skew",_number, _x, _y
+{
+	#errors
+	this.aoz.sprites.setSkew(%_number,%_x,%_y);
+}
+End Instruction
+
+Function "x sprite", _number
 {
 	#errors
 }
-End Function( {this.aoz.sprites.spriteBobCol(%_number,this.aoz.currentScreen,%_start,%_end)} )
-Function "spritebob col", _number
+End Function( {this.aoz.sprites.getX(%_number)} )
+
+Function "y sprite", _number
 {
 	#errors
 }
-End Function( {this.aoz.sprites.spriteCol(%_number)} )
-Function "sprite col", _number
+End Function( {this.aoz.sprites.getY(%_number)} )
+
+Function "i sprite", _number
 {
 	#errors
 }
-End Function( {this.aoz.sprites.spriteBobCol(%_number,this.aoz.currentScreen)} )
-Function "sprite col", _number, _start To _End
-{
-	#errors
-}
-End Function( {this.aoz.sprites.spriteCol(%_number,%_start,%_end)} )
+End Function( {this.aoz.sprites.getI(%_number)} )
+
 Function "sprite base", _number
 {
 	#notimplemented
 }
 End Function( {0} )
-Function "x sprite", _number
-{
-	#errors
-}
-End Function( {this.aoz.sprites.xSprite(%_number)} )
-Function "y sprite", _number
-{
-	#errors
-}
-End Function( {this.aoz.sprites.ySprite(%_number)} )
-Function "i sprite", _number
-{
-	#errors
-}
-End Function( {this.aoz.sprites.iSprite(%_number)} )

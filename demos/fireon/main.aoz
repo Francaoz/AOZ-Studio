@@ -1,0 +1,104 @@
+'
+'
+' some kind of "fire" effect'
+'
+'
+#manifest:"pc"
+#fullScreen:true
+#fps:true
+
+screen open 0,Screen Width,Screen Height,16,lowres
+double buffer
+autoback 0
+
+screen open 1,Screen Width,Screen Height,16,lowres
+'screen hide 1
+curs off : flash off
+palette $000,$100,$200,$310,$420,$531,$652,$773,$882,$991,$AA3,$BB3,$CC4,$ED5,$FE5,$FF5
+
+XSIZE=Screen Width / 2
+YSIZE=Screen Height / 10
+reserve as data 10,XSIZE*YSIZE*2
+
+WAVEWIDTH# = 32
+WAVESPEED# = 0.01
+WAVEACCELERATION# = 0.99
+HORIZONTALDECAY# = 0.99
+ANGLEACCELERATION# = 0.99
+dim WAVE#( Screen Height )
+global WAVE#()
+
+//calculate_wave[ WAVEWIDTH#, WAVESPEED#, WAVEACCELERATION#, HORIZONTALDECAY#, ANGLEACCELERATION# ]
+
+STA=start(10)
+
+ink 15
+paper 0
+pen 15
+background_color = 2
+cls background_color
+
+do
+
+	for t=0 to XSIZE/3
+		x1=rnd(XSIZE)
+		poke start(10)+((YSIZE-1)*XSIZE)+x1,15
+		poke start(10)+((YSIZE-2)*XSIZE)+x1,15
+		poke start(10)+((YSIZE-3)*XSIZE)+x1,15
+	next t
+
+	for x=0 to XSIZE
+		for y=YSIZE-55 to YSIZE-1
+			d1=peek(STA+((y+1)*XSIZE)+x)
+			d2=peek(STA+((y+1)*XSIZE)+x+1)
+			d3=peek(STA+((y+1)*XSIZE)+x-1)
+			d4=((d1+d2+d3))/3
+			if y<YSIZE-2 : plot x + WAVE#( Screen Height - y ),y,d4 : End If
+			poke start(10)+(y*XSIZE)+x,d4
+		next y
+	next x
+	screen copy 1,0,32,XSIZE,YSIZE-2 to 0,0,0,Screen Width,Screen Height
+
+	k$ = inkey$
+	speed = 1
+	if key state( 70 ) then speed = speed * 10			// PC mode, using Javascript scan-code for "F" (fast)
+	if k$ = "4" Then add XSIZE, -speed : XSIZE = max( min( XSIZE, 1920 * 4 ), 2 ) : changed = true
+	if k$ = "6" Then add XSIZE, speed : XSIZE = max( min( XSIZE, 1920 * 4 ), 2 ) : changed = true
+	if k$ = "8" Then add YSIZE, -speed : YSIZE = max( min( YSIZE, 1080 * 4 ), 32 ) : changed = true
+	if k$ = "2" Then add YSIZE, speed : YSIZE = max( min( YSIZE, 1080 * 4 ), 32 ) : changed = true
+	/*
+	if key state( 87 )
+		speed# = 1.01
+		'if key state( 70 ) then speed# = speed# * 10
+		if k$ = "8" Then WAVEACCELERATION# = WAVEACCELERATION# / speed#
+		if k$ = "4" Then WAVEACCELERATION# = WAVEACCELERATION# * speed#
+		if k$ = "4" Then WAVEWIDTH# = WAVEWIDTH# / speed#
+		if k$ = "8" Then WAVEWIDTH# = WAVEWIDTH# * speed#
+		changed = true
+	end if
+	*/
+	if changed Then bank shrink 10, XSIZE*YSIZE*2 : cls background_color : calculate_wave[ WAVEWIDTH#, WAVESPEED#, WAVEACCELERATION#, HORIZONTALDECAY#, ANGLEACCELERATION# ]
+	screen 0
+	home : print "                                         "
+	home : print "XSIZE: ";str$( XSIZE );" - YSIZE: "+str$( YSIZE );
+	screen 1
+
+	screen swap
+
+	wait vbl
+loop
+
+
+procedure calculate_wave[ wavewidth, speed#, acceleration#, horizontaldecay#, angleacceleration# ]
+
+	radius# = wavewidth / 2;
+	angle# = 0
+	anglespeed# = speed#
+	for y = 0 To Screen Height
+		WAVE( y ) = sin( angle# ) * radius#
+		radius# = radius# * horizontaldecay#
+		angle# = angle# + anglespeed#
+		anglespeed# = anglespeed# * angleacceleration#
+	next
+
+end proc

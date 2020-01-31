@@ -31,7 +31,6 @@ function Screen( aoz, renderer, contextName, definition )
 	this.renderer = renderer;
 	this.contextName = contextName;
 	this.utilities = aoz.utilities;
-	this.sprites = aoz.sprites;
 	this.banks = aoz.banks;
 	this.position =
 	{
@@ -1458,15 +1457,25 @@ Screen.prototype.pasteIcon = function( number, x, y, scaleX, scaleY, angle, tags
 //////////////////////////////////////////////////////////////////////
 // Bobs
 //////////////////////////////////////////////////////////////////////
-Screen.prototype.getBobFromIndex = function( index, contextName )
+Screen.prototype.getBob = function( index, errorMessage, contextName )
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
-	return this.bobsContext.getElement( contextName, index );
+	return this.bobsContext.getElement( contextName, index, errorMessage );
 };
 Screen.prototype.getNumberOfBobs = function()
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	return this.bobsContext.getNumberOfElements( contextName );
+};
+Screen.prototype.getHighestBobIndex = function()
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	return this.bobsContext.getHighestElementIndex( contextName );
+};
+Screen.prototype.getLowestBobIndex = function()
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	return this.bobsContext.getLowestElementIndex( contextName );
 };
 Screen.prototype.bob = function( index, position, image, tags, contextName )
 {
@@ -1481,7 +1490,7 @@ Screen.prototype.bob = function( index, position, image, tags, contextName )
 	this.setModified();
 	this.bobsToUpdate = true;
 };
-Screen.prototype.bobOff = function( index, contextName )
+Screen.prototype.destroyBob = function( index, contextName )
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	if ( typeof index == 'undefined' )
@@ -1494,13 +1503,6 @@ Screen.prototype.bobOff = function( index, contextName )
 		this.bobsToUpdate = true;
 		this.setModified();
 	}
-};
-Screen.prototype.bobDestroy = function( index, contextName )
-{
-	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
-	this.bobsContext.deleteElement( contextName, index );
-	this.bobsToUpdate = true;
-	this.setModified();
 };
 Screen.prototype.bobsUpdate = function( force )
 {
@@ -1518,6 +1520,15 @@ Screen.prototype.bobsUpdate = function( force )
 			this.setModified();
 		}
 	}
+};
+Screen.prototype.updateBank = function( newBank, newBankIndex, contextName )
+{
+	var update = false;
+	this.bobsContext.parseAll( contextName, function( bob )
+	{
+		update |= bob.updateBank( newBank, newBankIndex, contextName );
+	} );
+	return update;
 };
 Screen.prototype.setBobsUpdate = function( yes_no )
 {
@@ -1580,6 +1591,14 @@ Screen.prototype.limitBob = function( index, rectangle, contextName )
 			bob.setLimits( rectangle );
 		} );
 	}
+	this.bobsToUpdate = true;
+	this.setModified();
+};
+Screen.prototype.bobAlpha = function( index, alpha, tags, contextName )
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+	var bob = this.bobsContext.getElement( contextName, index, 'bob_not_defined' );
+	bob.setAlpha( alpha, tags );
 	this.bobsToUpdate = true;
 	this.setModified();
 };

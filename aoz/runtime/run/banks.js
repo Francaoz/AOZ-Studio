@@ -34,8 +34,26 @@ function Banks( aoz )
 	this.quickBanks = {};
 	this.numberOfSoundsToPreload = typeof this.aoz.manifest.sounds.numberOfSoundsToPreload == 'undefined' ? 4 : this.aoz.manifest.sounds.numberOfSoundsToPreload;
 	this.soundPoolSize = this.aoz.manifest.sounds.soundPoolSize;
+	this.numberOfReserves = 0;
 
 INSERT_CODE
+
+	// Poke the indexes and reservation numbers.
+	for ( var b = 0; b < this.banks.length; b++ )
+	{
+		if ( this.banks[ b ] )
+		{
+			for ( var c in this.banks[ b ] )
+			{
+				var bank = this.banks[ b ][ c ];
+				if ( bank )
+				{
+					bank.index = b;
+					bank.reserveNumber = this.numberOfReserves++;
+				}
+			}
+		}
+	}
 };
 
 Banks.prototype.reserve = function( number, type, length, contextName )
@@ -56,54 +74,138 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 	if ( !bank )
 		this.banks[ number ] = {};
 	type = type.toLowerCase();
+	var bank;
 	switch ( type )
 	{
 		case 'images':
-			this.banks[ number ][ contextName ] = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domaine: type, type: type } );
+			bank = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domain: type, type: type } );
 			break;
 		case 'icons':
-			this.banks[ number ][ contextName ] = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domain: type, type: type } );
+			bank = new ImageBank( this.aoz, [], this.aoz.manifest.default.screen.palette, { domain: type, type: type } );
 			break;
 		case 'musics':
-			this.banks[ number ][ contextName ] = new SampleBank( this.aoz, [], [], { domain: type, type: type } );
+			bank = new SampleBank( this.aoz, [], [], { domain: type, type: type } );
 			break;
 		case 'samples':
-			this.banks[ number ][ contextName ] = new SampleBank( this.aoz, [], [], { domain: type, type: type } );
+			bank = new SampleBank( this.aoz, [], [], { domain: type, type: type } );
 			break;
 		case 'picpac':
 		case 'amal':
-			this.banks[ number ][ contextName ] = new DataBank( this.aoz, undefined, 0, { domain: type, type: type } );
+			bank = new DataBank( this.aoz, undefined, 0, { domain: type, type: type } );
 			break;
 		case 'work':
 		case 'tracker':
 		case 'data':
 		default:
-			this.banks[ number ][ contextName ] = new DataBank( this.aoz, undefined, length, { domain: type, type: type } );
+			bank = new DataBank( this.aoz, undefined, length, { domain: type, type: type } );
 			break;
 	}
+	bank.reserveNumber = this.numberOfReserves++;
+	bank.index = number;
+	this.banks[ number ][ contextName ] = bank;
 	this.quickBanks[ contextName ] = {};
-	return this.banks[ number ][ contextName ];
+	return bank;
 };
-Banks.prototype.erase = function( bankIndex, contextName )
+Banks.prototype.erase = function( bankIndex, noError, contextName )
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 
-	if ( bankIndex < 1 )
-		throw 'illegal_function_call';
-	if ( !this.manifest.unlimitedBanks && bankIndex > 16 )
-		throw 'illegal_function_call';
+	if ( bankIndex < 1 || ( !this.manifest.unlimitedBanks && bankIndex > 16 ) )
+	{
+		if ( !noError )
+			throw 'illegal_function_call';
+		return;
+	}
 
+	if ( !this.banks[ bankIndex ] || !this.banks[ bankIndex ][ contextName ] )
+	{
+		if ( !noError )
+			throw 'bank_not_reserved';
+		return;
+	}
 	this.getBank( bankIndex, contextName ).erase();
-	if ( !this.banks[ bankIndex ] )
-		throw 'bank_not_reserved';
-	if ( !this.banks[ bankIndex ][ contextName ] )
-		throw 'bank_not_reserved';
 	this.banks[ bankIndex ] = this.utilities.cleanObject( this.banks[ bankIndex ], contextName );
 	this.quickBanks[ contextName ] = {};
+};
+Banks.prototype.eraseTemp = function( bankIndex, contextName )
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+
+	for ( var b = 0; b < this.banks.length; b++ )
+	{
+		if ( this.banks[ b ] && this.banks[ b ][ contextName ] )
+		{
+			var bank = this.banks[ b ][ contextName ];
+			if ( bank.isType( 'work' ) )
+			{
+				this.erase( b, contextName );
+				this.updateBank( null, b, contextName );
+			}
+		}
+	}
+};
+Banks.prototype.eraseAll = function( bankIndex, contextName )
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+
+	for ( var b = 0; b < this.banks.length; b++ )
+	{
+		if ( this.banks[ b ] && this.banks[ b ][ contextName ] )
+		{
+			this.erase( b, contextName );
+			this.updateBank( null, b, contextName );
+		}
+	}
+};
+Banks.prototype.updateBank = function( bank, bankIndex, contextName )
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+
+	this.aoz.screensContext.parseAll( contextName, function( screen )
+	{
+		screen.updateBank( bank, bankIndex, contextName )
+	} );
+	if ( this.aoz.sprites )
+	{
+		this.aoz.sprites.updateBank( bank, bankIndex, contextName );
+	}
+};
+Banks.prototype.bankShrink = function( bankIndex, newLength, contextName )
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+
+	var bank = this.getBank( bankIndex, contextName );
+	bank.setLength( newLength );
+	this.updateBank( bank, bankIndex, contextName );
+};
+Banks.prototype.bankSwap = function( bankIndex1, bankIndex2, contextName )
+{
+	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+
+	if ( bankIndex1 < 1 || bankIndex2 < 1 || typeof bankIndex1 == 'undefined' || typeof bankIndex2 == 'undefined' )
+		throw 'illegal_function_call';
+	if ( !this.manifest.unlimitedBanks && ( bankIndex1 > 16 || bankIndex2 > 16 ) )
+		throw 'illegal_function_call';
+
+	if ( !this.banks[ bankIndex1 ][ contextName ] || !this.banks[ bankIndex2 ][ contextName ] )
+		throw 'bank_not_reserved';
+
+	// Swap!
+	var bank1 = this.banks[ bankIndex1 ][ contextName ];
+	var bank2 = this.banks[ bankIndex2 ][ contextName ];
+	this.banks[ bankIndex1 ][ contextName ] = bank2;
+	this.banks[ bankIndex2 ][ contextName ] = bank1;
+	bank2.index = bankIndex1;
+	bank1.index = bankIndex2;
+
+	// Update banks
+	this.updateBank( bank1, bank1.index, contextName );
+	this.updateBank( bank2, bank2.index, contextName );
 };
 Banks.prototype.getBank = function( bankIndex, contextName, bankType )
 {
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+
 	if ( typeof bankIndex == 'undefined' )
 	{
 		if ( typeof bankType == 'undefined' )
@@ -161,7 +263,6 @@ Banks.prototype.getLength = function( bankIndex, contextName )
 };
 Banks.prototype.listBank = function( contextName )
 {
-	var result = '';
 	contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
 	for ( var b = 0; b < this.banks.length; b++ )
 	{
@@ -383,7 +484,8 @@ ImageBank.prototype.add = function( index, tags )
 		hotSpotY: 0,
 		collisionMaskPrecision: this.collisionPrecision,
 		collisionMaskAlphaThreshold: this.collisionAlphaThreshold,
-		getCanvas: this.getImageCanvas
+		getCanvas: this.getImageCanvas,
+		getCollisionMask: this.getCollisionMask
 	}
 	this.context.setElement( this.domain, image, index, true );
 	this.setTags( image, tags );
@@ -436,9 +538,28 @@ ImageBank.prototype.getImageCanvas =  function( hRev, vRev )
 	}
 	return canvas;
 };
+ImageBank.prototype.getCollisionMask = function( image )
+{
+	// Note: we are in the "image" context ;)
+	if ( !this.collisionMask )
+	{
+		var context = this.canvas.getContext( '2d' );
+		var dataView = context.getImageData( 0, 0, this.width, this.height );
+
+		this.collisionMask = dataView;
+		this.collisionMaskWidth = image.width;
+		this.collisionMaskHeight = image.height;
+		this.collisionMaskPrecision = 1;
+	}
+	return { mask: this.collisionMask, width: this.collisionMaskWidth, height: this.collisionMaskHeight, precision: this.collisionMaskPrecision };
+};
 ImageBank.prototype.getLength = function()
 {
 	return this.context.getNumberOfElements( this.domain );
+};
+ImageBank.prototype.setLength = function()
+{
+	throw 'illegal_function_call';
 };
 ImageBank.prototype.setElement = function( index, canvas, tags )
 {
@@ -745,6 +866,10 @@ SampleBank.prototype.getLength = function()
 {
 	return this.context.getNumberOfElements( this.domain );
 };
+SampleBank.prototype.setLength = function()
+{
+	throw 'illegal_function_call';
+};
 SampleBank.prototype.reset = function()
 {
 	return this.context.reset( this.domain );
@@ -862,6 +987,20 @@ DataBank.prototype.getLength = function( index )
 	if ( element && element.aoz )
 		return element.length;
 	return this.context.numberOfElements;
+};
+DataBank.prototype.setLength = function( newLength )
+{
+	if ( this.type == 'tracker' )
+		throw 'illegal_function_call';
+	var element = this.context.getElement( this.domain, 1 );
+
+	// If MemoryBlock
+	if ( element && element.aoz )
+	{
+		element.setLength( newLength );
+		return;
+	}
+	throw 'illegal_function_call';
 };
 DataBank.prototype.setTags = function( index, tags )
 {

@@ -10,24 +10,24 @@
 ****************************************************************************@*/
 /** @file
  *
- * AMOS 2 Extensions Manifest
+ * AOZ Instructions Module Manifest
  *
  */
 {
 	// Version of the manifest
 	version: "8"						// Will only work after applications compiled with manifest 7 and above.
-	versionExtension: "1"				// Indicates an extension and the version of this manifest
+	versionModule: "1"					// Indicates an extension and the version of this manifest
 
 	// Informations about the application
 	infos:
 	{
-		applicationName: "The Picture Compactor Extension"
+		applicationName: "The Collision Instructions"
 		author: "By Francois Lionet"
 		version: "Version 0.99"
-		date: "02/10/2019"
-		copyright: "(c) Francois Lionet / AOZ Studio 2019"
-		start: "picpac.aoz"
-		object: "picpac"
+		date: "30/01/2020"
+		copyright: "(c) AOZ Studio 2019-2020"
+		start: "collisions.aoz"
+		object: "collisions"
 	}
 	compilation:
 	{

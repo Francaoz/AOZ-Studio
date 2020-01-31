@@ -15,7 +15,7 @@
  */
 {
 	// Version of the manifest
-	version: "8"
+	version: "9"
 
 	// Informations about the application
 	infos:
@@ -42,6 +42,7 @@
 		unlimitedWindows: true			// true / false. Default = false -> max number of text windows
 		maskHardwareCoordinates: false	// true / false. Default = true -> will round screen display X coordinates and width to multiple of 16
 		endian: "little"				// order of bytes in files: "big"-> as on Amiga "little"-> as on PC
+		noWarning: []					// list of warnings NOT to output (see documentation)
 	}
 
 	// The display setup
@@ -75,6 +76,14 @@
 		fullScreenIconY: 2				// Vertical position of the icon, positive means on the top, negative values are subtracted from the height of the browser window
 		fullScreenIconImage: "./runtime/resources/full_screen.png"		// The path to the image to use for full-screen, can be semi-transparent, here 32x32
 		smallScreenIconImage: "./runtime/resources/small_screen.png"	// The path to the image to use for quit full-screen, can be semi-transparent, here 32x32
+	}
+
+	// Loading screen
+	bootScreen:
+	{
+		active: true
+		waitSounds: true
+		clickSounds: false
 	}
 
 	// Sprites and bobs
