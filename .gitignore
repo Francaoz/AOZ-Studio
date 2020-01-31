@@ -15,7 +15,6 @@ aoz-linux
 aoz-linux-x64
 aoz-linux-x86
 aoz-macos
-aoz-x86.exe
 aoz.exe
 *.db
 *.obj

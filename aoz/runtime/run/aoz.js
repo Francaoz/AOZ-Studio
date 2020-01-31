@@ -1534,6 +1534,7 @@ AOZ.SHIFT = 0x0001;
 AOZ.CONTROL = 0x0002;
 AOZ.ALT = 0x0004;
 AOZ.META = 0x0008;
+// JAVASCRIPT - AMIGA
 AOZ.keyCodeToScanCode =
 {
 	37: 79,			// Left
@@ -1725,10 +1726,13 @@ AOZ.prototype.keyState = function( code )
 			if ( AOZ.keyCodeToScanCode[ k ] == code )
 			{
 				code = parseInt( k );
+				break;
 			}
 		}
 	}
-	return this.keymap[ code ];
+	if ( code )
+		return this.keymap[ code ];
+	return false;
 };
 AOZ.prototype.keyShift = function( shift )
 {
