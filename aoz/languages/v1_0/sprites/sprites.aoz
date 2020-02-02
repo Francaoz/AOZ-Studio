@@ -100,7 +100,7 @@
 			this.aoz.spritesContext.parseAll( contextName, function( sprite )
 			{
 				done |= sprite.update( { force: force } );
-			};
+			} );
 			if ( done )
 			{
 				this.sortSpritesPriority();
