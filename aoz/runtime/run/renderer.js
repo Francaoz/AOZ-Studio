@@ -195,7 +195,7 @@ Renderer.prototype.render = function( force )
 {
 	var self = this;
 	force = typeof force == 'undefined' ? false : true;
-	if ( !this.rendering && ( force || ( this.modified & this.viewOn ) ) )
+	if ( !this.aoz.crash && !this.rendering && ( force || ( this.modified & this.viewOn ) ) )
 	{
 		this.rendering = true;
 		this.context.save();
@@ -454,15 +454,20 @@ Renderer.prototype.render = function( force )
 			{
 				for ( var r = 0; r < rainbowsToRemove.length; r++ )
 				{
-					this.aoz.screensContext.deleteElement( this.aoz.currentContextName, rainbowsToRemove[ r ] );
+					this.aoz.screensContext.deleteElement( this.aoz.currentContextName, rainbowsToRemove[ r ].screen );
 				}
 			}
 			else if ( rainbowsToDraw )
 			{
+				var scale = 
+				{
+					x: this.canvas.width / ( this.hardWidth - this.hardLeftX ),
+					y: this.canvas.height / ( this.hardHeight - this.hardTopY )
+				};
 				for ( var r = 0; r < rainbowsToDraw.length; r++ )
 				{
 					var rainbow = rainbowsToDraw[ r ];
-					rainbow.render( this.context, { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height } );
+					rainbow.render( this.context, { x: 0, y: 0, width: this.canvas.width, height: this.canvas.height }, scale );
 				}
 			}
 		};
@@ -502,44 +507,46 @@ Renderer.prototype.render = function( force )
 		this.context.restore();
 	}
 
-	// Display FPS?
-	if ( this.manifest.display.fps )
+	if ( !this.aoz.crash )
 	{
-		if ( ( this.aoz.fpsPosition % 10 ) == 0 || !this.previousFps )
+		// Display FPS?
+		if ( this.manifest.display.fps )
 		{
-			this.previousFps = 0;
-			for ( var f = 0; f < this.aoz.fps.length; f++ )
-				this.previousFps += this.aoz.fps[ f ];
-			this.previousFps = 1000 / ( this.previousFps / this.aoz.fps.length );
+			if ( ( this.aoz.fpsPosition % 10 ) == 0 || !this.previousFps )
+			{
+				this.previousFps = 0;
+				for ( var f = 0; f < this.aoz.fps.length; f++ )
+					this.previousFps += this.aoz.fps[ f ];
+				this.previousFps = 1000 / ( this.previousFps / this.aoz.fps.length );
+			}
+
+			var text = this.aoz.errors.getErrorFromNumber( 202 ).message;
+			text = this.aoz.utilities.replaceStringInText( text, '%1', '' + Math.floor( this.previousFps ) );
+			this.context.fillStyle = this.manifest.display.backgroundColor;
+			this.context.fillRect( this.fpsRectX, this.fpsRectY, this.fpsRectWidth, this.fpsRectHeight );
+			this.context.fillStyle = this.manifest.display.fpsColor;
+			this.context.font = this.manifest.display.fpsFont;
+			this.context.textBaseline = 'top';
+			this.context.fillText( text, this.manifest.display.fpsX, this.manifest.display.fpsY );
 		}
 
-		var text = this.aoz.errors.getErrorFromNumber( 202 ).message;
-		text = this.aoz.utilities.replaceStringInText( text, '%1', '' + Math.floor( this.previousFps ) );
-		this.context.fillStyle = this.manifest.display.backgroundColor;
-		this.context.fillRect( this.fpsRectX, this.fpsRectY, this.fpsRectWidth, this.fpsRectHeight );
-		this.context.fillStyle = this.manifest.display.fpsColor;
-		this.context.font = this.manifest.display.fpsFont;
-		this.context.textBaseline = 'top';
-		this.context.fillText( text, this.manifest.display.fpsX, this.manifest.display.fpsY );
+		// Display Full Screen Icons?
+		if ( this.manifest.display.fullScreenIcon && this.fullScreenIcons )
+		{
+			if ( this.isFullScreen() )
+				this.fullScreenIconOn = 'small_screen';
+			else
+				this.fullScreenIconOn = 'full_screen';
+			var image = this.fullScreenIcons[ this.fullScreenIconOn ];
+			this.fullScreenIconX = this.manifest.display.fullScreenIconX >= 0 ? this.manifest.display.fullScreenIconX * this.fullScreenIconRatio : this.width + this.manifest.display.fullScreenIconX  * this.fullScreenIconRatio;
+			this.fullScreenIconY = this.manifest.display.fullScreenIconY >= 0 ? this.manifest.display.fullScreenIconY * this.fullScreenIconRatio : this.height + this.manifest.display.fullScreenIconY * this.fullScreenIconRatio;
+			this.fullScreenIconWidth = image.width * this.fullScreenIconRatio;
+			this.fullScreenIconHeight = image.height * this.fullScreenIconRatio;
+			this.context.fillStyle = this.manifest.display.backgroundColor;
+			this.context.fillRect( this.fullScreenIconX, this.fullScreenIconY, this.fullScreenIconWidth, this.fullScreenIconHeight );
+			this.context.drawImage( image, this.fullScreenIconX, this.fullScreenIconY, this.fullScreenIconWidth, this.fullScreenIconHeight );
+		}
 	}
-
-	// Display Full Screen Icons?
-	if ( this.manifest.display.fullScreenIcon && this.fullScreenIcons )
-	{
-		if ( this.isFullScreen() )
-			this.fullScreenIconOn = 'small_screen';
-		else
-			this.fullScreenIconOn = 'full_screen';
-		var image = this.fullScreenIcons[ this.fullScreenIconOn ];
-		this.fullScreenIconX = this.manifest.display.fullScreenIconX >= 0 ? this.manifest.display.fullScreenIconX * this.fullScreenIconRatio : this.width + this.manifest.display.fullScreenIconX  * this.fullScreenIconRatio;
-		this.fullScreenIconY = this.manifest.display.fullScreenIconY >= 0 ? this.manifest.display.fullScreenIconY * this.fullScreenIconRatio : this.height + this.manifest.display.fullScreenIconY * this.fullScreenIconRatio;
-		this.fullScreenIconWidth = image.width * this.fullScreenIconRatio;
-		this.fullScreenIconHeight = image.height * this.fullScreenIconRatio;
-		this.context.fillStyle = this.manifest.display.backgroundColor;
-		this.context.fillRect( this.fullScreenIconX, this.fullScreenIconY, this.fullScreenIconWidth, this.fullScreenIconHeight );
-		this.context.drawImage( image, this.fullScreenIconX, this.fullScreenIconY, this.fullScreenIconWidth, this.fullScreenIconHeight );
-	}
-
 	// The end!
 	this.modified = false;
 	this.rendering = false;
@@ -570,4 +577,97 @@ Renderer.prototype.swapFullScreen = function()
 		else
 			document.exitFullscreen();
 	}
+}
+Renderer.prototype.captureCrash = function( error )
+{
+	// Captures the display
+	this.aoz.crash = {};
+	this.aoz.crash.canvas = this.canvas.toDataURL( 'image/png' );
+	this.aoz.crash.error = error;
+};	
+Renderer.prototype.meditate = function( error )
+{
+	var meditations1 =
+	[
+		'BAAAAAAD',
+		'BAADF00D',
+		'BADDCAFE',
+		'8BADF00D',
+		'1BADB002',
+		'ABADBABE',
+		'DEAD2BAD',
+		'DEADBAAD',
+		'DEADBABE',
+		'DEADBEAF',
+		'DEADC0DE',
+	];
+	var meditations2 =
+	[
+		'CODECACA',
+		'CODEBAAD',
+		'B16B00B5',
+		'B105F00D',
+		'BEEFBABE',
+		'CAFEBABE',
+		'CAFED00D',
+		'DABBAD00',
+		'DAEBA000',
+		'FACEFEED',
+		'FBADBEEF',
+		'FEE1DEAD',
+		'FEEDBABE',
+		'FEEDC0DE'
+	];
+
+	this.guruMeditation =
+	{
+		sx: this.canvas.width,
+		sy: 160,
+		borderOn: false
+	}
+	this.guruMeditation.sLine = this.guruMeditation.sy / 20,
+	this.guruMeditation.fontHeight = this.guruMeditation.sy / 6,
+	this.guruMeditation.sxBorder = this.guruMeditation.sx / 40;
+	this.guruMeditation.syBorder = this.guruMeditation.sy / 8;
+	this.guruMeditation.yText1 = this.guruMeditation.sy / 2 - this.guruMeditation.fontHeight;
+	this.guruMeditation.yText2 = this.guruMeditation.sy / 2 + this.guruMeditation.fontHeight;
+	this.guruMeditation.guru1 = meditations1[ Math.floor( Math.random() * meditations1.length ) ];
+	this.guruMeditation.guru2 = meditations2[ Math.floor( Math.random() * meditations2.length ) ];
+
+	// Shift image down
+	this.context.drawImage( this.canvas, 0, 0, this.canvas.width, this.canvas.height, 0, this.guruMeditation.sy, this.canvas.width, this.canvas.height - this.guruMeditation.sy );
+	this.guruMeditation.borderOn = true;
+	this.drawGuruMeditation();
+
+	// Draw meditation
+	var self = this;
+	this.guruMeditation.handle = setInterval( function()
+	{
+		self.guruMeditation.borderOn = !self.guruMeditation.borderOn;
+		self.drawGuruMeditation();
+	}, 1000 );
+};
+Renderer.prototype.drawGuruMeditation = function()
+{
+	this.context.fillStyle = '#000000';
+	this.context.globalAlpha = 1;
+	this.context.fillRect( 0, 0, this.guruMeditation.sx, this.guruMeditation.sy );
+	
+	if ( this.guruMeditation.borderOn )
+	{
+		this.context.strokeStyle = '#FF0000';
+		this.context.setLineDash( [] );
+		this.context.lineWidth =  this.guruMeditation.sLine;
+		this.context.strokeRect( this.guruMeditation.sxBorder, this.guruMeditation.syBorder, this.guruMeditation.sx - this.guruMeditation.sxBorder * 2, this.guruMeditation.sy - this.guruMeditation.syBorder * 2 );
+	}
+
+	this.context.textAlign = "center";
+	this.context.textBaseline = "middle";
+	this.context.fillStyle = '#FF0000';
+	this.context.font = this.guruMeditation.fontHeight + 'px Arial';
+	var text = 'Software Failure. Press left mouse button to continue.';
+	if ( this.aoz.crashInfo )
+		text = 'Software Failure. Press left mouse button to send a report.';
+	this.context.fillText( text, this.guruMeditation.sx / 2, this.guruMeditation.yText1 );
+	this.context.fillText( 'Magician Meditation #' + this.guruMeditation.guru1 + '.' + this.guruMeditation.guru2, this.guruMeditation.sx / 2, this.guruMeditation.yText2 );
 }

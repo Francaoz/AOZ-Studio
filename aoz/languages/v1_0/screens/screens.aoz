@@ -747,6 +747,10 @@ Instruction "screen", _number
 	this.aoz.setScreen(%_number);
 }
 End Instruction
+Function "screen"
+{
+}
+End Function( {this.aoz.currentScreen.number} )
 
 Function "hires"
 {
@@ -766,30 +770,30 @@ Function "halfbright"
 End Function( {4} )
 
 
-Function "x hard", _x, _screen
+Function "x hard", _screen, _x
 {
 	#errors
-	var s=this.aoz.getScreen(%_screen);
+	var s%COUNT%=this.aoz.getScreen(%_screen);
 }
-End Function( {%_x*s.renderScale.x+s.x} )
+End Function( {(%_x*s%COUNT%.renderScale.x+s%COUNT%.position.x)} )
 Function "x hard", _x
 {
 	#errors
 }
-End Function( {%_x*this.aoz.currentScreen.renderScale.x+this.aoz.currentScreen.position.x} )
+End Function( {(%_x*this.aoz.currentScreen.renderScale.x+this.aoz.currentScreen.position.x)} )
 
 
-Function  "y hard", _y, _screen
+Function  "y hard", _screen, _y
 {
 	#errors
-	var s=this.aoz.getScreen(%_screen);
+	var s%COUNT%=this.aoz.getScreen(%_screen);
 }
-End Function( {%_y*s.renderScale.y+s.y} )
+End Function( {(%_y*s%COUNT%.renderScale.y+s%COUNT%.position.y)} )
 Function  "y hard", _y
 {
 	#errors
 }
-End Function( {%_y*this.aoz.currentScreen.renderScale.y+this.aoz.currentScreen.position.y} )
+End Function( {(%_y*this.aoz.currentScreen.renderScale.y+this.aoz.currentScreen.position.y)} )
 
 Function "alpha", _number
 {
@@ -846,7 +850,7 @@ Instruction "flash off"
 	#notimplemented
 }
 End Instruction
-Instruction "flash"
+Instruction "flash", _number, _string$
 {
 	#notimplemented
 }

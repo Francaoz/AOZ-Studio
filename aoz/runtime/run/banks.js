@@ -391,9 +391,16 @@ function ImageBank( aoz, imageList, palette, options )
 	if ( imageList )
 		this.loadList( imageList, options.tags );
 };
-ImageBank.prototype.isType = function( type )
+ImageBank.prototype.isType = function( types )
 {
-	return type == this.type;
+	if ( typeof types == 'string' )
+		types = [ types ];
+	for ( var t = 0; t < types.length; t++ )
+	{
+		if ( types[ t ] == this.type )
+			return true;
+	}
+	return false;
 };
 ImageBank.prototype.loadList = function( imageList, tags )
 {
@@ -776,9 +783,16 @@ function SampleBank( aoz, soundList, soundTypesList, options )
 	if ( soundList )
 		this.loadList( soundList, soundTypesList, options.tags );
 };
-SampleBank.prototype.isType = function( type )
+SampleBank.prototype.isType = function( types )
 {
-	return type == this.type;
+	if ( typeof types == 'string' )
+		types = [ types ];
+	for ( var t = 0; t < types.length; t++ )
+	{
+		if ( types[ t ] == this.type )
+			return true;
+	}
+	return false;
 };
 SampleBank.prototype.loadList = function( soundList, soundTypesList, tags )
 {
@@ -907,9 +921,16 @@ function DataBank( aoz, loadList, length, options )
 	else if ( length > 0 )
 		this.context.setElement( this.domain, this.aoz.allocMemoryBlock( length, this.aoz.manifest.compilation.endian ), 1, true );
 };
-DataBank.prototype.isType = function( type )
+DataBank.prototype.isType = function( types )
 {
-	return type == this.type;
+	if ( typeof types == 'string' )
+		types = [ types ];
+	for ( var t = 0; t < types.length; t++ )
+	{
+		if ( types[ t ] == this.type )
+			return true;
+	}
+	return false;
 };
 DataBank.prototype.getElement = function( index )
 {

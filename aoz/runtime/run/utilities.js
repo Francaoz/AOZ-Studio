@@ -29,6 +29,48 @@ function Utilities( aoz )
 	this.aoz = aoz;
 }
 
+Utilities.prototype.sendCrashMail = function()
+{
+	if ( this.aoz.crashInfo )
+	{
+		var body = '\r\n\r\n';
+		body += 'application: ' + this.aoz.manifest.infos.applicationName + '\r\n';
+		body += 'date: ' + this.getFormattedDate() + '\r\n';
+		body += 'source position: ' + this.aoz.sourcePos + '\r\n';
+		body += 'message: ' + this.aoz.crash.error.message + '\r\n';
+		body += 'stack: ' + this.aoz.crash.error.stack + '\r\n';
+		body += '\r\n\r\n\r\n\r\n';
+
+		var subject = 'AOZ Studio Runtime Crash Report';
+		this.sendMail( 'crash@aoz.studio', subject, body );
+	}
+};
+Utilities.prototype.sendMail = function( to, subject, body )
+{
+	var message = encodeURI( "mailto:" + to + "?subject=" + subject + "&body=" + body )
+    window.open( message );
+};
+Utilities.prototype.getFormattedDate = function()
+{
+    var date = new Date();
+
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var hour = date.getHours();
+    var min = date.getMinutes();
+    var sec = date.getSeconds();
+
+    month = (month < 10 ? "0" : "") + month;
+    day = (day < 10 ? "0" : "") + day;
+    hour = (hour < 10 ? "0" : "") + hour;
+    min = (min < 10 ? "0" : "") + min;
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    var str = day + '/' + month + '/' + date.getFullYear() + "-" + hour + ":" + min + ":" + sec;
+
+    return str;
+};
+
 Utilities.prototype.rotate = function( x, y, cx, cy, angle )
 {
 	var cos = Math.cos( angle );
@@ -455,6 +497,23 @@ Utilities.prototype.getProperty = function ( obj, prop, noCase )
 			{
 				return obj[ p ];
 			}
+		}
+	}
+	return obj[ prop ];
+};
+Utilities.prototype.findPropertyWithProp = function ( obj, propName, prop, noCase )
+{
+	if ( noCase )
+		prop = prop.toLowerCase();
+	for ( p in obj )
+	{
+		if ( obj[ p ] )
+		{
+			var found = obj[ p ][ propName ];
+			if ( noCase )
+				found = found.toLowerCase();
+			if ( found == prop )
+				return obj[ p ];
 		}
 	}
 	return obj[ prop ];

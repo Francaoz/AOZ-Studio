@@ -175,8 +175,8 @@ Fonts.prototype.getFontInformation = function( reference, contextName )
 Fonts.prototype.getAmigaFontDefinition = function( font )
 {
 	var result = {};
-	result.definition = AmigaFonts[ font.fontInformation.index ];
-	result.characters = AmigaCharacters[ font.fontInformation.index ];
+	result.definition = AmigaFonts[ font.fontInformation.name ];
+	result.characters = AmigaCharacters[ font.fontInformation.name ];
 	if ( !result.definition || !result.characters )
 		throw 'font_not_defined';
 	result.heightDefinition = result.definition[font.baseHeight ];
@@ -291,7 +291,7 @@ Fonts.prototype.loadFont = function( fontInformation, weight, italic, stretch, c
 				{
 					fontInformation.font =
 					{
-						fontCode: typeof AmigaFonts[ fontInformation.index ] == 'undefined' ? WindowFont[ fontInformation.index ] : AmigaFonts[ fontInformation.index ],
+						fontCode: AmigaFonts[ fontInformation.name ],
 						fontInformation: fontInformation,
 						canvasDefinitions: [],
 						baseLines: [],
@@ -351,7 +351,7 @@ Fonts.prototype.getFont$ = function( reference )
 			result += '(' + fontInformation.type + '): ';
 			if ( fontInformation.type == 'google' )
 			{
-				var fontCode = GoogleFonts[ fontInformation.index ];
+				var fontCode = GoogleFonts[ fontInformation.name ];
 				for ( var f = 0; f < fontCode.sizes.length; f++ )
 				{
 					var fontDef = fontCode.sizes[ f ];

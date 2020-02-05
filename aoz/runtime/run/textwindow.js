@@ -18,7 +18,7 @@
 /** @file
  *
  * AOZ Runtime
- * 
+ *
  * Text Windows
  *
  * @author FL (Francois Lionet)
@@ -123,7 +123,7 @@ function TextWindow( aoz, screen, contextName, definition )
 			{
 				var x = ( self.x + ( self.xInside + self.xCursor ) * self.fontWidth ) * self.screen.scale.x;
 				var y = ( self.y + ( self.yInside + self.yCursor ) * self.fontHeight ) * self.screen.scale.y;
-				self.cursorContext.drawImage( self.screen.canvas, x, y, self.cursorCanvas.width, self.cursorCanvas.height, 0, 0, self.cursorCanvas.width, self.cursorCanvas.height );		
+				self.cursorContext.drawImage( self.screen.canvas, x, y, self.cursorCanvas.width, self.cursorCanvas.height, 0, 0, self.cursorCanvas.width, self.cursorCanvas.height );
 			}
 
 			// Cycle through animation

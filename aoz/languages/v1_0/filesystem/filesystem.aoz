@@ -180,10 +180,11 @@
 
 	this.bLoad = function( args )
 	{
-		var options = this.getMemory( args[ 1 ] );
+		var path = args[ 0 ];
+		var start = args[ 1 ];
 		var self = this;
 		this.load_done = false;
-		this.aoz.filesystem.loadBinary( args[ 0 ], options, function( response, data, extra )
+		this.aoz.filesystem.loadBinary( path, start, function( response, data, extra )
 		{
 			self.load_done = true;
 			if ( !response )
@@ -891,7 +892,7 @@ Instruction "bload", _file$, _address, _tags
 {
 	#waiting
 	#add_to_filesystem:"%_file$"
-	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"bLoad,waitFunction":"load_wait",args:[%_file$,%address,%_tags]};
+	return{type:12,waitThis:this.aoz.moduleFilesystem,callFunction:"bLoad",waitFunction:"load_wait",args:[%_file$,%_address,%_tags]};
 }
 End Instruction
 Instruction "bsave", _file$, _number1 To _number2

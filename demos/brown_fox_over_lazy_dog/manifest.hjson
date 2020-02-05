@@ -15,7 +15,7 @@
  */
 {
 	// Version of the manifest
-	version: "8"
+	version: "9"
 
 	// Informations about the application
 	infos:
@@ -109,6 +109,20 @@
 		}
 	}
 
+	// Loading screen
+	bootScreen:
+	{
+		active: true
+		waitSounds: true
+		clickSounds: false
+	}
+
+	// Rainbows
+	rainbows:
+	{
+		mode: "slow"
+	}
+	
 	// Fonts
 	fonts:
 	{

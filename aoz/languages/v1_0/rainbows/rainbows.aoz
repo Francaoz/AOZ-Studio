@@ -37,7 +37,9 @@
     this.utilities = this.aoz.utilities;
     this.aoz.moduleRainbows = this;
 	this.context = new AOZContext( this.aoz, this.aoz.currentContextName, { sorted: true } );
-    this.mode = 'fast';
+    this.mode = 'slow';
+    if ( this.aoz.manifest.rainbows && this.aoz.manifest.rainbows.mode )
+        this.mode = this.aoz.manifest.rainbows.mode;
 
     // Rainbow class
     function Rainbow( aoz, name, ink, height, red$, green$, blue$ )
@@ -79,7 +81,7 @@
         }
         this.aoz.renderer.setModified();
     };
-    Rainbow.prototype.render = function( context, rectangle )
+    Rainbow.prototype.render = function( context, rectangle, scale )
     {
         if ( this.rainbows.mode == 'slow' )
         {
@@ -102,12 +104,19 @@
                 var gIndex = colours.g;
                 var bIndex = colours.b;
                 var length = this.redBuffer.length;
-                for ( var y = 0; y < this.height; y++ )
+                var scaleY = Math.max( Math.floor( scale.y ), 1 );
+                var countY = scaleY;
+                for ( var y = 0; y < height; y++ )
                 {
                     var r = this.redBuffer[ position ];
                     var g = this.greenBuffer[ position ];
                     var b = this.blueBuffer[ position ];
-
+                    if ( this.aoz.manifest.compilation.useShortColors )
+                    {
+                        r &= 15; r = ( r << 4 ) | r;
+                        g &= 15; g = ( g << 4 ) | g;
+                        b &= 15; b = ( b << 4 ) | b;
+                    }
                     for ( x = 0; x < width; x++ )
                     {
                         var address = ( y * width + x ) * 4;
@@ -118,8 +127,12 @@
                             data[ address + 2 ] = b;
                         }
                     }
-                    if ( ++position >= length )
-                        position = 0;
+                    if ( --countY == 0 )
+                    {       
+                        countY = scaleY           
+                        if ( ++position >= length )
+                            position = 0;
+                    }
                 }
                 context.putImageData( imageData, rectangle.x, rectangle.y );
             }
@@ -135,13 +148,17 @@
                 // Redraw
                 var bufferLength = this.redBuffer.length;
                 var position = this.offset;
+                var color;
                 for ( var y = 0; y < this.displayHeight; y++ )
                 {
                     var r = this.redBuffer[ position ];
                     var g = this.greenBuffer[ position ];
                     var b = this.blueBuffer[ position ];
-
-                    this.screen.setColour( 1, this.aoz.utilities.getRGBA( r, g, b, 255 ) );
+                    if ( this.aoz.manifest.compilation.useShortColors )
+                        color = ( r & 15 ) << 8 | ( g & 15 ) << 4 | ( b & 15 );
+                    else
+                        color = ( r & 255 ) << 16 | ( g & 255 ) << 8 | ( b & 255 );
+                    this.screen.setColour( 1, color );
                     this.screen.draw( { x: 0, y: y, width: this.screen.dimension.width, height: 0 } );
 
                     if ( ++position >= bufferLength )

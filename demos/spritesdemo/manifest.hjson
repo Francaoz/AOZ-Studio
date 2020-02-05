@@ -97,6 +97,12 @@
 		soundPoolSize: 4				// Four voices in Amiga mode
 	}
 
+	// Rainbows
+	rainbows:
+	{
+		mode: "slow"
+	}
+	
 	// Fonts
 	fonts:
 	{

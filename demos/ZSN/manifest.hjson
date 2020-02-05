@@ -109,6 +109,12 @@
 		}
 	}
 
+	// Rainbows
+	rainbows:
+	{
+		mode: "slow"
+	}
+	
 	// Fonts
 	fonts:
 	{	

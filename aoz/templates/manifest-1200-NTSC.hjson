@@ -125,6 +125,12 @@
 		clickSounds: false
 	}
 
+	// Rainbows
+	rainbows:
+	{
+		mode: "slow"
+	}
+	
 	// Fonts
 	fonts:
 	{
@@ -135,7 +141,14 @@
 		// folder and the compiler will do the rest!
 		amiga:
 		[
-			"times"
+			"2001"
+			"broadway"
+			"lines"
+			"mFast"
+			"News"
+			"peridot"
+			"Pica"
+			"sapphire"
 		]
 
 		// Available Google Fonts can be found in the "aoz/fonts/google" folder

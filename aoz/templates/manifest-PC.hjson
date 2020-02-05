@@ -1,4 +1,4 @@
-/*@****************************************************************************
+	/*@****************************************************************************
 *
 *   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗
 *  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
@@ -95,6 +95,12 @@
 		collisionAlphaThreshold: 1		// Level of alpha for which a pixel is considered 'not transparent' and will generate a collision ( 0 being transparent and 255 being opaque)
 	}
 
+	// Rainbows
+	rainbows:
+	{
+		mode: "slow"
+	}
+	
 	// Fonts
 	fonts:
 	{
@@ -170,8 +176,8 @@
 			{
 				x: 0
 				y: 0
-				fontWidth: 8							// Number of pixels the cursor is actually moved when printing one character
-				fontHeight: 16							// Number of pixels the cursor is actually moved when printing one character
+				fontWidth: 15							// Number of pixels the cursor is actually moved when printing one character
+				fontHeight: 30							// Number of pixels the cursor is actually moved when printing one character
 				border: 0
 				paper: 0								// Please note the change in PC mode! Cursor is now independant of any color or palette.
 				pen: 1									// Please note the change in PC mode! Cursor is now independant of any color or palette.
@@ -181,7 +187,7 @@
 					name: "IBM Plex Mono"				// Upper or lower case does not matter. The font will be automatically added to the application
 														// no need to include it in the 'fonts' section.
 					type: "google"						// "amiga" or "google"
-					height: 13.375						// You need to find the correct value by trial and error! Has to be exact for large PC screens
+					height: 25.078						// You need to find the correct value by trial and error! Has to be exact for large PC screens
 														// where the text window can contain a lot of text (example 240 x 45 characters in 1920 x 720!)
 				}
 				cursorImage: "./runtime/resources/cursor_pc.png"	// The path to the image to use as cursor from the aoz folder. Can also be an absolute path.

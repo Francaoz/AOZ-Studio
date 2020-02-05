@@ -216,7 +216,7 @@ function AOZ( canvasId, manifest )
 	}
 	else
 	{
-		welcomeStep = 100;
+		welcomeStep = -100;
 	}
 	// Wait for initiialization / display welcome screen...
 	var self = this;
@@ -247,7 +247,7 @@ function AOZ( canvasId, manifest )
 						// White renderer screem
 						self.renderer.context.fillStyle = self.utilities.getRGBAString( welcomeAlpha, welcomeAlpha, welcomeAlpha );
 						self.renderer.context.fillRect( 0, 0, self.renderer.canvas.width, self.renderer.canvas.height );
-						welcomeAlpha += 4;
+						welcomeAlpha += 5;
 						if ( welcomeAlpha >= 256 )
 						{
 							self.renderer.context.fillStyle = '#FFFFFF';
@@ -266,12 +266,12 @@ function AOZ( canvasId, manifest )
 						break;
 					case 4:
 						drawI( images[ 3 ], 110, 15, welcomeAlpha );
-						welcomeAlpha += 0.02;
+						welcomeAlpha += 0.03;
 						if ( welcomeAlpha >= 1 )
 							welcomeWait = 500;
 						break;
 					case 5:
-						welcomeStep = -1;
+						welcomeStep = -7;
 						break;
 					case 6:
 						welcomeStep++;
@@ -315,6 +315,8 @@ function AOZ( canvasId, manifest )
 							welcomeStep = 99;
 						}
 						break;
+					case 99:
+						break;
 					case 100:
 						clearInterval( handle );
 						self.default( 'application' );
@@ -342,7 +344,7 @@ function AOZ( canvasId, manifest )
 				{
 					self.loadingCount = 0;
 					self.loadingMax = 0;
-					welcomeStep = 6;
+					welcomeStep = -welcomeStep;
 				}
 			}
 		}
@@ -350,7 +352,7 @@ function AOZ( canvasId, manifest )
 		{
 			self.renderer.context.imageSmoothingEnabled = true;
 			self.renderer.context.imageRendering = 'pixelated';
-			var ratioX = ( self.renderer.width / 1280 ) * 1.25;
+			var ratioX = ( self.renderer.width / 1280 ) * 0.6;
 			var ratioY = ratioX;
 			var xx = self.renderer.width / 2;
 			var yy = self.renderer.height / 2;
@@ -405,10 +407,23 @@ function AOZ( canvasId, manifest )
 						self.caughtError = null;
 						if ( error.stack )
 						{
+							self.badEnd = true;
 							self.setErrorNumber( self.errors.getErrorFromId( 'internal_error' ).number );
 							console.log( error.message );
 							console.log( error.stack );
-							self.break = true;
+							self.renderer.captureCrash( error );
+							if ( self.aoz.manifest.compilation.emulation.toLowerCase() != "pc" )
+							{
+								self.renderer.meditate();
+								self.clickMouse = false;
+								self.waiting = self.waitForGuru;
+								self.waitThis = self;
+							}
+							else
+							{
+								self.utilities.sendCrashMail();
+								self.break = true;
+							}
 							break;
 						}
 						self.setErrorNumber( self.errors.getErrorFromId( error ).number );
@@ -442,6 +457,7 @@ function AOZ( canvasId, manifest )
 						}
 						else
 						{
+							self.badEnd = true;
 							self.break = true;
 						}
 						ret = null;
@@ -740,10 +756,10 @@ function AOZ( canvasId, manifest )
 					message += '.';
 					console.log( message );
 				}
-				console.log( 'Program ended successfully.' );
+				var text = self.badEnd ? 'Program ended.' : 'Program ended successfully.';
+				console.log( text );
 				if ( self.displayAlerts )
 				{
-					var text = 'Program ended successfully.';
 					if ( message != '' )
 						text = message + '\n' + text;
 					setTimeout( function()
@@ -778,7 +794,16 @@ function AOZ( canvasId, manifest )
 		}
 	}
 };
-
+AOZ.prototype.waitForGuru = function()
+{
+	if ( this.clickMouse )
+	{
+		if ( this.clickMouse & 0x01 )
+			this.utilities.sendCrashMail();
+		this.waiting = null;
+		this.break = true;
+	}
+};
 AOZ.prototype.run = function( section, position, parent, root )
 {
 	// Run the extensions first
@@ -806,6 +831,19 @@ AOZ.prototype.pushExtension = function( section )
 AOZ.HREV = 0x80000000;
 AOZ.VREV = 0x40000000;
 
+
+AOZ.prototype.free = function()
+{
+	return 0;
+};
+AOZ.prototype.fastFree = function()
+{
+	return 0;
+};
+AOZ.prototype.chipFree = function()
+{
+	return 0;
+};
 
 /////////////////////////////////////////////////////////////////////////
 //
@@ -839,7 +877,7 @@ AOZ.prototype.update = function( force )
 	if ( force )
 	{
 		if ( this.sprites )
-			this.sprites.spritesUpdate( force );
+			this.sprites.update( force );
 		for ( var screen = this.screensContext.getFirstElement(); screen != null; screen = this.screensContext.getNextElement() )
 			screen.bobsUpdate( force );
 	}
@@ -1501,7 +1539,7 @@ AOZ.prototype.val = function( value )
 		value = value.substring( 1 );
 		base = 2;
 	}
-	var result = parseInt( value, base );
+	var result = parseFloat( value, base );
 	if ( isNaN( result ) )
 		result = 0;
 	return result;
@@ -2764,13 +2802,32 @@ AOZ.prototype.getMemoryBlockFromAddress = function( address )
 };
 AOZ.prototype.getMemory = function( number )
 {
+	var result;
 	var index = Math.floor( number / this.memoryHashMultiplier );
 	if ( index == 0 )
 	{
-		return { start: this.banks.getStart( number ), length: this.banks.getLength( number ) };
+		var bank = this.banks.getBank( number );
+		if ( !bank.isType( [ 'picpac', 'amal', 'work', 'tracker', 'data' ] ) )
+			throw 'bank_type_mismatch';
+		result = 
+		{ 
+			bank: bank,
+			block: bank.getElement( 1 ),
+			start: this.banks.getStart( number ), 
+			length: this.banks.getLength( number )
+		};
 	}
-	var block = this.getMemoryBlockFromAddress( number );
-	return { start: number, length: block.length };
+	else
+	{
+		var block = this.getMemoryBlockFromAddress( number );
+		result =
+		{
+			block: block,
+			start: number,
+			length: block.length
+		}		
+	}
+	return result;
 };
 AOZ.prototype.poke = function( address, value )
 {

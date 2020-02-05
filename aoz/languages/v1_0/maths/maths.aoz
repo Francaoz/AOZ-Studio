@@ -140,7 +140,7 @@ End Function( {Math.sinh((%_angle)*this.aoz.degreeRadian)} )
 Function "hcos", _angle
 {
 }
-End Function( {Math.cosh((%_angle)/*this.aoz.degreeRadian)} )
+End Function( {Math.cosh((%_angle)*this.aoz.degreeRadian)} )
 Function "htan", _angle
 {
 	#errors

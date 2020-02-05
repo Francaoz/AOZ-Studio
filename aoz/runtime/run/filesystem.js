@@ -115,27 +115,43 @@ function Filesystem( aoz )
 	}
 	this.externalFiles = INSERT_EXTERNALFILES;
 }
-Filesystem.prototype.getFile = function( path, checkFile )
+Filesystem.prototype.getFile = function( path, options )
 {
+	options = typeof options == 'undefined' ? {} : options;
+	var result =
+	{
+		isFileSystem: true,
+		isDirectory: false,
+		isURL: false,
+		URL$: '',
+		parent: null,
+		files: null,
+		file: null,
+		filename: '',
+		name:'',
+		path: '',
+		filter: '',
+		error: false
+	};
+
 	path = this.utilities.replaceStringInText( path, '\\', '/' );
 
-	var parent, drive;
 	while( true )
 	{
 		var column = path.indexOf( ':' );
 		if ( column >= 0 )
 		{
-			drive = path.substring( 0, column );
+			result.drive = path.substring( 0, column );
 			path = path.substring( column + 1 );
 			var temp;
-			if ( ( temp = this.utilities.getProperty( this.assigns, drive, this.noCase ) ) )
-				drive = temp;
+			if ( ( temp = this.utilities.getProperty( this.assigns, result.drive, this.noCase ) ) )
+				result.drive = temp;
 		}
 		else
 		{
 			if ( path.indexOf( '/' ) == 0 )
 			{
-				drive = 'application';
+				result.drive = 'application';
 			}
 			else
 			{
@@ -145,38 +161,164 @@ Filesystem.prototype.getFile = function( path, checkFile )
 		}
 		break;
 	};
-	if ( drive.toLowerCase() == 'http' )
-	{
-		return { isURL: true, URL:path };
-	}
-	var files = this.utilities.getProperty( Filesystem.files, drive, this.noCase );
-	if ( !files )
-		throw 'drive_not_found';
-	var parent = Filesystem;
-	var fullPath = drive + ':' + path;
 
-	var slash = path.indexOf( '/' );
-	while( slash >= 0 )
+	if ( result.drive.toLowerCase() == 'http' || result.drive.toLowerCase() == 'https' )
 	{
-		var f = path.substring( 0, slash );
-		if ( f == '' )
-			break;
-		parent = files;
-	    files = this.utilities.getProperty( files, f, this.noCase );
-		if ( !files )
-			throw 'directory_not_found';
-		path = path.substring( slash + 1 );
-		slash = path.indexOf( '/' );
+		result.isUrl = true;
+		result.url$ = path;
+		// Extract parameters...
+		// Check domains...
+		// cf Friend.
 	}
-	if ( checkFile && typeof this.utilities.getProperty( files, path, this.noCase ) == 'undefined' )
-		throw 'file_not_found';
-	var filter = '';
-	if ( path.indexOf( '*' ) >= 0 || path.indexOf( '?' ) >= 0 )
+	else
 	{
-		filter = path;
-		path = '';
+		result.files = this.utilities.getProperty( Filesystem.files, result.drive, this.noCase );
+		if ( !result.files )
+		{
+			result.error = 'drive_not_found';
+			if ( !options.noErrors )
+				throw result.error;
+		}
+		else
+		{
+			result.parent = Filesystem;
+			result.fullPath = result.drive + ':' + path;
+
+			var slash = path.indexOf( '/' );
+			while( slash >= 0 )
+			{
+				var f = path.substring( 0, slash );
+				if ( f == '' )
+					break;
+				result.parent = result.files;
+				result.files = this.utilities.getProperty( result.files, f, this.noCase );
+				if ( !result.files )
+				{
+					result.error = 'directory_not_found';
+					if ( !options.noErrors )
+						throw result.error;
+					break;
+				}
+				path = path.substring( slash + 1 );
+				slash = path.indexOf( '/' );
+			}
+
+			if ( !result.error )
+			{
+				result.name = path;
+				result.isDirectory = false;
+				if ( path != '' )
+				{
+					if ( path.indexOf( '*' ) >= 0 || path.indexOf( '?' ) >= 0 )
+					{
+						result.filter = path;
+						result.path = '';
+					}
+					else
+					{
+						result.file = this.findFileInDirectory( result.files, path, this.noCase );
+						if ( result.file )
+						{
+							if ( options.askForReplace )
+							{
+								if ( !confirm( "File already exists, overwrite?" ) )
+								{
+									result.error = 'cannot_write_file';
+									if ( !options.noErrors )
+										throw result.error;
+								}
+							}
+
+							result.isDirectory = result.file.isDirectory;
+							if ( !result.file.isDirectory )
+							{
+								if ( options.onlyDirectories )
+								{
+									result.error = 'cannot_open_file';
+									if ( !options.noErrors )
+										throw result.error;
+								}
+								else
+								{
+									result.filename = path;
+								}
+							}
+							else
+							{
+								if ( options.onlyFiles )
+								{
+									result.error = 'cannot_open_file';
+									if ( !options.noErrors )
+										throw result.error;
+								}
+								else
+								{
+									result.files = result.file;
+									result.file = null;
+								}
+							}
+						}
+						else
+						{
+							if ( options.mustExist )
+							{
+								result.error = 'file_not_found';
+								if ( !options.noErrors )
+									throw result.error;
+							}
+						}
+					}
+				}
+				else
+				{
+					if ( !options.onlyFiles )
+					{
+						result.isDirectory = true;
+						result.isRoot = true;
+						result.name  = result.drive;
+					}
+					else
+					{
+						if ( !options.noErrors )
+							throw 'cannot_open_file';
+						result.error = true;
+					}
+				}
+			}
+		}
 	}
-	return { isFileSystem: true, parent: parent, files: files, filename: path, path: fullPath, filter: filter };
+	// Clean results...
+	if ( !result.error )
+	{
+		if ( result.files )
+		{
+			var temp = {};
+			for ( var f in result.files )
+			{
+				if ( this.utilities.isObject( result.files[ f ] ) )
+					temp[ f ] = result.files[ f ];
+			}
+			result.files = temp;
+		}
+	}
+	return result;
+};
+Filesystem.prototype.findFileInDirectory = function ( directory, filename, noCase )
+{
+	var fname = noCase ? filename.toLowerCase() : filename;
+	for ( f in directory )
+	{
+		var file = directory[ f ];
+		if ( file && this.utilities.isObject( file ) )
+		{
+			var name = noCase ? file.name.toLowerCase() : file.name;
+			if ( name == fname )
+			{
+				return file;
+			}
+		}
+	}
+	return null;
 };
 
 Filesystem.prototype.setInput = function( char1, char2 )
@@ -187,8 +329,8 @@ Filesystem.prototype.setInput = function( char1, char2 )
 };
 Filesystem.prototype.openOut = function( port, path, callback, extra )
 {
-	var fileDefinition = this.getFile( path );
-	if ( fileDefinition.filename == '' )
+	var fileDefinition = this.getFile( path, { mustExist: false, askForReplace: false } );
+	if ( fileDefinition.error )
 		throw 'disc_error';
 	if ( port < 1 )
 		throw 'illegal_function_call';
@@ -208,8 +350,8 @@ Filesystem.prototype.openOut = function( port, path, callback, extra )
 };
 Filesystem.prototype.openIn = function( port, path, callback, extra )
 {
-	var descriptor = this.getFile( path );
-	if ( descriptor.filename == '' )
+	var descriptor = this.getFile( path, { mustExist: true } );
+	if ( descriptor.error )
 		callback( false, 'illegal_function_call', extra );
 	if ( port < 1 )
 		callback( false, 'illegal_function_call', extra );
@@ -240,14 +382,14 @@ Filesystem.prototype.openIn = function( port, path, callback, extra )
 };
 Filesystem.prototype.append = function( port, path, callback, extra )
 {
-	var descriptor = this.getFile( path );
-	if ( descriptor.filename == '' )
-		callback( false, 'illegal_function_call', extra );
+	var descriptor = this.getFile( path, { mustExist: false } );
+	if ( descriptor.error )
+		callback( false, 'cannot_open_file', extra );
 	if ( port < 1 )
 		callback( false, 'illegal_function_call', extra );
 	if ( this.openFiles[ port ] )
 		callback( false, 'file_already_opened', extra );
-	if ( descriptor.files[ descriptor.filename ] )
+	if ( descriptor.files[ descriptor.name ] )
 	{
 		var self = this;
 		this.loadFile( descriptor, { binary: false, text: true }, function( response, data, extra )
@@ -412,7 +554,7 @@ Filesystem.prototype.close = function( port, callback, extra )
 		{
 			this.openFiles[ port ] = null;
 			callback( true, {}, extra );
-		}		
+		}
 	}
 	else
 	{
@@ -445,7 +587,7 @@ Filesystem.prototype.close = function( port, callback, extra )
 							else
 								callback( false, errors, extra );
 						}
-							
+
 					}, f );
 				}
 				else
@@ -462,14 +604,14 @@ Filesystem.prototype.close = function( port, callback, extra )
 };
 Filesystem.prototype.openRandom = function( port, path, callback, extra )
 {
-	var descriptor = this.getFile( path );
-	if ( descriptor.filename == '' )
+	var descriptor = this.getFile( path, { mustExist: false } );
+	if ( descriptor.error )
 		callback( false, 'illegal_function_call', extra );
 	if ( port < 1 )
 		callback( false, 'illegal_function_call', extra );
 	if ( this.openFiles[ port ] )
 		callback( false, 'file_already_opened', extra );
-	if ( descriptor.files[ descriptor.filename ] )
+	if ( descriptor.files[ descriptor.name ] )
 	{
 		var self = this;
 		this.loadFile( descriptor, { binary: false, text: true }, function( response, data, extra )
@@ -657,42 +799,11 @@ Filesystem.prototype.saveFile = function( descriptor, source, options, callback,
 };
 Filesystem.prototype.loadFile = function( descriptor, options, callback, extra )
 {
-	file = this.utilities.getProperty( descriptor.files, descriptor.filename, this.noCase );
+	file = this.findFileInDirectory( descriptor.files, descriptor.name, this.noCase );
 	if ( !file )
 	{
-		if ( this.noCase )
-		{
-			for ( var f in descriptor.files )
-			{
-				if ( typeof descriptor.files[ f ] == 'object' )
-				{
-					if ( descriptor.files[ f ].name.toLowerCase() == descriptor.filename.toLowerCase() )
-					{
-						file = descriptor.files[ f ];
-						break;
-					}
-				}
-			}
-		}
-		else
-		{
-			for ( var f in descriptor.files )
-			{
-				if ( typeof descriptor.files[ f ] == 'object' )
-				{
-					if ( descriptor.files[ f ].name == descriptor.filename )
-					{
-						file = descriptor.files[ f ];
-						break;
-					}
-				}
-			}
-		}
-		if ( !file )
-		{
-			callback( false, 'file_not_found', extra );
-			return;
-		}
+		callback( false, 'file_not_found', extra );
+		return;
 	}
 
 	if ( typeof file.localStorage == 'undefined' )
@@ -741,8 +852,8 @@ Filesystem.prototype.loadFile = function( descriptor, options, callback, extra )
 
 Filesystem.prototype.saveBinary = function( path, options, callback, extra )
 {
-	var descriptor = this.getFile( path );
-	if ( descriptor.filename != '' )
+	var descriptor = this.getFile( path, { mustExist: false } );
+	if ( descriptor.error )
 	{
 		var memoryBlock = this.aoz.getMemoryBlockFromAddress( options.start );
 		var arrayBuffer = memoryBlock.extractArrayBuffer( options.start, options.end );
@@ -754,37 +865,32 @@ Filesystem.prototype.saveBinary = function( path, options, callback, extra )
 	}
 	callback( false, 'disc_error', extra );
 };
-Filesystem.prototype.loadBinary = function( path, options, callback, extra )
+Filesystem.prototype.loadBinary = function( path, start, callback, extra )
 {
-	var fileDefinition = this.getFile( path );
-	file = this.utilities.getProperty( fileDefinition.files, fileDefinition.filename, this.noCase );
-	if ( !file )
-		callback( false, 'file_not_found', extra );
+	var fileDefinition = this.getFile( path, { mustExist: true, noDirectory: true, noErrors: true } );
+	if ( fileDefinition.error )
+		callback( false, error, extra );
 
 	var self = this;
 	this.loadFile( fileDefinition, { binary: true }, function( response, data, extra )
 	{
 		if ( response )
 		{
-			if ( options && options.start )
+			var info = self.aoz.getMemory( start );
+			try
 			{
-				var block = self.aoz.getMemoryBlockFromAddress( options.start );
-				try
-				{
-					block.pokeArrayBuffer( options.start, data );
-				}
-				catch( error )
-				{
-					callback( false, error, extra );
-					return;
-				}
-				callback( true, options, extra );
+				info.block.pokeArrayBuffer( info.start, data );
 			}
-			else
+			catch( error )
 			{
-				var memoryBlock = this.aoz.allocMemoryBlock( data, self.aoz.manifest.compilation.endian );
-				callback( true, memoryBlock, extra );
+				callback( false, error, extra );
+				return;
 			}
+			callback( true, info, extra );
+		}
+		else
+		{
+			callback( false, 'cannot_load_file', extra );
 		}
 	}, extra );
 };
@@ -792,22 +898,22 @@ Filesystem.prototype.loadBinary = function( path, options, callback, extra )
 Filesystem.prototype.dir = function( path )
 {
 	path = typeof path == 'undefined' ? this.currentPath : path;
-	var files = this.getFile( path );
-	if ( files.filename.length == 0 )
+	var info = this.getFile( path );
+	if ( info.isDirectory )
 	{
 		var message = this.aoz.errors.getErrorFromId( 'directory_of' ).message;
 		message = this.utilities.replaceStringInText( message, '%1', path );
 		this.aoz.currentScreen.currentTextWindow.print( message, true );
-		for ( var f in files.files )
+		for ( var f in info.files )
 		{
-			if ( f != '__size__')
+			var file = info.files[ f ];
+			if ( this.utilities.isObject( file ) && file.name )
 			{
-				var filename = files.files[ f ].name;
-				if ( this.filter( filename, files.filter ) )
+				if ( this.filter( file.name, info.filter ) )
 				{
-					if ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( filename, this.filterOut ) ) )
+					if ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( file.name, this.filterOut ) ) )
 					{
-						var line = this.getFileDescription( files.files[ f ] );
+						var line = this.getFileDescription( file );
 						this.aoz.currentScreen.currentTextWindow.print( line, true );
 					}
 				}
@@ -826,7 +932,7 @@ Filesystem.prototype.getFileDescription = function( file )
 	if ( typeof file.length != 'undefined' )
 		line = '  ' + filename + file.length;
 	else
-		line = '* ' + filename;	
+		line = '* ' + filename;
 	return line;
 	*/
 	return name;
@@ -882,19 +988,17 @@ Filesystem.prototype.filter = function( name, filter )
 Filesystem.prototype.dirFirst$ = function( path )
 {
 	path = typeof path == 'undefined' ? this.currentPath : path;
-	var files = this.getFile( path );
-	if ( files.filename.length == 0 )
+	var info = this.getFile( path, { mustExist: true, onlyDirectory: true } );
+	this.fileList = [];
+	this.fileListPosition = 0;
+	for ( var f in info.files )
 	{
-		this.fileList = [];
-		this.fileListPosition = 0;
-		for ( var filename in files.files )
+		var file = info.files[ f ];
+		if ( this.filter( file.name, info.filter ) )
 		{
-			if ( this.filter( filename, files.filter ) )
+			if ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( file.name, this.filterOut ) ) )
 			{
-				if ( filename != '__size__' && ( this.filterOut == '' || ( this.filterOut != '' && !this.filter( filename, this.filterOut ) ) ) )
-				{
-					this.fileList.push( files.files[ filename ] );
-				}
+				this.fileList.push( info.files[ f ] );
 			}
 		}
 	}
@@ -915,21 +1019,15 @@ Filesystem.prototype.mkDir = function( path )
 {
 	if ( path == '' )
 		throw 'illegal_function_call';
-	var files = this.getFile( path );
-	if ( files.filename == '' )
-		throw 'illegal_function_call';
-	if ( files.files[ files.filename ] )
-		throw 'disc_error';
-	files.files[ files.filename ] = {};
+	var info = this.getFile( path, { mustExist: false } );
+	info.files[ info.name ] = {};
 };
 Filesystem.prototype.exist = function( path )
 {
 	if ( path == '' )
 		throw 'illegal_function_call';
-	var files = this.getFile( path );
-	if ( files.filename == '' )
-		return true;
-	return typeof this.utilities.getProperty( files.files, files.filename, this.noCase ) != 'undefined';
+	var info = this.getFile( path, { mustExist: true, noErrors: true } );
+	return !info.error;
 };
 Filesystem.prototype.setDir = function( width, filterOut )
 {
@@ -942,18 +1040,15 @@ Filesystem.prototype.setDir = function( width, filterOut )
 };
 Filesystem.prototype.rename = function( path, name )
 {
-	var descriptor = this.getFile( path, true );
-	if ( typeof this.utilities.getProperty( descriptor.files, path, this.noCase ) != 'undefined' )
+	var info = this.getFile( path, { mustExist: true, onlyFiles: true } );
+	if ( this.findFileInDirectory( info.files, name, this.noCase ) )
 		throw 'file_already_exist';
-	descriptor.files[ name ] = this.utilities.getProperty( files, path, this.noCase );
-	descriptor.parent.files[ parentName ] = this.utilities.cleanObject( files, path, this.noCase );
+	info.file.name = name;
 };
 Filesystem.prototype.kill = function( path )
 {
-	var descriptor = this.getFile( path, true );
-	if ( typeof this.utilities.getProperty( descriptor.files, path, this.noCase ) == 'undefined' )
-		throw 'file_not_found';
-	descriptor.parent.files[ parentName ] = this.utilities.cleanObject( files, path, this.noCase );
+	var info = this.getFile( path, { mustExist: true, onlyFiles: true } );
+	info.files = this.utilities.cleanObject( info.files, info.file, this.noCase );
 };
 Filesystem.prototype.setDir$ = function( path )
 {
@@ -961,9 +1056,7 @@ Filesystem.prototype.setDir$ = function( path )
 	var end = path.charAt( path.length - 1 );
 	if ( end != ':' && end != '/' )
 		path += '/';
-	var files = this.getFile( path );
-	if ( files.filename != '' )
-		throw 'directory_not_found';
+	this.getFile( path, { mustExist: true, onlyDirectory: true } );		// Genrates errors...
 	this.currentPath = path;
 };
 Filesystem.prototype.getDir$ = function()

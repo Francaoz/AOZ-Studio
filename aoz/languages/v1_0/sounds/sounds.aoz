@@ -158,26 +158,15 @@
     };
     Voice.prototype.stopSound = function( args )
     {
-        var sound;
-        var name = args[ 0 ];
-        var startTime = args[ 1 ];
-        var duration = args[ 2 ];
-        if ( sound = this.playing[ name ] )
+        for ( var name in this.playing )
         {
-            duration = typeof duration != 'undefined' ? duration : 0;
-            startTime = typeof startTime != 'undefined' ? Math.floor( startime * 1000 ) : 1;
-            var self = this;
-            setTimeout( function()
+            var sound;
+            if ( ( sound = this.playing[ name ] ) )
             {
-                if ( duration )
-                {
-                    sound.amToDestroy = true;
-                    sound.fade( self.volume, 0, duration );
-                }
-                else
-                    sound.stop();
-            }, startTime );
+                sound.stop();
+            }
         }
+        this.playing = {};
     };
     Voice.prototype.setPan = function( args )
     {
@@ -261,7 +250,7 @@ End Instruction
 Instruction "sam stop", _voices
 {
     #errors
-    this.aoz.moduleSounds.callVoices( 'stopSound', %_voices );
+    this.aoz.moduleSounds.callVoices( 'stopSound', %_voices, [ ] );
 }
 End Instruction
 
@@ -495,6 +484,13 @@ End Instruction
 
 // Med Load
 Instruction "med load", _module$, _bank
+{
+    #notimplemented
+}
+End Instruction
+
+// Med Cont
+Instruction "med cont"
 {
     #notimplemented
 }

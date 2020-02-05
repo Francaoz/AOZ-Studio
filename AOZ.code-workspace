@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "C:\\Development\\aoz release applications"
 		}
 	],
 	"settings": {

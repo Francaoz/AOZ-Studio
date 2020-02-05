@@ -1,1 +1,5 @@
+// Setup Amiga emulation
+#manifest:"amiga"
+#speed:"safe"
+
 // Enter your code here and click "Run"

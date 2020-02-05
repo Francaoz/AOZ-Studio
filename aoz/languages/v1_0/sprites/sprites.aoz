@@ -100,11 +100,36 @@
 			this.aoz.spritesContext.parseAll( contextName, function( sprite )
 			{
 				done |= sprite.update( { force: force } );
-			};
+			} );
 			if ( done )
 			{
 				this.sortSpritesPriority();
 				this.setModified();
+			}
+		}
+	};
+	this.sortSpritesPriority = function( contextName )
+	{
+		contextName = typeof contextName == 'undefined' ? this.aoz.currentContextName : contextName;
+		if ( this.priorityOn )
+		{
+			if ( this.priorityReverseOn )
+			{
+				this.spritesContext.sort( contextName, function( b1, b2 )
+				{
+					if ( b1.position.y == b2.position.y )
+						return 0;
+					return ( b1.position.y > b2.position.y ) ? -1 : 1;
+				} );
+			}
+			else
+			{
+				this.spritesContext.sort( contextName, function( b1, b2 )
+				{
+					if ( b1.position.y == b2.position.y )
+						return 0;
+					return ( b1.position.y < b2.position.y ) ? -1 : 1;
+				} );
 			}
 		}
 	};
@@ -219,7 +244,7 @@
 Instruction "sprite",_number, _x, _y, _i
 {
 	#errors
-	this.aoz.sprites.sprite(%_number,%_x,%_y,%_i);
+	this.aoz.sprites.sprite(%_number,{x:%_x,y:%_y },%_i);
 }
 End Instruction
 
@@ -277,7 +302,7 @@ End Instruction
 Instruction "sprite scale",_number, _x, _x
 {
 	#errors
-	this.aoz.sprites.setScale(%_number,%_x,%_y);
+	this.aoz.sprites.setScale(%_number,{x:%_x,y:%_y});
 }
 End Instruction
 
@@ -291,7 +316,7 @@ End Instruction
 Instruction "sprite skew",_number, _x, _y
 {
 	#errors
-	this.aoz.sprites.setSkew(%_number,%_x,%_y);
+	this.aoz.sprites.setSkew(%_number,{x:%_x,y:%_y});
 }
 End Instruction
 
