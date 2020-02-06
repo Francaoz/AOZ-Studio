@@ -5,7 +5,7 @@
 //  By Dave Baldwin February 2020  - V0.9.3
 
 #manifest:"pc"
-#fullscreen:true
+#fullscreen:"true"
 number_of_colours = 32 
 screenWidth = Screen Width
 screenHeight = Screen Height
