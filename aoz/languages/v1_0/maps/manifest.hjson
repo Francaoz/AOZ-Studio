@@ -1,0 +1,89 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ Instructions Module Manifest
+ *
+ */
+{
+	// Version of the manifest
+	version: "9"						// Will only work after applications compiled with manifest 9 and above.
+	versionModule: "1"					// Indicates an extension and the version of this manifest
+
+	// Informations about the application
+	infos:
+	{
+		applicationName: "The Maps Instructions"
+		author: "By Baptiste Bideaux"
+		version: "Version 0.99"
+		date: "12/02/2020"
+		copyright: "(c) AOZ Studio 2019-2020"
+		start: "maps.aoz"
+		object: "maps"
+	}
+	compilation:
+	{
+		noWarnings: []
+	}	
+	errors:
+	{
+		us:
+		[
+			"map_greater_than_0: 			The map must have a width and a height greater than 0"
+			"map_unknow_maps_format: 		Unknow maps file format"
+			"map_index_out_of_range: 		Map index out of range"
+			"map_incorrect_argument: 		Incorrect argument. viewId argument cannot be empty"
+			"map_no_defined: 				No map defined"
+			"map_position_x_out: 			Position X outside the map area"
+			"map_position_y_out: 			Position Y outside the map area"
+			"map_no_map_defined_in_view: 	No map defined in map view"
+			"map_unknown_map_height: 		Unknown map height"
+			"map_unable_to_add: 			Unable to add a map"
+			"map_one_must_remain:	 		At least one map must remain"
+			"map_unable_to_insert: 			Unable to insert a map"
+			"map_already_exists_with: 		A Map view already exists with %1"
+			"map_not_found: 				Map not found"
+			"map_view_not_open:				Map view %1 not opened"
+			"map_tile_width_undefined: 		Tile width undefined"
+			"map_tile_height_undefined: 	Tile height undefined"
+			"map_view_not_found: 			View not found"
+			"map_no_reference_tile: 		No references tile"
+			"map_without_data: 				Map without datas"
+			"map_no_request_found: 			No request found. Try the findTile instruction"
+			"map_tile_size_not_defined: 	Tile size not defined"
+		]
+		fr:
+		[
+			"map_greater_than_0: 			La map doit avoir une largeur et hauteur superieures a 0"
+			"map_unknow_maps_format: 		Format de map inconnu"
+			"map_index_out_of_range: 		Index de map en dehors des limites"
+			"map_incorrect_argument: 		Argument incorrect, viewId ne peut etre vide"
+			"map_no_defined: 				Aucune map n'est definie"
+			"map_position_x_out: 			La position X se situe en dehors de la map"
+			"map_position_y_out: 			La position Y se situe en dehors de la map"
+			"map_no_map_defined_in_view: 	Aucune map n'est definie dans cette view"
+			"map_unknown_map_height: 		Hauteur de map inconnue"
+			"map_unable_to_add: 			Impossible d'ajouter une map"
+			"map_one_must_remain: 			Il doit rester au moins une map"
+			"map_unable_to_insert: 			Impossible d'inserer une map"
+			"map_already_exists_with: 		Une vue de map existe deja avec %1"
+			"map_not_found: 				Map introuvable"
+			"map_view_not_open: 			La vue de map %1 n'est pas ouverte"
+			"map_tile_width_undefined: 		Largeur de tuile non definie"
+			"map_tile_height_undefined: 	Hauteur de tuile non definie"
+			"map_view_not_found: 			La vue est introuvable"
+			"map_no_reference_tile: 		Pas de tuile de reference"
+			"map_without_data: 				Map sans donnee"
+			"map_no_request_found: 			Requete non trouvee... Essayez l'instruction findTile"
+			"map_tile_size_not_defined: 	Taille de tuile non definie"
+		]
+	}
+}

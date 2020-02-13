@@ -117,7 +117,7 @@
                         g &= 15; g = ( g << 4 ) | g;
                         b &= 15; b = ( b << 4 ) | b;
                     }
-                    for ( x = 0; x < width; x++ )
+                    for ( var x = 0; x < width; x++ )
                     {
                         var address = ( y * width + x ) * 4;
                         if ( data[ address ] == rIndex && data[ address + 1 ] == gIndex && data[ address + 2 ] == bIndex )
@@ -196,22 +196,22 @@
                 do
                 {
                     if ( info.eol || c != '(' )
-                        throw 'syntax_error_in_amal_string';
+                        throw 'syntax_error_in_rainbow_string';
 
                     var lines = info.getNumber();
                     c = info.getNextChar();
                     if ( info.eol || c != ',' )
-                        throw 'syntax_error_in_amal_string';
+                        throw 'syntax_error_in_rainbow_string';
 
                     var delta = info.getNumber();
                     c = info.getNextChar();
                     if ( info.eol || c != ',' )
-                        throw 'syntax_error_in_amal_string';
+                        throw 'syntax_error_in_rainbow_string';
 
                     var count = info.getNumber();
                     c = info.getNextChar();
                     if ( c != ')' )
-                        throw 'syntax_error_in_amal_string';
+                        throw 'syntax_error_in_rainbow_string';
 
                     definition[ destination ] =
                     {
@@ -319,19 +319,15 @@
     // Instructions...
     this.setRainbow = function( index, ink, height, red$, green$, blue$ )
     {
-        #errors
         var rainbow = new Rainbow( this.aoz, 'rainbow_' + index, ink, height, red$, green$, blue$ );
         this.context.setElement( this.aoz.currentContextName, rainbow, index, true );
     };
     this.deleteRainbow = function( index )
     {
-        #errors
-        var rainbow = new Rainbow( this.aoz, 'rainbow_' + number, ink, height, red$, green$, blue$ );
         this.context.deleteElement( this.aoz.currentContextName, index, 'rainbow_not_found' );
     };
     this.getRainbow = function( index )
     {
-        #errors
         return this.context.getElement( this.aoz.currentContextName, index, 'rainbow_not_found' );
     };
 }

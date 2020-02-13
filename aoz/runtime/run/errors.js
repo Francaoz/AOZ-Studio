@@ -28,36 +28,100 @@
 function Errors( aoz )
 {
 	this.aoz = aoz;
+	this.language = this.aoz.utilities.getBrowserLanguage();
 	
 	// <ERRORS-INSERT>
 };
-Errors.prototype.getErrorFromId = function( id )
+Errors.prototype.getError = function( error )
 {
-	id += ':';
-	var message;
-	for ( var l = 0; l < this.errors.length; l++ )
+	if ( typeof error == 'string' )
+		error = { error: error, params: [] };
+	var id = error.error + ':';
+
+	// First in browser language
+	var result = getError( this.errors[ this.language ], error );
+	if ( result ) 
+		return result;
+	
+	// Then in English
+	if ( this.language != 'us' )
 	{
-		if ( this.errors[ l ].indexOf( id ) == 0 )
+		result = getError( this.errors[ 'us' ], error );
+		if ( result ) 
+			return result;
+	}
+
+	// Then any language (TODO: keep?)
+	for ( var l in this.errors )
+	{
+		if ( l != this.language && l != 'us' )
 		{
-			message = this.errors[ l ].substring( id.length );
-			return { number: l, message: message };
+			result = getError( this.errors[ l ], error );
+			if ( result ) 
+				return result;
 		}
 	}
-	return { number: -1, message: 'Message not found ' + id };
+
+	// Then just the message...
+	return { number: -1, index: '', message: error.error };
+
+	function getError( errorList, error )
+	{
+		if ( errorList )
+		{
+			var number = errorList.findIndex( function( element )
+			{
+				return element.indexOf( id ) == 0;
+			}) 
+			if ( number )
+			{
+				var message = errorList[ number ].substring( id.length );
+				for ( var p = 0; p < error.params.length; p++ )
+					message = this.aoz.utilities.replaceStringInText( message, '%' + ( p + 1 ), error.params[ p ] );
+				return { number: number, index: id.substring( 0, id.length - 1 ), message: message };
+			}
+		}		
+		return undefined;
+	}
 };
 Errors.prototype.getErrorFromNumber = function( number )
 {
-	if ( number < this.errors.length )
+	// Browser language
+	var result = getError( this.errors[ this.language ], number )
+	if ( result )
+		return result;
+	
+	// English!
+	if ( this.language != 'us' )
 	{
-		var message = this.errors[ number ];
-		var pos = message.indexOf( ':' );
-		if ( pos >= 0 )
+		result = getError( this.errors[ 'us' ], number )
+		if ( result )
+			return result;
+	}
+	
+	// Any language (TODO: keep?)
+	for ( var l in this.errors )
+	{
+		if ( l != this.language && l != 'us' )
 		{
-			var index = message.substring( 0, pos );
-			message = message.substring( pos + 1 );
-			return { number: number, message: message, index: index };
+			result = getError( this.errors[ l ], number );
+			if ( result ) 
+				return result;
 		}
 	}
-	return { number: -1, message: 'Message not found ' + number, index: '' };
+	return { number: number, message: 'Message not found ' + number, index: '' };
+	
+	function getError( list, num )
+	{
+		if ( num < list.length )
+		{
+			var message = list[ num ];
+			var pos = message.indexOf( ':' );
+			if ( pos >= 0 )
+			{
+				return { number: num, message: message.substring( pos + 1 ), index: message.substring( 0, pos ) };
+			}
+		}
+		return undefined;
+	}	
 };
- 

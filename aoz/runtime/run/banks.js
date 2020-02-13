@@ -64,7 +64,8 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 		throw 'illegal_function_call';
 	if ( !this.manifest.unlimitedBanks && number > 16 )
 		throw 'illegal_function_call';
-	length = typeof length == 'undefined' ? 0 : length;
+
+	var length = typeof length == 'undefined' ? 0 : length;
 	if ( length < 0 )
 		throw 'illegal_function_call';
 	if ( !type || type == '' )
@@ -74,7 +75,7 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 	if ( !bank )
 		this.banks[ number ] = {};
 	type = type.toLowerCase();
-	var bank;
+	var bank, copyBlock = false;
 	switch ( type )
 	{
 		case 'images':
@@ -98,6 +99,7 @@ Banks.prototype.reserve = function( number, type, length, contextName )
 		case 'data':
 		default:
 			bank = new DataBank( this.aoz, undefined, length, { domain: type, type: type } );
+			copyBlock = true;
 			break;
 	}
 	bank.reserveNumber = this.numberOfReserves++;
@@ -278,6 +280,46 @@ Banks.prototype.listBank = function( contextName )
 			}
 		}
 	}
+};
+Banks.prototype.loadFileToBank = function( pathOrDescriptor, bankIndex, bankType, options, callback, extra )
+{
+	options = typeof options == 'undefined' ? options : {};
+	var contextName = typeof options.contextName == 'undefined' ? this.aoz.currentContextName : options.contextName;
+
+	var descriptor;
+	if ( typeof pathOrDescriptor == 'string' )
+	{
+		descriptor = this.aoz.filesystem.getFile( pathOrDescriptor );
+		if ( descriptor.filename == '' )
+			callback( false, 'illegal_function_call', extra );		
+	}
+	else	
+	{ 
+		descriptor = pathOrDescriptor;
+	}
+
+	var self = this;
+	this.aoz.filesystem.loadFile( descriptor, { binary: true }, function( response, arrayBuffer, extra )
+	{
+		if ( response )
+		{
+			var block = self.aoz.allocMemoryBlock( arrayBuffer, 'big' );
+			var bank = self.aoz.banks.reserve( bankIndex, bankType, block.length, contextName );
+			var elementIndex = typeof options.elementIndex == 'undefined' ? 1 : options.elementIndex;
+			if ( elementIndex < 0 )
+			{
+				callback( false, 'illegal_function_call', extra );
+				return;
+			}
+			block.filename = descriptor.name;
+			bank.setElement( elementIndex, block );
+			callback( true, bank, extra );
+		}
+		else
+		{
+			callback( false, 'cannot_load_file', extra );
+		}
+	}, extra );
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -800,22 +842,25 @@ SampleBank.prototype.loadList = function( soundList, soundTypesList, tags )
 	tags = typeof tags == 'undefined' ? '' : tags;
 	for ( var i = 0; i < soundList.length; i++ )
 	{
-		var infos = this.context.getElementInfosFromFilename( this.domain, soundList[ i ], 'sample' );
-		infos.path = './resources/' + this.path + '/' + soundList[ i ];
+		var element = soundList[ i ];
+		var infos = this.context.getElementInfosFromFilename( this.domain, element.a, this.type );
+		infos.path = './resources/' + this.path + '/' + element.a;
+		infos.filename = element.b;
 		this.aoz.loadingMax++;
-		this.utilities.loadMultipleUnlockedSound( infos.path, this.banks.numberOfSoundsToPreload, { }, function( response, soundsLoaded, infos )
+		this.utilities.loadMultipleUnlockedSound( infos.path, this.banks.numberOfSoundsToPreload, { }, function( response, soundsLoaded, extra )
 		{
 			if ( response )
 			{
 				var sound =
 				{
-					name: infos.name,
-					path: infos.path,
+					name: extra.name,
+					filename: extra.filename,
+					path: extra.path,
 					sounds: soundsLoaded,
 				};
-				self.context.setElement( this.domain, sound, infos.index, true );
+				self.context.setElement( this.domain, sound, extra.index, true );
 				if ( typeof tags != 'undefined' )
-					self.setTags( infos.index, tags );
+					self.setTags( extra.index, tags );
 			}
 			self.aoz.loadingCount++;
 		}, infos );
@@ -945,16 +990,18 @@ DataBank.prototype.loadList = function( loadList, tags )
 	tags = typeof tags == 'undefined' ? '' : tags;
 	for ( var i = 0; i < loadList.length; i++ )
 	{
-		var path = './resources/' + this.path + '/' + loadList[ i ];
-		var infos = this.context.getElementInfosFromFilename( this.domain, loadList[ i ], 'sample' );
-		infos.path = path;
-		this.utilities.loadUnlockedBankElement( path, infos, function( response, data, extra )
+		var element = loadList[ i ];
+		var infos = this.context.getElementInfosFromFilename( this.domain, element.a, this.type );
+		infos.path = './resources/' + this.path + '/' + element.a;
+		infos.filename = element.b;
+		this.utilities.loadUnlockedBankElement( infos.path, infos, function( response, data, extra )
 		{
 			if ( response )
 			{
-				var block = nself.aoz.allocMemoryBlock( data, self.aoz.manifest.compilation.endian );
+				var block = self.aoz.allocMemoryBlock( data, self.aoz.manifest.compilation.endian );
 				block.path = extra.path;
 				block.name = extra.name;
+				block.filename = extra.filename;
 				self.context.setElement( self.domain, block, extra.index, true );
 			}
 		}, infos );

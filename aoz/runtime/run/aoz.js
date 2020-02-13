@@ -36,6 +36,7 @@ function AOZ( canvasId, manifest )
 	this.memoryHashMultiplier = 1000000000000;
 	this.loadingCount = 0;
 	this.loadingMax = 0;
+	this.finalWait = 0;
 	this.use = {};
 
 	this.utilities = new Utilities( this );
@@ -277,7 +278,7 @@ function AOZ( canvasId, manifest )
 						welcomeStep++;
 						break;
 					case 7:
-						if ( self.use[ 'sounds' ] )
+						if ( self.useSounds )
 						{
 							if ( self.manifest.bootScreen.waitSounds )
 							{
@@ -335,7 +336,7 @@ function AOZ( canvasId, manifest )
 			if ( self.loadingError )
 			{
 				clearInterval( handle );
-				var message = self.errors.getErrorFromId( self.loadingError );
+				var message = self.errors.getError( self.loadingError ).message;
 				alert( message );
 			}
 			else
@@ -408,7 +409,8 @@ function AOZ( canvasId, manifest )
 						if ( error.stack )
 						{
 							self.badEnd = true;
-							self.setErrorNumber( self.errors.getErrorFromId( 'internal_error' ).number );
+							self.errorObject = self.errors.getError( 'internal_error' );
+							self.setErrorNumber( self.errorObject.number );
 							console.log( error.message );
 							console.log( error.stack );
 							self.renderer.captureCrash( error );
@@ -426,7 +428,8 @@ function AOZ( canvasId, manifest )
 							}
 							break;
 						}
-						self.setErrorNumber( self.errors.getErrorFromId( error ).number );
+						self.errorObject = self.errors.getError( error );
+						self.setErrorNumber( self.errorObject.number );
 						if ( self.onError )
 						{
 							if ( typeof self.onError == 'number' )
@@ -497,7 +500,7 @@ function AOZ( canvasId, manifest )
 						case 3:
 							if ( self.returns.length == 0 )
 							{
-								self.setErrorNumber( self.errors.getErrorFromId( 'return_without_gosub' ).number );
+								self.setErrorNumber( self.errors.getError( 'return_without_gosub' ).number );
 								self.break = true;
 								break;
 							}
@@ -681,7 +684,7 @@ function AOZ( canvasId, manifest )
 						case 13:
 							if ( self.returns.length == 0 )
 							{
-								self.setErrorNumber( self.errors.getErrorFromId( 'return_without_gosub' ).number );
+								self.setErrorNumber( self.errors.getError( 'return_without_gosub' ).number );
 								self.break = true;
 								break;
 							}
@@ -744,14 +747,14 @@ function AOZ( canvasId, manifest )
 				var message = '';
 				if ( self.lastError )
 				{
-					message = self.errors.getErrorFromNumber( self.error ).message;
+					message = self.errorObject.message;
 					if ( self.lastErrorPos )
 					{
 						var pos = self.lastErrorPos.indexOf( ':' );
 						var line = parseInt( self.lastErrorPos.substring( 0, pos ) ) + 1;
 						var column = parseInt( self.lastErrorPos.substring( pos + 1 ) ) + 1;
-						message += ' ' + self.errors.getErrorFromId( 'at_line' ).message + line + ', ';
-						message += self.errors.getErrorFromId( 'at_column' ).message + column;
+						message += ' ' + self.errors.getError( 'at_line' ).message + line + ', ';
+						message += self.errors.getError( 'at_column' ).message + column;
 					}
 					message += '.';
 					console.log( message );
@@ -790,8 +793,25 @@ function AOZ( canvasId, manifest )
 				self.parent = pop.parent;
 				self.onError = pop.onError;
 				self.isErrorProc = pop.isErrorProc;
+
+				if ( self.finalWait )
+				{
+					self.finalWait--;
+					if ( self.finalWait == 0 )
+					{
+						self.waitThis = self;
+						self.waiting = self.waitForFinalLoad;
+					}
+				}
 			}
 		}
+	}
+};
+AOZ.prototype.waitForFinalLoad = function()
+{
+	if ( this.loadingCount == this.loadingMax )
+	{
+		this.waiting = null;
 	}
 };
 AOZ.prototype.waitForGuru = function()
@@ -2034,7 +2054,7 @@ AOZ.prototype.input_wait = function( args )
 				if ( variable.type != 2 && isNaN( value ) )
 				{
 					this.currentScreen.currentTextWindow.print( '', true );
-					this.currentScreen.currentTextWindow.print( this.errors.getErrorFromId( 'please_redo_from_start' ).message );
+					this.currentScreen.currentTextWindow.print( this.errors.getError( 'please_redo_from_start' ).message );
 					this.inputXCursor = this.currentScreen.currentTextWindow.xCursor;
 					this.currentScreen.currentTextWindow.anchorYCursor();
 					this.inputPosition = 0;
@@ -2635,7 +2655,7 @@ AOZ.prototype.bin$ = function( value, digits )
 };
 AOZ.prototype.hex$ = function( value, digits )
 {
-	var result = value.toString( 16 );
+	var result = value.toString( 16 ).toUpperCase();
 	if ( typeof value != 'undefined' )
 	{
 		if ( value < 0 )
@@ -3331,7 +3351,7 @@ AOZ.prototype.amalError$ = function()
 {
 	if ( this.amalErrorStringCount < this.amalErrors.length )
 	{
-		return this.errors.getErrorFromId( this.amalErrors[ this.amalErrorStringCount++ ].error );
+		return this.errors.getError( this.amalErrors[ this.amalErrorStringCount++ ].error );
 	}
 	return '';
 };

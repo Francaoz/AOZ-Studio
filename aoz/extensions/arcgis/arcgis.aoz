@@ -1,0 +1,144 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ ArcGIS extension
+ * By Francois Lionet
+ *
+ * @author FL
+ * @date first pushed on 14/02/2020
+ *
+ */
+#basicRemarks:false
+#insertIntoHead:'<link rel="stylesheet" href="https://js.arcgis.com/4.13/esri/themes/light/main.css">'
+#insertIntoHead:'<script src="https://js.arcgis.com/4.13/"></script>'
+#insertIntoBody:'<div style="padding: 0; margin: 0; height: 100%; width: 100%" id="arcgis_id"></div>'
+
+//
+// Initialization
+//
+{
+    this.aoz.moduleArcGIS = this;
+	this.mapsContext = new AOZContext( this.aoz, this.aoz.currentContextName, { sorted: true } );
+
+    var self = this;
+    var arcgis = this;
+    this.aoz.loadingMax++;
+    require( [ "esri/Map", "esri/views/MapView" ], function( Map, MapView ) 
+    {
+        self.aoz.loadingCount++;
+        self.Map = function( aoz, maps, containerName, zoom, center, options )
+        {
+            this.aoz = aoz;
+            this.maps = maps;
+            arcgis.please_wait = true;
+
+            options = typeof options == 'undefined' ? {} : options;
+            if ( !options.map )
+            {
+                options.map = 
+                { 
+                    basemap: 'streets' 
+                };
+            };
+            if ( !options.view )
+            {
+                options.view = 
+                { 
+                    zoom: 4, 
+                    center: 
+                    { 
+                        x: 100, 
+                        y: 100 
+                    } 
+                }
+            };
+
+            var map = new Map( options.map );
+            var viewProperties = options.view;
+            viewProperties.container = containerName;
+            viewProperties.map = map;
+            viewProperties.zoom = zoom;
+            viewProperties.center = center;
+            var view = new MapView( viewProperties );
+
+            var myself = this;
+            view.when( function()
+            {
+                // All the resources in the MapView and the map have loaded. Now execute additional processes
+                myself.map = map;
+                myself.view = view;
+                arcgis.please_wait = false;
+            }, 
+            function( error )
+            {
+                // Use the errback function to handle when the view doesn't load properly
+                throw { error: 'cannot_create_map', parameter: error };
+                console.log( "The view's resources failed to load: ", error );
+                arcgis.please_wait = false;
+            } );
+        };
+
+        // Instructions...
+        self.setMap = function( args )
+        {
+            var index = args[ 0 ];
+            var containerName = args[ 1 ];
+            var zoom = args[ 2 ];
+            var center = { x: args[ 3 ], y: args[ 4 ] };
+            var tags = args[ 5 ];           // TODO
+
+            var map = new self.Map( self.aoz, self, containerName, zoom, center, {} );
+            self.mapsContext.setElement( self.aoz.currentContextName, map, index, true );
+        };
+        self.deleteMap = function( args )
+        {
+            this.mapsContext.deleteElement( this.aoz.currentContextName, args[ 0 ], 'map_not_found' );
+        };
+        self.getMap = function( index )
+        {
+            return this.mapsContext.getElement( this.aoz.currentContextName, index, 'map_not_found' );
+        };
+        self.wait = function()
+        {
+            if ( !this.please_wait )
+            {
+                this.aoz.waiting = null;
+            }
+        };
+    } );
+}
+
+// TODO: take containerName and not generic name...
+Instruction "map open", _index, _containerName$, _zoom, _x, _y, _tags$
+{
+	#waiting
+    #errors    
+	return{type:12,waitThis:this.aoz.moduleArcGIS,callFunction:"setMap",waitFunction:"wait",args:[%_index,%_containerName$,%_zoom,%_x,%_y,%_tags$]};
+}
+End Instruction
+Instruction "map close", _index
+{
+	#waiting
+    #errors
+	return{type:12,waitThis:this.aoz.moduleArcGIS,callFunction:"setMap",waitFunction:"wait",args:[%_containerName$,%_zoom,%_x,%_y,%_tags$]};
+}
+End Instruction
+
+
+

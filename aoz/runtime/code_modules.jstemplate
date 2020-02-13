@@ -21,12 +21,14 @@
 
 function MODULE_NAME( aoz )
 {
-	this.manifest=JSON.parse('MANIFEST');
+	this.manifest=JSON.parse(atob('MANIFEST'));
 	this.parent=this;
 	this.root=this;
 	this.aoz=aoz;
 	this.contextName='MODULE_NAME';
 	this.aoz.use["MODULE_SHORTNAME"]=this;
+	this.aoz.useSounds|=MODULE_USESOUNDS;
+	this.aoz.finalWait++;
 
 <HEADER-END>
 <FOOTER-START>

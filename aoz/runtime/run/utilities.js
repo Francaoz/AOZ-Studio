@@ -29,6 +29,20 @@ function Utilities( aoz )
 	this.aoz = aoz;
 }
 
+Utilities.prototype.getBrowserLanguage = function()
+{
+	var lang = window.navigator.languages ? window.navigator.languages[0] : null;
+		lang = lang || window.navigator.language || window.navigator.browserLanguage || window.navigator.userLanguage;
+
+	let shortLang = lang;
+	if (shortLang.indexOf('-') !== -1)
+		shortLang = shortLang.split('-')[0];
+
+	if (shortLang.indexOf('_') !== -1)
+		shortLang = shortLang.split('_')[0];
+		
+	return shortLang.toLowerCase();
+};
 Utilities.prototype.sendCrashMail = function()
 {
 	if ( this.aoz.crashInfo )
@@ -666,6 +680,7 @@ function MemoryBlock( aoz, buffer, endian )
 	this.bufferView = new Uint8Array( buffer );
 	this.length = this.bufferView.byteLength;
 	this.endian = typeof endian != 'undefined' ? endian : 'big';
+	this.isMemoryBlock = true;
 };
 MemoryBlock.prototype.setLength = function( newLength )
 {
@@ -822,7 +837,7 @@ MemoryBlock.prototype.pokeArrayBuffer = function( address, buffer )
 MemoryBlock.prototype.poke$ = function( address, text )
 {
 	address = address - Math.floor( address / this.aoz.memoryHashMultiplier ) * this.aoz.memoryHashMultiplier;
-	if ( address + text.length > this.bufferView.length )
+	if ( address + text.length > this.bufferView.byteLength )
 		throw 'illegal_function_call';
 	for ( var p = 0; p < text.length; p++ )
 		this.bufferView[ address + p ] = text.charCodeAt( p ) & 0xFF;
@@ -836,7 +851,7 @@ MemoryBlock.prototype.peek$ = function( address, length, stop )
 		var c = String.fromCharCode( this.bufferView[ address + p ] );
 		if ( c == stop )
 			break;
-		if ( address + p > this.bufferView.length )
+		if ( address + p > this.bufferView.byteLength )
 			throw 'illegal_function_call';
 		text += c;
 	}
@@ -847,7 +862,7 @@ MemoryBlock.prototype.fill = function( start, end, value )
 	start = start - Math.floor( start / this.aoz.memoryHashMultiplier ) * this.aoz.memoryHashMultiplier;
 	end = end - Math.floor( end / this.aoz.memoryHashMultiplier ) * this.aoz.memoryHashMultiplier;
 	var length = end - start;
-	if ( length < 0 || start + length > this.bufferView.length )
+	if ( length < 0 || start + length > this.bufferView.byteLength )
 		throw 'illegal_function_call';
 
 	for ( var p = 0; p <= length - 4; p += 4 )
@@ -868,7 +883,7 @@ MemoryBlock.prototype.fill = function( start, end, value )
 };
 MemoryBlock.prototype.copyTo = function( sourceAddress, destinationBlock, destinationAddress, length )
 {
-	if ( sourceAdress + length > this.bufferView.length || destinationAddress + length > destinationBlock.bufferView.length )
+	if ( sourceAdress + length > this.bufferView.byteLength || destinationAddress + length > destinationBlock.bufferView.byteLength )
 		throw 'illegal_function_call';
 	if ( destinationBlock == this )
 	{
@@ -891,7 +906,7 @@ MemoryBlock.prototype.copyTo = function( sourceAddress, destinationBlock, destin
 };
 MemoryBlock.prototype.copyFrom = function( destinationAddress, sourceBlock, sourceAddress, length )
 {
-	if ( destinationAddress + length > this.bufferView.length || sourceAddress + length > sourceBlock.bufferView.length )
+	if ( destinationAddress + length > this.bufferView.byteLength || sourceAddress + length > sourceBlock.bufferView.byteLength )
 		throw 'illegal_function_call';
 	if ( sourceBlock == this )
 	{
@@ -949,7 +964,7 @@ MemoryBlock.prototype.hunt = function( start, end, text )
 	var length = end - start;
 	if ( length < 0 )
 		throw 'illegal_function_call';
-	if ( start + text.length > this.bufferView.length )
+	if ( start + text.length > this.bufferView.byteLength )
 		return 0;
 	for ( var i = 0; i < length - text.length; i++ )
 	{
@@ -1289,7 +1304,7 @@ Utilities.prototype.loadMultipleUnlockedSound = function( path, number, options,
 Utilities.prototype.loadUnlockedBankElement = function( path, options, callback, extra )
 {
 	var self = this;
-	var name = 'bank_' + options.bankIndex;
+	var name = 'bank_' + options.name;
 	if ( AOZ_Files[ name ] )
 	{
 		callback( true, AOZ_Files[ name ] );

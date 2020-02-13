@@ -1,0 +1,181 @@
+/*@*****************************************************************************
+*                                                                              *
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗  *
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗ *
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║ *
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝ *
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝  *
+*                                                                              *
+* This file is part of AOZ Studio.                                             *
+* Copyright (c) AOZ Studio. All rights reserved.                               *
+*                                                                              *
+* Licensed under the GNU General Public License v3.0.                          *
+* More info at: https://choosealicense.com/licenses/gpl-3.0/                   *
+* And in the file AOZ_StudioCodeLicense.pdf.                                   *
+*                                                                              *
+*****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Tracket Instruction Set
+ * By Batuiste Bideaux
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author FL
+ * @date first pushed on 27/10/2019
+ */
+#include_javascript:"modplayer/player.js"	
+#include_javascript:"modplayer/pt.js"
+#include_javascript:"modplayer/ft2.js"
+#include_javascript:"modplayer/st3.js"
+#include_javascript:"modplayer/utils.js"
+#useSounds:true
+#noWarning:"instruction_not_implemented"
+
+{
+    this.aoz.modulePlayer = this;
+    this.modules = [];
+    this.module_isLoop = false;
+    this.load_done = true;
+    this.lastPlay = -1;
+    this.supportedformats=new Array('mod', 's3m', 'xm');
+    this.load = function(args){
+
+        var path = args[0];
+        var bankNumber = args[1];
+		var self = this;
+        this.load_done = false;
+		this.aoz.banks.loadFileToBank( path, bankNumber, 'tracker', {}, function( response, bank, extra )
+		{
+            if ( !response )
+                throw data;
+            self.load_done = true;
+        } );
+    };
+    
+	this.load_wait = function()
+	{
+		if ( this.load_done )
+		{
+			this.aoz.waiting = null;
+		}
+	};
+
+    this.trackLoop = function(_repeat){
+        self.module_isLoop = _repeat;
+    };
+
+    this.play = function(bankNumber, patternNumber){
+
+        if(this.lastPlay && this.lastPlay > -1){
+            this.modules["bank_" + this.lastPlay].stop();
+        }
+
+        var bank = this.aoz.banks.getBank( bankNumber, this.aoz.currentContextName, 'tracker' );
+        var module = this.modules["bank_" + bankNumber];
+        if(module === undefined)
+        {        
+            var block = bank.getElement( 1 );
+            var ext=block.filename.split('.').pop().toLowerCase().trim();
+            if (this.supportedformats.indexOf(ext)==-1) 
+            {
+                // unknown extension, maybe amiga-style prefix?
+                ext=block.filename.split('/').pop().split('.').shift().toLowerCase().trim();
+                if (this.supportedformats.indexOf(ext)==-1) 
+                {
+                    throw "unsupported_tracker_format";
+                }
+            }
+
+            module = new Modplayer();
+            module.loadBuffer(block.buffer, ext);
+            this.modules["bank_" + bankNumber] = module;
+            this.lastPlay = bankNumber;    
+            this.module_isLoop = false;
+        }
+
+        patternNumber = typeof patternNumber == 'undefined' ? 0 : patternNumber;
+        if(isNaN(patternNumber) || patternNumber < 0){
+            throw "invalid_pattern_number";
+        }
+
+        if(patternNumber > (module.player.songlen - 1)){
+            patternNumber = 0;
+        }
+
+        module.setrepeat(this.module_isLoop);
+        module.player.position = patternNumber;
+        module.play();
+        this.lastPlay = bankNumber;
+    };
+
+    this.stop = function(){
+        if(this.lastPlay && this.lastPlay > -1){
+            this.modules["bank_" + this.lastPlay].stop();
+        }    
+    };
+
+    this.pause = function(){
+        if(this.lastPlay && this.lastPlay > -1){
+            this.modules["bank_" + this.lastPlay].pause();
+        }    
+    };
+
+    this.resume = function(){
+        if(this.lastPlay && this.lastPlay > -1){
+            this.modules["bank_" + this.lastPlay].play();
+        }    
+    }
+}
+Instruction "Track Loop On"
+    {
+        #errors
+        this.aoz.modulePlayer.trackLoop(true);
+    }
+End Instruction
+
+Instruction "Track Loop Off"
+    {
+        #errors
+        this.aoz.modulePlayer.trackLoop(false);
+    }
+End Instruction
+
+Instruction "Track Load", moduleName$, bankNumber
+    {
+        #errors
+        #waiting
+       	#add_to_filesystem:"%moduleName$"
+        return{type:12,waitThis:this.aoz.modulePlayer,callFunction:"load", waitFunction:"load_wait", args:[%moduleName$, %bankNumber]};
+    }
+End Instruction
+
+Instruction "Track Play", bankNumber, patternNumber
+    {
+        #errors
+        this.aoz.modulePlayer.play(%bankNumber, %patternNumber);
+    }
+End Instruction
+
+Instruction "Track Stop"
+    {
+        #errors
+        this.aoz.modulePlayer.stop();
+    }
+End Instruction
+
+Instruction "Track Pause"
+    {
+        #errors
+        this.aoz.modulePlayer.pause();
+    }
+End Instruction
+
+Instruction "Track Resume"
+    {
+        #errors
+        this.aoz.modulePlayer.resume();
+    }
+End Instruction

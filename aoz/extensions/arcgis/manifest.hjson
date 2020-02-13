@@ -1,0 +1,49 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ Extensions Manifest
+ *
+ */
+{
+	// Version of the manifest
+	version: "9"						// Will only work after applications compiled with manifest 7 and above.
+	versionExtension: "1"				// Indicates an extension and the version of this manifest
+
+	// Informations about the application
+	infos:
+	{
+		applicationName: "The ArcGIS Extension"
+		author: "By Francois Lionet"
+		version: "Version 0.1"
+		date: "13/10/2019"
+		copyright: "(c) AOZ Studio 2020 - Open Source - licence to come ;)"
+		start: "arcgis.aoz"
+		object: "arcgis"
+	}
+	compilation:
+	{
+		noWarning: []
+	}
+	errors:
+	{
+		en:
+		[
+			"map_not_found:				Map not found"
+			"cannot_create_map:			Cannot create map (reported error %1)"
+		]
+		fr:
+		[
+			"map_not_found:				Carte introuvable"
+			"cannot_create_map:			Impossible de creer la cater (retour d'erreur %1)"
+		]
+	}
+}

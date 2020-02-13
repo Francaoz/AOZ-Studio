@@ -1,0 +1,49 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝
+*
+****************************************************************************@*/
+/** @file
+ *
+ * AOZ Instructions Module Manifest
+ *
+ */
+{
+	// Version of the manifest
+	version: "9"						// Will only work after applications compiled with manifest 7 and above.
+	versionModule: "1"					// Indicates an extension and the version of this manifest
+
+	// Informations about the application
+	infos:
+	{
+		applicationName: "The Tracker Instructions"
+		author: "By Baptiste Bideaux"
+		version: "Version 0.99"
+		date: "12/02/2020"
+		copyright: "(c) AOZ Studio 2019-2020"
+		start: "collectoys.aoz"
+		object: "collectoys"
+	}
+	compilation:
+	{
+		noWarning: []
+	}
+	errors:
+	{
+		en:
+		[
+			"unsupported_tracker_format:				Unsupported tracker format",
+			"invalid_pattern_number:					Invalid pattern number",
+		]
+		fr:
+		[
+			"unsupported_tracker_format:				Format de tracker non supporte",
+			"invalid_pattern_number:					Numero de pattern invalide",
+		]
+	}
+}

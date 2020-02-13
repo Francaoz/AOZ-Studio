@@ -797,56 +797,96 @@ Filesystem.prototype.saveFile = function( descriptor, source, options, callback,
 	localStorage.setItem( 'aoz_current_files', JSON.stringify( currentFiles ) );
 	callback( true, {}, extra );
 };
+
 Filesystem.prototype.loadFile = function( descriptor, options, callback, extra )
 {
-	file = this.findFileInDirectory( descriptor.files, descriptor.name, this.noCase );
-	if ( !file )
+	if ( typeof descriptor == 'string' )
 	{
-		callback( false, 'file_not_found', extra );
-		return;
+		descriptor = this.getFile( descriptor );
+		if ( !descriptor.filename )
+			throw 'file_not_found';
 	}
-
-	if ( typeof file.localStorage == 'undefined' )
+	if ( this.getFileDescription.isUrl )
 	{
-		var self = this;
-		var name = '';
-		if ( file.context )
-			name += file.context + '_';
-		name += file.number;
-		this.utilities.loadScript( './resources/filesystem/' + name  + '.js', {}, function( response, data, extra )
+        var request = new XMLHttpRequest();
+		request.open( "GET", descriptot.url, true );
+		request.timeout = options.timeout ? options.timeout : 5 * 1000;
+        request.responseType = options.responseType ? options.responseType : 'arraybuffer';
+		request.onload = function() 
 		{
 			if ( response )
 			{
-				var data = Filesdata[ name ];//file.number ];
-				if ( options.binary )
-				{
-					data = self.utilities.convertStringToArrayBuffer( data );
-					//Filesdata[ file.number ] = '';
-				}
-				else if ( options.text )
-				{
-					var arrayBuffer = self.utilities.convertStringToArrayBuffer( data );
-					var view = new Uint8Array( arrayBuffer );
-					data = '';
-					for ( var p = 0; p < view.byteLength; p++ )
-						data += String.fromCharCode( view[ p ] );
-				}
-				callback( true, data, extra );
-				return;
+				callback( response, request.response, extra );
 			}
+			else
+			{
+				callback( true, 'cannot_load_file', extra );
+			}
+		}
+		request.onreadystatechange = function() 
+		{
+			if ( request.status === 404 ) 
+			{
+				callback( false, 'file_not_found', extra );
+			}
+		};
+		request.ontimeout = function ( e ) 
+		{
 			callback( false, 'cannot_load_file', extra );
-		}, extra );
+		};		  
+        request.send();
 	}
 	else
 	{
-		if ( !this.storageAvailable( 'localStorage' ) )
-			throw 'local_storage_not_available';
-		var data = localStorage.getItem( 'aoz_' + file.localStorage );
-		if ( options.binary )
+		file = this.findFileInDirectory( descriptor.files, descriptor.name, this.noCase );
+		if ( !file )
 		{
-			data = this.utilities.convertStringToArrayBuffer( data );
+			callback( false, 'file_not_found', extra );
+			return;
 		}
-		callback( true, data, extra );
+	
+		if ( typeof file.localStorage == 'undefined' )
+		{
+			var self = this;
+			var name = '';
+			if ( file.context )
+				name += file.context + '_';
+			name += file.number;
+			this.utilities.loadScript( './resources/filesystem/' + name  + '.js', {}, function( response, data, extra )
+			{
+				if ( response )
+				{
+					var data = Filesdata[ name ];//file.number ];
+					if ( options.binary || options.responseType == 'arraybuffer' )
+					{
+						data = self.utilities.convertStringToArrayBuffer( data );
+						//Filesdata[ file.number ] = '';
+					}
+					else if ( options.text || options.responseType == 'text' )
+					{
+						var arrayBuffer = self.utilities.convertStringToArrayBuffer( data );
+						var view = new Uint8Array( arrayBuffer );
+						data = '';
+						for ( var p = 0; p < view.byteLength; p++ )
+							data += String.fromCharCode( view[ p ] );
+					}
+					callback( true, data, extra );
+					return;
+				}
+				callback( false, 'cannot_load_file', extra );
+			}, extra );
+		}
+		else
+		{
+			if ( !this.storageAvailable( 'localStorage' ) )
+				throw 'local_storage_not_available';
+			var data = localStorage.getItem( 'aoz_' + file.localStorage );
+			if ( options.binary )
+			{
+				data = this.utilities.convertStringToArrayBuffer( data );
+			}
+			callback( true, data, extra );
+		}
 	}
 };
 
@@ -901,7 +941,7 @@ Filesystem.prototype.dir = function( path )
 	var info = this.getFile( path );
 	if ( info.isDirectory )
 	{
-		var message = this.aoz.errors.getErrorFromId( 'directory_of' ).message;
+		var message = this.aoz.errors.getError( 'directory_of' ).message;
 		message = this.utilities.replaceStringInText( message, '%1', path );
 		this.aoz.currentScreen.currentTextWindow.print( message, true );
 		for ( var f in info.files )

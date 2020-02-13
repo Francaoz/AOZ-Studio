@@ -1,0 +1,1635 @@
+/*@****************************************************************************
+*
+*   █████╗  ██████╗ ███████╗    ███████╗████████╗██╗   ██╗██████╗ ██╗ ██████╗ 
+*  ██╔══██╗██╔═══██╗╚══███╔╝    ██╔════╝╚══██╔══╝██║   ██║██╔══██╗██║██╔═══██╗
+*  ███████║██║   ██║  ███╔╝     ███████╗   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██╔══██║██║   ██║ ███╔╝      ╚════██║   ██║   ██║   ██║██║  ██║██║██║   ██║
+*  ██║  ██║╚██████╔╝███████╗    ███████║   ██║   ╚██████╔╝██████╔╝██║╚██████╔╝
+*  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝    ╚══════╝   ╚═╝    ╚═════╝ ╚═════╝ ╚═╝ ╚═════╝ 
+*
+****************************************************************************@*/
+/** @file
+ *
+ * The AOZ Maps Instruction Set
+ * By Baptiste Bideaux and Francois Lionet
+ *
+ * Using the new modular language syntax system
+ * Program the language with the language.
+ *
+ * @author BP - FL
+ * @date first pushed on 24/12/2019
+ */
+
+//
+// Initialization
+//
+{
+	this.aoz.MAPS = this;
+	this.views = {};
+	this.options = {};
+	this.maps = [];
+	this.currentMap = undefined;
+	this.mapCopy = undefined;
+	this.mapIndex = -1;
+	this.load_done = true;
+	this.screenView = 1000;
+	this.findRequest = undefined;
+	
+	this.create = function(_width, _height){
+		if(_width < 1 || _height < 1){
+			throw "map_greater_than_0";
+		}
+	
+		this.reset();
+		this.options.width = _width;
+		this.options.height = _height;
+		this.addMap();
+	};
+
+	this.load = function(args){
+		this.reset();
+		this.load_done = false;
+
+		var path = args[ 0 ];
+		var parts = path.split(".");
+		var ext = parts[parts.length - 1];
+
+		switch(ext){
+
+			// Chargement de maps au format TEXT
+			case 'txt':
+				this.loadTXT(path);
+				break;
+
+			// Chargement de maps au format TILED
+			case 'tmx':
+				this.loadTMX(path);
+				break;
+			
+			default:
+				this.load_done = true;
+				throw 'unknow_maps_format';
+				break;
+		}
+		
+		return;
+	};
+
+	// Chargement de maps au format TXT
+	this.loadTXT = function( path )
+	{
+		this.load_done = false;
+		this.maps = [];
+		this.options = {
+			width: 0,
+			height: 0,
+			refTiles: []
+		};
+
+		var self = this;
+		this.aoz.filesystem.loadFile( path, { responseType: 'text' }, function( response, data, extra ) 
+		{
+			if ( response )	
+			{
+				var txtDoc, map, datas;
+				txtDoc = data.split("\n");
+				var map = undefined;
+				var lines = undefined;
+				var width = 0;
+				var height = 0;
+				var lastRef = [];
+				for(i = 0; i < txtDoc.length; i++)
+				{
+					var line = self.aoz.utilities.trimString(txtDoc[i]);
+					if(line.toLowerCase() == "start")
+					{
+						map = {
+							width: 0,
+							height: 0,
+							datas: [],
+							tileSize:{
+								width: 0,
+								height: 0
+							},
+							refTiles: []
+						}
+						lines = [];
+					}
+					else if(line.toLowerCase() == "end")
+					{
+						if(map){
+							if(lines){
+								var _newLines = [];
+								for(l = 0; l < lines.length; l++){
+									var line = lines[l];
+									for(ll = line.length; ll < map.width; ll++){
+										line = line + " ";
+									}
+									_newLines.push(line);
+								}
+								lines = _newLines;
+
+								for(l = 0; l < lines.length; l++){
+									var line = lines[l]
+									for(ll = 0; ll < line.length; ll++){
+										var c = line.substring(ll, ll+1);
+										map.datas.push(c);
+									}
+								}
+
+								self.maps.push(map);
+							}
+						}
+					}
+					else if(line != ""){
+
+						if(line.substring(0,4) == 'ref:'){
+							var values = line.substring(4).split(",");
+							var ref = {
+								tile: values[0],
+								tileImage: parseInt(values[1]),
+								tileObject: values[4]
+							};
+
+							if(map.refTiles){
+								map.refTiles.push(ref);
+							}
+
+						}else{
+							if(line.substring(0,5) == "size:"){
+								var values = line.substring(5).split(",");
+								map.tileSize.width = parseInt(values[0]);
+								map.tileSize.height = parseInt(values[1]);
+							}else{
+
+								lines.push(line);
+								if(line.length > map.width){
+									map.width = line.length;
+								}
+								
+								if(map){
+									map.height++;
+								} 
+
+								if(map.width > self.options.width){
+									self.options.width = map.width;
+								}
+
+								if(map.height > self.options.height){
+									self.options.height = map.height;
+								}
+							}
+						}
+					}
+
+				}
+			}
+			console.log(self.options);
+			console.log(self.maps);
+			self.load_done = true;
+		} );
+	};
+
+	// Chargement de maps au format TILED
+	this.loadTMX = function( path )
+	{
+		console.log('Load TMX');
+		this.load_done = false;
+		var self = this;
+		this.aoz.filesystem.loadFile( path, { responseType: 'text' }, function( response, data, extra )
+		{
+			if ( response )
+			{			
+				var xmlDoc, map, datas;
+				var parser = new DOMParser();
+				xmlDoc = parser.parseFromString(data, "text/xml");
+				map = xmlDoc.getElementsByTagName("map");
+
+				if(map){
+					self.options = {};
+					for (i = 0; i < map[0].attributes.length; i++){
+						var attr = map[0].attributes[i];
+						if(attr.name == "width" || attr.name == "height"){
+							self.options[attr.name] = parseInt(attr.value);
+						}else{
+							self.options[attr.name] = attr.value;
+						}
+					}
+				}
+
+				var tiles = xmlDoc.getElementsByTagName("tile");
+				var layers = xmlDoc.getElementsByTagName("layer");
+				var datas = xmlDoc.getElementsByTagName("data");
+				if(datas){
+					self.maps = [];
+					for (i = 0; i < datas.length; i++){
+						var map = {};
+						if(layers[i]){
+							for(_j = 0; _j < layers[i].attributes.length; _j++){
+								var attr = layers[i].attributes[_j];
+								if(attr.name == "width"){
+									map.width = parseInt(attr.value);
+								}
+								if(attr.name == "height"){
+									map.height = parseInt(attr.value);
+								}
+							}
+						}
+						var datai = datas[i].innerHTML.replace(/(\r\n|\n|\r)/gm,"").split(",");
+						map.datas = datai;
+						map.refTiles = [];
+						self.maps.push(map);
+					}
+				}
+				console.log(self);
+			}
+			self.load_done = true;			
+		} );
+	};
+	
+	this.load_wait = function()
+	{
+		if ( this.load_done )
+		{
+			this.aoz.waiting = null;
+		}
+	};
+	
+	this.setMapIndex = function(_viewId, _mapIndex){
+		if(_mapIndex < 0 || _mapIndex > this.maps.length - 1){
+			throw "map_index_out_of_range";
+		}
+
+		if(this.maps){
+			if(_viewId){
+				if(_viewId == ''){
+					throw "map_incorrect_argument"
+				}
+
+				if(this.views[_viewId]){
+					this.views[_viewId].currentMap = {
+						datas: [],
+						width: this.maps[_mapIndex].width,
+						height: this.maps[_mapIndex].height,
+						tileSize: this.maps[_mapIndex].tileSize,
+						refTiles: this.maps[_mapIndex].refTiles
+					};
+					
+					for(_i = 0; _i< this.maps[_mapIndex].datas.length; _i++){
+						var data = this.maps[_mapIndex].datas[_i];
+						this.views[_viewId].currentMap.datas.push(data);
+					}
+
+					this.views[_viewId].mapCopy = undefined;
+					this.views[_viewId].mapIndex = _mapIndex;
+					this.views[_viewId].offsetX = 0;					
+					this.views[_viewId].offsetY = 0;
+					this.views[_viewId].offsetZ = 0;
+					this.viewUpdate(_viewId);					
+				}else{
+					throw "map_view_not_found"
+				}
+
+			}else{
+				throw "map_incorrect_argument"
+			}
+		}else{
+			throw "map_no_defined";
+		}
+	};
+
+	this.getMapIndex = function(_viewId){
+		if(typeof _viewId == 'undefined'){
+			throw "map_incorrect_argument"
+		}else{
+			if(_viewId == ''){
+				throw "map_incorrect_argument"
+			}
+
+			if(this.views[_viewId]){
+				return this.views[_viewId].mapIndex;
+			}else{
+				throw "map_not_defined";				
+			}
+		}		
+	};
+
+	this.getTileValue = function(_viewId, _x, _y){
+
+		var value = "";
+		var w = this.options.width;
+		var h = this.options.width;
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+				
+				if(_y && (_x < 0 || _x > this.views[_viewId].currentMap.width)){
+					throw "map_position_x_out";
+				}
+			
+				if(_y && (_y < 0 || _y > this.views[_viewId].currentMap.height)){
+					throw "map_position_y_out";
+				}
+
+				if(this.views[_viewId].currentMap.width && this.views[_viewId].currentMap.height){
+					w = this.views[_viewId].currentMap.width;
+					h = this.views[_viewId].currentMap.height;
+				}
+
+				if(_y){
+					n = (_y * w) + _x;
+				}else{
+					n = _x;
+				}
+				
+				return this.views[_viewId].currentMap.datas[n];			
+			}else{
+				throw "map_no_map_defined_in_view";
+			}
+		}else{
+			throw "map_incorrect_argument"
+		}
+	};
+
+	this.setTileValue = function(_viewId, _x, _y, _value){
+		
+		var n=0;
+		var w = this.options.width;
+		var h = this.options.width;
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+
+				if(_y && (_x < 0 || _x > this.views[_viewId].currentMap.width)){
+					throw "map_position_x_out";
+				}
+			
+				if(_y && (_y < 0 || _y > this.views[_viewId].currentMap.height)){
+					throw "map_position_y_out";
+				}			
+
+				if(this.views[_viewId].currentMap.width && this.views[_viewId].currentMap.height){
+					w = this.views[_viewId].currentMap.width;
+					h = this.views[_viewId].currentMap.height;
+				}
+
+				if(_y){
+					n = (_y * w) + _x;
+				}else{
+					n = _x;
+				}
+
+				this.views[_viewId].currentMap.datas[n] = _value;
+				this.viewUpdate(_viewId);
+			}else{
+				throw "map_no_map_defined_in_view";
+			}
+		}else{
+			throw "map_incorrect_argument"
+		}
+	};
+
+	this.tileReplace = function(_viewId, _tileSearch, _tileReplace){
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+
+				for(_i = 0; _i < this.views[_viewId].currentMap.datas.length; _i++){
+					var tile = this.views[_viewId].currentMap.datas[_i];
+					if(tile == _tileSearch){
+						this.views[_viewId].currentMap.datas[_i] = _tileReplace;
+					}
+				}
+
+				this.viewUpdate(_viewId);
+			}
+		}else{
+			throw "map_incorrect_argument"
+		}
+	};
+
+	this.getMapWidth = function(_viewId){
+		var w = -1;	
+		if(this.options.width){
+			w = this.options.width;
+		}
+
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap && this.views[_viewId].currentMap.width){
+				w = this.views[_viewId].currentMap.width;
+			}else{
+				throw "map_no_map_defined_in_view";
+			}
+		}else{
+			throw "map_incorrect_argument"
+		}
+
+		if(w > -1){
+			return parseInt(w);
+		}else{
+			throw "Unknown map width.";
+		}
+	};
+
+	this.getMapHeight = function(_viewId){
+		var h = -1;	
+		if(this.options.height){
+			h = this.options.height;
+		}
+
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap && this.views[_viewId].currentMap.height){
+				h = this.views[_viewId].currentMap.height;
+			}else{
+				throw "map_no_map_defined_in_view";
+			}
+		}else{
+			throw "map_incorrect_argument"
+		}
+
+		if(h > -1){
+			return parseInt(h);
+		}else{
+			throw "map_unknown_map_height";
+		}
+	};
+
+	this.reset = function(){
+		this.options = {
+			width: 0,
+			height: 0,
+			refTiles: []
+		};
+		this.maps = [];
+		this.currentMap = undefined;
+		this.mapCopy = undefined;
+		this.mapIndex = -1;
+		this.views = {};
+	};
+
+	this.addMap = function(){
+		if(this.maps && this.options.width && this.options.height){
+			var map = {
+				width: this.options.width,
+				height: this.options.height
+			};
+			var datas = [];
+			for(i = 0; i< this.options.width; i++){
+				for(j = 0; j < this.options.height; j++){
+					datas.push("0");
+				}
+			}
+			map.datas = datas;
+			this.maps.push(map);
+		}else{
+			throw "map_unable_to_add";
+		}	
+	};
+
+	this.removeMap = function(_mapIndex){
+		if(this.maps){
+		
+			if(_mapIndex < 0 || _mapIndex > this.maps.length - 1){
+				throw "map_index_out_of_range";
+			}
+			
+			if(this.maps.length == 1){
+				throw "map_one_must_remain";
+			}
+			
+			this.maps.splice(_mapIndex,1);
+		}else{
+			throw "map_no_defined";
+		}
+	};
+	
+	this.insertMap = function(_mapIndex){
+		if(this.mapsthis.maps && this.options.width && this.options.height){
+			if(_mapIndex < 0 || _mapIndex > this.maps.length - 1){
+				throw "map_index_out_of_range";
+			}
+			var map = {
+				width: this.options.width,
+				height: this.options.height
+			};
+			var datas = [];
+			for(i = 0; i< this.options.width; i++){
+				for(j = 0; j < this.options.height; j++){
+					datas.push("0");
+				}
+			}
+			map.datas = datas;
+			this.maps.splice(_mapIndex,0,map);
+		}else{
+			throw "map_unable_to_insert";
+		}
+	};
+	
+	this.mapCount = function(){
+		if(this.maps){
+			return this.maps.length;
+		}else{
+			throw "map_no_defined";
+		}		
+	};
+
+	this.copy = function(_viewId){
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+				this.views[_viewId].mapCopy = {
+					datas: []
+				};
+				
+				for (i = 0; i < this.views[_viewId].currentMap.datas.length; i++){
+					this.views[_viewId].mapCopy.datas.push(this.views[_viewId].currentMap.datas[i]);
+				}
+
+			}else{
+				throw "map_no_map_defined_in_view"
+			}
+
+		}else{
+			throw "map_incorrect_argument"
+		}
+	};
+
+	this.restore = function(_viewId){
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument"
+			}
+
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].mapCopy && this.views[_viewId].mapCopy.datas){
+				if(this.views[_viewId].currentMap){
+					this.views[_viewId].currentMap.datas = [];
+					
+					for (i = 0; i < this.views[_viewId].mapCopy.datas.length; i++){
+						this.views[_viewId].currentMap.datas.push(this.views[_viewId].mapCopy.datas[i]);
+					}
+					this.views[_viewId].mapCopy = undefined;
+					this.viewUpdate(_viewId);
+
+				}else{
+					throw "map_no_map_defined_in_view"
+				}
+			}else{
+				throw "No map stored in memory."
+			}
+
+		}else{
+			throw "map_incorrect_argument"
+		}
+	};
+
+	this.viewOpen = function(_viewId, _x, _y, _width, _height, _mapIndex){
+		if(_viewId == ""){
+			throw "map_incorrect_argument"
+		}
+
+		if(this.views[_viewId]){
+			throw { error: "map_already_exists_with", params: [ _viewId ] };
+		}
+
+		var _map = this.maps[_mapIndex];
+		if(typeof _map == 'undefined'){
+			throw "map_not_found";
+		}
+
+		var view = {
+			type: '2d',
+			x: _x,
+			y: _y,
+			offsetX: 0,
+			offsetY: 0,
+			offsetZ: 0,
+			width: _width,
+			height: _height,
+			currentMap: _map,
+			mapIndex: _mapIndex,
+			screen: this.screenView
+		};
+
+		var currentScreen = this.aoz.currentScreen.index;
+		this.aoz.screenOpen(this.screenView, 2000, 2000, 32, 0);
+		this.aoz.currentScreen.currentTextWindow.setCursor(false);
+		this.aoz.currentScreen.cls(0);
+		this.aoz.getScreen(view.screen).show(false);
+		this.aoz.setScreen(currentScreen);
+
+		this.screenView++;
+
+		this.views[_viewId] = view;
+		this.viewUpdate(_viewId);
+	};
+
+	this.viewClose = function(_viewId){
+		if(_viewId == ""){
+			throw "map_incorrect_argument"
+		}
+
+		if(this.views[_viewId]){
+			this.aoz.screenClose(this.views[_viewId].screen);
+			this.views[_viewId] = undefined;
+		}else{
+			throw { error: "map_view_not_open", params: [ _viewId ] };
+		}
+
+	};
+
+	this.getViewOffsetX = function(_viewId){
+		if(_viewId == ""){
+			throw "map_incorrect_argument";
+		}
+
+		if(this.views[_viewId]){
+			return this.views[_viewId].offsetX;
+		}
+	
+	};
+
+	this.getViewOffsetY = function(_viewId){
+		if(_viewId == ""){
+			throw "map_incorrect_argument"
+		}
+
+		if(this.views[_viewId]){
+			return this.views[_viewId].offsetY;
+		}
+	
+	};
+	
+	this.getViewOffsetZ = function(_viewId){
+		if(_viewId == ""){
+			throw "map_incorrect_argument"
+		}
+
+		if(this.views[_viewId]){
+			return this.views[_viewId].offsetZ;
+		}
+	
+	};
+
+	this.viewOffset = function(_viewId, _offsetX, _offsetY, _offsetZ){
+		if(_viewId == ""){
+			throw "map_incorrect_argument"
+		}
+
+		if(this.views[_viewId]){
+			var view = this.views[_viewId];
+			if(view.currentMap){
+				var w = (view.currentMap.tileSize.width)?view.currentMap.tileSize.width:this.options.tileSize.width;
+				var h = (view.currentMap.tileSize.height)?view.currentMap.tileSize.height:this.options.tileSize.height;
+			}else{
+				throw "map_no_map_defined_in_view";
+			}
+
+			if(typeof w == 'undefined'){
+				throw "map_tile_width_undefined";
+			}
+
+			if(typeof h == 'undefined'){
+				throw "map_tile_height_undefined";
+			}
+
+			if(_offsetX > ((view.currentMap.width * view.currentMap.tileSize.width) - view.width)){
+				_offsetX = ((view.currentMap.width * view.currentMap.tileSize.width) - view.width);
+			}
+
+			if(_offsetY > ((view.currentMap.height * view.currentMap.tileSize.height) - view.height)){
+				_offsetY = ((view.currentMap.height * view.currentMap.tileSize.height) - view.height);
+			}
+
+			if(_offsetX < 0){
+				_offsetX = 0;
+			}
+
+			if(_offsetY < 0){
+				_offsetY = 0;
+			}
+
+			this.views[_viewId].offsetX = _offsetX;
+			this.views[_viewId].offsetY = _offsetY;
+			this.views[_viewId].offsetZ = _offsetZ;
+			this.viewRedraw(_viewId);
+		}else{
+			throw "map_view_not_found";
+		}		
+	};
+
+	this.viewDisplay = function(_viewId, _x, _y, _width, _height){
+		if(_viewId == ""){
+			throw "map_incorrect_argument"
+		}
+
+		if(this.views[_viewId]){
+			
+			if(_x){
+				this.views[_viewId].x = _x;
+			}
+
+			if(_y){
+				this.views[_viewId].y = _y;
+			}
+
+			if(_width){
+				this.views[_viewId].width = _width;
+			}
+
+			if(_height){
+				this.views[_viewId].height = _height;
+			}
+
+			this.viewUpdate(_viewId);
+
+		}else{
+			throw "map_view_not_found";
+		}
+
+	};
+
+	this.viewRedraw = function(_viewId){
+		var view = this.views[_viewId];
+		if(view){
+			var dx =  view.x;
+			var dy =  view.y;
+			var w =  view.width;
+			var h =  view.height;
+			var sx =  view.offsetX;
+			var sy =  view.offsetY;
+
+			this.aoz.getScreen(view.screen).screenCopy(this.aoz.currentScreen ,0,{x:sx,y:sy,width:(w),height:(h)},{x:dx,y:dy});				
+		}else{
+			throw "map_view_not_found";
+		}
+	};
+
+	this.viewUpdate = function(_viewId, _backColor){
+		var currentScreen = this.aoz.currentScreen.index;
+
+		if(this.views[_viewId]){
+			// Redraw map here
+			if(this.views[_viewId].currentMap){
+				this.aoz.setScreen(this.views[_viewId].screen);
+				this.aoz.currentScreen.cls(0);
+				this.aoz.getScreen(this.views[_viewId].screen).show(false);
+
+				if( (typeof this.views[_viewId].currentMap.refTiles == 'undefined') || this.views[_viewId].currentMap.refTiles.length == 0){
+					this.views[_viewId].currentMap.refTiles = this.options.refTiles;
+					this.views[_viewId].currentMap.tileSize = this.options.tileSize;
+				}
+
+				if(this.views[_viewId].currentMap.refTiles && this.views[_viewId].currentMap.refTiles.length > 0){
+
+					if( (typeof this.options.refTiles == 'undefined') || this.options.refTiles.length == 0 ){
+						this.options.refTiles = this.views[_viewId].currentMap.refTiles;
+						this.options.tileSize = this.views[_viewId].currentMap.tileSize;
+					}
+
+					var x = 0;
+					var y = 0;
+
+					for(i = 0; i < this.views[_viewId].currentMap.datas.length; i++){
+						var tile = this.views[_viewId].currentMap.datas[i];
+						var ref = undefined;
+						for(r = 0; r < this.views[_viewId].currentMap.refTiles.length; r++){
+							if (this.views[_viewId].currentMap.refTiles[r].tile == tile){
+
+								ref = this.views[_viewId].currentMap.refTiles[r];
+								break;
+							}
+						}
+
+						if(ref){
+							if(ref.tile == tile){
+								this.aoz.currentScreen.pasteImage('images', ref.tileImage, x * this.views[_viewId].currentMap.tileSize.width, y * this.views[_viewId].currentMap.tileSize.height);
+//								this.aoz.currentScreen.pasteBob(ref.tileImage,x * this.views[_viewId].currentMap.tileSize.width, y * this.views[_viewId].currentMap.tileSize.height);
+							}
+						}
+
+						x++;
+						if(x == this.getMapWidth(_viewId)){
+							x = 0;
+							y++;
+						} 
+					}
+
+				}else{
+					throw "map_no_reference_tile";
+				}
+			}
+		}
+		this.aoz.setScreen(currentScreen);
+		this.viewRedraw(_viewId);
+	};
+
+	this.tileRef = function(_viewId, _value, _numImage, _objectName){
+		if(_viewId){
+		
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+				var ref = {
+					tile: _value,
+					tileImage: _numImage,
+					object: _objectName
+				};
+
+				if(typeof this.views[_viewId].currentMap.refTiles == 'undefined'){
+					this.views[_viewId].currentMap.refTiles = [];
+					this.views[_viewId].currentMap.refTiles.push(ref);
+				}
+
+				for(_r = 0; _r < this.views[_viewId].currentMap.refTiles.length; _r++){
+					var rref = this.views[_viewId].currentMap.refTiles[_r];
+					if(rref.tile == ref.tile){
+						this.views[_viewId].currentMap.refTiles.slice(_r, 1);
+						break;
+					};
+				}
+				this.views[_viewId].currentMap.refTiles.push(ref);
+			}else{
+				throw "map_no_map_defined_in_view";
+			}
+
+		}else{
+			var ref = {
+				tile: _value,
+				tileImage: _numImage
+			};
+
+			if(typeof this.options.refTiles == 'undefined'){
+				this.options.refTiles = [];
+				this.options.refTiles.push(ref);
+			}
+
+			for(_r = 0; _r < this.options.refTiles.length; _r++){
+				var rref = this.options.refTiles[_r];
+				if(rref.tile == ref.tile){
+					this.options.refTiles.slice(_r, 1);
+					break;
+				}
+			}
+			this.options.refTiles.push(ref);
+		}
+	};
+
+	this.tileSize = function(_viewId, _width, _height){
+		if(_viewId){
+		
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+
+				this.views[_viewId].currentMap.tileSize = {
+					width: _width,
+					height: _height
+				};
+
+			}else{
+				throw "map_no_map_defined_in_view"
+			}
+
+		}else{
+			if(typeof this.options.tileSize == 'undefined'){
+				this.options.tileTile = [];
+			}
+			this.options.tileSize = {
+				width: _width,
+				height: _height
+			};
+		}
+	};
+
+	this.tileWidth = function(_viewId){
+		if(_viewId){
+		
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+				if (this.views[_viewId].currentMap.tileSize.width){
+					return this.views[_viewId].currentMap.tileSize.width;
+				}else{
+					throw "Tile width undefined";
+				}
+			}else{
+				throw "map_no_map_defined_in_view"
+			}
+
+		}else{
+			if(typeof this.options.tileSize == 'undefined'){
+				throw "map_tile_width_undefined";
+			}
+			return this.options.tileSize.width;
+		}
+	};
+
+	this.tileHeight = function(_viewId){
+		if(_viewId){
+		
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_view_not_found";
+			}
+
+			if(this.views[_viewId].currentMap){
+				if (this.views[_viewId].currentMap.tileSize.height){
+					return this.views[_viewId].currentMap.tileSize.height;
+				}else{
+					throw "map_tile_width_undefined";
+				}
+			}else{
+				throw "map_no_map_defined_in_view"
+			}
+
+		}else{
+			if(typeof this.options.tileSize == 'undefined'){
+				throw "map_tile_width_undefined";
+			}
+
+			return this.options.tileSize.height;
+		}
+	};
+
+	this.tileCount = function(_viewId, _tileValue){
+		var _datas = [];
+		if(_viewId){
+			if(_viewId == ""){
+				throw "map_incorrect_argument";
+			}
+
+			var view = this.views[_viewId];
+			if(view){
+				if(view.currentMap && view.currentMap.datas){
+					_datas = view.currentMap.datas;
+				}else{
+					throw "map_without_data";
+				}
+			}else{
+				throw "map_view_not_found";
+			}
+
+		}else{
+			throw "map_incorrect_argument";
+		}
+
+		var n = 0;
+		for(_i = 0; _i < _datas.length; _i++){
+			var tile = _datas[_i];
+			if(tile == _tileValue){
+				n++;
+			}
+		}
+
+		return n;
+	};
+
+	this.findTile = function(_viewId, _tileValue){
+		if(_viewId){			
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_incorrect_argument";
+			}
+
+			if(_viewId == ""){
+				throw "map_incorrect_argument";
+			}
+
+			if(typeof this.views[_viewId].currentMap == 'undefined'){
+				throw "map_no_map_defined_in_view";
+			}
+
+			this.findRequest = {
+				seek: 0,
+				datas: this.views[_viewId].currentMap.datas,
+				tileValue: _tileValue
+			}
+		}else{
+			throw "map_incorrect_argument";
+		}
+		return this.findNext();
+	};
+
+	this.findNext = function(){
+		if(this.findRequest){
+			for(_r = this.findRequest.seek; _r < this.findRequest.datas.length; _r++){
+				var data = this.findRequest.datas[_r];
+				if(data == this.findRequest.tileValue){
+					return _r;
+				}
+				this.findRequest.seek++;
+			}
+
+			this.findRequest = undefined;
+			return -1;
+		}else{
+			throw "map_no_request_found"
+		}
+	};
+
+	this.tileX = function(_viewId, _tileIndex){
+		if(_viewId){			
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_incorrect_argument";
+			}
+
+			if(typeof this.views[_viewId].currentMap == 'undefined'){
+				throw "map_no_map_defined_in_view";
+			}
+
+			if(typeof this.views[_viewId].currentMap.tileSize == 'undefined'){
+				if(this.options.tileSize){
+					this.views[_viewId].currentMap.tileSize = this.options.tileSize;
+				}else{
+					throw "map_tile_size_not_defined";
+				}
+			}
+
+			var w = this.views[_viewId].currentMap.tileSize.width;
+			var h = this.views[_viewId].currentMap.tileSize.height;
+			var mapWidth = this.views[_viewId].currentMap.width;
+			var mapHeight = this.views[_viewId].currentMap.height;
+
+			var _y = Math.round(_tileIndex / mapWidth);
+			var _x = _tileIndex - (_y * mapWidth);
+			if(_x < 0){
+				_x = mapWidth + _x;
+			}
+			return (_x * w) + this.views[_viewId].x;
+
+		}else{
+			throw "map_incorrect_argument";
+		}
+	};
+
+	this.tileY = function(_viewId, _tileIndex){
+		if(_viewId){			
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_incorrect_argument";
+			}
+
+			if(typeof this.views[_viewId].currentMap == 'undefined'){
+				throw "map_no_map_defined_in_view";
+			}
+
+			if(typeof this.views[_viewId].currentMap.tileSize == 'undefined'){
+				if(this.options.tileSize){
+					this.views[_viewId].currentMap.tileSize = this.options.tileSize;
+				}else{
+					throw "map_tile_size_not_defined";
+				}
+			}
+
+			var w = this.views[_viewId].currentMap.tileSize.width;
+			var h = this.views[_viewId].currentMap.tileSize.height;
+			var mapWidth = this.views[_viewId].currentMap.width;
+			var mapHeight = this.views[_viewId].currentMap.height;
+
+			var _y = Math.round(_tileIndex / mapWidth);
+			var _x = _tileIndex - (_y * mapWidth);
+			if(_x < 0){
+				_y = _y - 1;
+			}
+
+			return (_y * h) + this.views[_viewId].y;
+
+		}else{
+			throw "map_incorrect_argument";
+		}
+	};
+
+	this.tileCollide = function(_viewId, _x, _y) {
+		console.log(_x + ", " + _y);
+
+		if(_viewId){			
+			if(typeof this.views[_viewId] == 'undefined'){
+				throw "map_view_not_found";
+			}
+
+			if(_viewId == ""){
+				throw "map_incorrect_argument";
+			}
+
+			if(typeof this.views[_viewId].currentMap == 'undefined'){
+				throw "map_no_map_defined_in_view";
+			}
+
+			if(typeof this.views[_viewId].currentMap.tileSize == 'undefined'){
+				if(this.options.tileSize){
+					this.views[_viewId].currentMap.tileSize = this.options.tileSize;
+				}else{
+					throw "map_tile_size_not_defined";
+				}
+			}
+
+			var w = this.views[_viewId].currentMap.tileSize.width;
+			var h = this.views[_viewId].currentMap.tileSize.height;
+			var mapWidth = this.views[_viewId].currentMap.width;
+			var mapHeight = this.views[_viewId].currentMap.height;
+			var _n = -1;
+
+			if(_x < this.views[_viewId].x || _x > (this.views[_viewId].x + this.views[_viewId].width)){
+				return -1;
+			}
+
+			if(_y < this.views[_viewId].y || _y > (this.views[_viewId].y + this.views[_viewId].height)){
+				return -1;
+			}
+			
+			_x = (_x - this.views[_viewId].x) + this.views[_viewId].offsetX;
+			_y = (_y - this.views[_viewId].y) + this.views[_viewId].offsetY;
+
+			_y = Math.round(_y / h);
+			_x = Math.round(_x / w);
+
+			console.log("--> " + _x + ", " + _y);
+
+			_n = (_y * mapWidth) + _x;
+			if(_n < 0){
+				_n = -1;
+			}
+
+			if(_n > ((mapWidth * mapHeight) - 1)){
+				_n = -1;
+			}
+
+			return _n 
+
+		}else{
+			throw "map_incorrect_argument";
+		}	
+	};
+}
+
+Rem
+Rem Création d'un groupe de maps
+Rem
+Instruction "CreateMaps", width, height
+    {
+		#errors
+		this.aoz.MAPS.create(%width, %height);
+    }
+End Instruction
+
+Rem
+Rem Ajoute une map vide au groupe de maps
+Rem
+Instruction "AddMap"
+    {
+		#errors
+		this.aoz.MAPS.addMap();
+    }
+End Instruction
+
+Rem
+Rem Supprime une map au groupe de maps
+Rem
+Instruction "RemoveMap", mapIndex
+    {
+		#errors
+		this.aoz.MAPS.removeMap(%mapIndex);
+    }
+End Instruction
+
+Rem
+Rem Insert une nouvelle map au groupe de maps
+Rem
+Instruction "InsertMap", mapIndex
+    {
+		#errors
+		this.aoz.MAPS.insertMap(%mapIndex);
+    }
+End Instruction
+
+Rem
+Rem Charge un groupe de maps
+Rem
+Instruction "LoadMaps", mapsName$
+    {
+		#waiting
+		#errors
+        return{type:12,waitThis:this.aoz.MAPS,callFunction:"load", waitFunction:"load_wait", args:[%mapsName$]};
+    }
+End Instruction
+
+Rem
+Rem Retourne l'index de la map courante d'une zone
+Rem
+Function "GetMapIndex", viewId$
+    {
+		#errors
+    }
+End Function( {this.aoz.MAPS.getMapIndex(undefined)} )
+
+Rem
+Rem Branchement d'une map sur une zone de visualization
+Rem
+Instruction "SetMapIndex", viewId$, mapIndex
+    {
+		#errors
+		this.aoz.MAPS.setMapIndex(%viewId$, %mapIndex);
+    }
+End Instruction
+
+Rem
+Rem Retourne la largeur de la map associée à une vue 
+Rem
+Function "GetMapWidth", viewId$
+    {
+		#errors
+    }
+End Function ( {this.aoz.MAPS.getMapWidth(%viewId$)} )
+
+Rem
+Rem Retourne la hauteur de la map associée à une vue 
+Rem
+Function "GetMapHeight", viewId$
+    {
+		#errors
+    }
+End Function ( {this.aoz.MAPS.getMapHeight(%viewId$)} )
+
+Rem
+Rem Retourne la valeur de la tuile de map 
+Rem
+Function "GetTileValue$", viewId$, tileIndex
+    {
+		#errors
+    }
+End Function ( {this.aoz.MAPS.getTileValue(%viewId$, %tileIndex, undefined)} )
+
+Rem
+Rem Retourne la valeur de la zone de map d'une vue à la position X et Y 
+Rem
+Function "GetTileValue$", viewId$, x, y
+    {
+		#errors
+    }
+End Function ( {this.aoz.MAPS.getTileValue(%viewId$ ,%x, %y)} )
+
+Rem
+Rem Définit la valeur de la zone de map d'une vue à la position X et Y 
+Rem
+Instruction "SetTileValue", viewId$, tileIndex, value$
+    {
+		#errors
+		this.aoz.MAPS.setTileValue(%viewId$, %tileIndex, undefined, %value$);
+    }
+End Instruction
+
+Rem
+Rem Définit la valeur de la zone de map d'une vue à la position X et Y 
+Rem
+Instruction "SetTileValue", viewId$, x, y, value$
+    {
+		#errors
+		this.aoz.MAPS.setTileValue(%viewId$, %x, %y, %value$);
+    }
+End Instruction
+
+Rem
+Rem Définit la valeur de la zone de map d'une vue à la position X et Y 
+Rem
+Instruction "MapTile Replace", viewId$, tileSearch$,tileReplace$
+    {
+		#errors
+		this.aoz.MAPS.tileReplace(%viewId$, %tileSearch$, %tileReplace$);
+    }
+End Instruction
+
+Rem
+Rem Réinitialise le groupe de maps de la mémoire 
+Rem
+Instruction "ResetMaps"
+    {
+		#errors
+        this.aoz.MAPS.reset();
+    }
+End Instruction
+
+Rem
+Rem Retourne le nombre de maps contenus dans le groupe 
+Rem
+Function "MapCount"
+    {
+		#errors
+    }
+End Function( {this.aoz.MAPS.mapCount()} )
+
+Rem
+Rem Garde en mémoire une copie de la la carte courante
+Rem
+Instruction "MapView Copy", viewId$
+	{
+		#error
+		this.aoz.MAPS.copy(%viewId$);
+	}
+End Instruction
+
+Rem
+Rem Restaure la carte courante depuis la copie en mémoire
+Rem
+Instruction "MapView Restore", viewId$
+	{
+		#error
+		this.aoz.MAPS.restore(%viewId$);
+	}
+End Instruction
+
+Rem
+Rem Ouvre une zone de visualisation de map
+Rem
+Instruction "MapView Open", viewId$, x, y, width, height, mapIndex
+	{
+		#errors
+		this.aoz.MAPS.viewOpen(%viewId$, %x, %y, %width, %height, %mapIndex);
+	}
+End Instruction
+
+Rem
+Rem Ferme une zone de visualisation de map ouverte avec l'instruction MapView Open
+Rem
+Instruction "MapView Close", viewId$
+	{
+		#errors
+		this.aoz.MAPS.viewClose(%viewId$);
+	}
+End Instruction
+
+Rem
+Rem Définit l'offset de la zone de visualisation de map 
+Rem
+Instruction "MapView Offset", viewId$, x, y, z
+	{
+		#errors
+		this.aoz.MAPS.viewOffset(%viewId$, %x, %y, %z);
+	}
+End Instruction
+
+Rem
+Rem Redefinit la position de la zone de visualisation de map  
+Rem
+Instruction "MapView Display", viewId$, x, y
+	{
+		#errors
+		this.aoz.MAPS.viewDisplay(%viewId$, %x, %y);
+	}
+
+End Instruction
+
+Rem
+Rem Redefinit la position et la taille de la zone de visualisation de map  
+Rem
+Instruction "MapView Display", viewId$, x, y, width, height
+	{
+		#errors
+		this.aoz.MAPS.viewDisplay(%viewId$, %x, %y, %width, %height);
+	}
+
+End Instruction
+
+Rem
+Rem Retourne l'offset X de la zone de visualisation de map 
+Rem
+Function "MapView Offset X", viewId$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.getViewOffsetX(%viewId$)} )
+
+Rem
+Rem Retourne l'offset Y de la zone de visualisation de map 
+Rem
+Function "MapView Offset Y", viewId$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.getViewOffsetY(%viewId$)} )
+
+Rem
+Rem Retourne l'offset Z de la zone de visualisation de map 
+Rem
+Function "MapView Offset Z", viewId$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.getViewOffsetZ(%viewId$)} )
+
+Rem
+Rem Dessine la zone de visualisation de map sur l'écran courant 
+Rem
+Instruction "MapView Redraw", viewId$
+	{
+		#errors
+		this.aoz.MAPS.viewRedraw(%viewId$, undefined);
+	}
+End Instruction
+
+Rem
+Rem Dessine la zone de visualisation de map sur l'écran courant avec une couleur de fond
+Rem
+Instruction "MapView Redraw", viewId$, backColor
+	{
+		#errors
+		this.aoz.MAPS.viewRedraw(%viewId$, %backColor);
+	}
+End Instruction
+
+Rem
+Rem Définit l'image associée à la valeur d'une tuile de carte
+Rem
+Instruction "MapTile Ref", value$, numImage
+	{
+		#errors
+		this.aoz.MAPS.tileRef(undefined, %value$, %numImage, undefined);
+	}
+End Instruction
+
+Rem
+Rem Définit l'image et l'objet associés à la valeur d'une tuile de carte
+Rem
+Instruction "MapTile Ref", value$, numImage, objectName$
+	{
+		#errors
+		this.aoz.MAPS.tileRef(undefined, %value$, %numImage, %objectName$);
+	}
+End Instruction
+
+Rem
+Rem Définit l'image associée à la valeur d'une tuile de carte d'une visualisation
+Rem
+Instruction "MapTile Ref", viewId$, value$, numImage
+	{
+		#errors
+		this.aoz.MAPS.tileImage(%viewId, %value$, %numImage);
+	}
+End Instruction
+
+Rem
+Rem Définit la taille des tuiles de carte
+Rem
+Instruction "MapTile Size", width, height
+	{
+		#errors
+		this.aoz.MAPS.tileSize(undefined, %width, %height);
+	}
+End Instruction
+
+Rem
+Rem Définit la taille des tuiles de carte d'une visualisation
+Rem
+Instruction "MapTile Size", viewId$, width, height
+	{
+		#errors
+		this.aoz.MAPS.tileSize(%viewId, %width, %height);
+	}
+End Instruction
+
+Rem
+Rem Retourne la largeur des tuiles de la vue demandée 
+Rem
+Function "MapTile Width", viewId$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.tileWidth(%viewId$)} )
+
+Rem
+Rem Retourne la heuteur des tuiles de la vue demandée 
+Rem
+
+Function "MapTile Height", viewId$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.tileHeight(%viewId$)} )
+
+Rem
+Rem Retourne le nombre de tuile ayant une valeur déterminée, dans la map d'une visualisation
+Rem
+Function "MapTile Count", viewId$, tileValue$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.tileCount(%viewId$, %tileValue$)} )
+
+Rem
+Rem Lance une recherche de valeur sur la map de visualisation et retourne l'index de la première occurence trouvée
+Rem
+Function "MapTile Find", viewId$, tileValue$
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.findTile(%viewId$, %tileValue$)} )
+
+Rem
+Rem Retourne l'index de la prochaine occurence recherchée sur une map 
+Rem
+Function "MapTile Next"
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.findNext()} )
+
+Rem
+Rem Retourne la position X d'une tuile de la map 
+Rem
+Function "MapTile X", viewId$, tileIndex
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.tileX(%viewId$, %tileIndex)} )
+
+Rem
+Rem Retourne la position Y d'une tuile de la map 
+Rem
+Function "MapTile Y", viewId$, tileIndex
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.tileY(%viewId$, %tileIndex)} )
+
+Rem
+Rem Retourne l'index de la tuile se trouvant aux coordonnées X et Y, sinon -1
+Rem
+Function "MapTile Test", viewId$, x, y 
+	{
+		#errors
+	}
+End Function( {this.aoz.MAPS.tileCollide(%viewId$, %x, %y)} )

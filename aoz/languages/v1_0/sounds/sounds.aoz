@@ -29,7 +29,7 @@
 #include_javascript:"howler.js-master/dist/howler.js"
 #include_javascript:"howler.js-master/dist/howler.spatial.min.js"
 #noWarning:"instruction_not_implemented"
-
+#useSounds:true
 
 //
 // Initialization
@@ -43,7 +43,6 @@
     this.voices = [];
     this.maxVoices = 32;
     this.numberOfLoops = 1;
-    this.aoz.useSounds = true;
 
     // Amiga mode...
     if ( this.aoz.manifest.sounds.mode == 'amiga' )
@@ -442,45 +441,6 @@ Instruction "tempo", _tempo
 }
 End Instruction
 
-// Track Load
-Instruction "track load", _module$, _bank
-{
-    #notimplemented
-}
-End Instruction
-
-// Track Play
-Instruction "track play"
-{
-    #notimplemented
-}
-End Instruction
-Instruction "track play", _bank, _pattern
-{
-    #notimplemented
-}
-End Instruction
-
-// Track Loop On
-Instruction "track loop on"
-{
-    #notimplemented
-}
-End Instruction
-
-// Track Loop Off
-Instruction "track loop off"
-{
-    #notimplemented
-}
-End Instruction
-
-// Track Stop
-Instruction "track stop"
-{
-    #notimplemented
-}
-End Instruction
 
 // Med Load
 Instruction "med load", _module$, _bank
